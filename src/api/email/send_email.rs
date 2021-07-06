@@ -13,7 +13,7 @@ use typed_builder::TypedBuilder;
 ///   .body(Body::Text("Hi, this is me!".to_string()))
 ///   .build();
 /// ```
-#[derive(Debug, PartialEq, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 #[serde(rename_all = "PascalCase")]
 #[derive(TypedBuilder)]
 pub struct SendEmailRequest {
@@ -87,7 +87,7 @@ pub struct SendEmailRequest {
 }
 
 /// The body of a email message
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum Body {
     #[serde(rename = "TextBody")]
     Text(String),
