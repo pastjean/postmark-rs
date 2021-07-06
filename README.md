@@ -24,7 +24,6 @@ use postmark::*;
 
 async fn send_email(){
   let client = PostmarkClient::builder()
-   .base_url("https://api.postmarkapp.com/")
    .token("<sometoken>")
    .build();
 
@@ -33,7 +32,7 @@ async fn send_email(){
     .to("you@example.com")
     .body(api::email::Body::Text("Hi, this is me!".to_string()))
     .build();
-  let resp = req.execute(&client).await.unwrap();
+  let resp = req.execute(&client).await;
 }
 ```
 
