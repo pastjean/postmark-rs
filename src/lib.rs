@@ -1,9 +1,7 @@
-//! # postmark-client
-//!
-//! Postmark client is a "client" agnostic rust client to postmark. We
+//! Postmark is a HTTP client agnostic rust client to postmark. We
 //! Provide a `reqwest` implementation of a client that can be used pretty
-//! simply by initializing it and passing it into the execute function of an
-//! [`Endpoint`].
+//! simply by initializing it and passing it into the execute function of a
+//! [`Query`], all [`Endpoint`] implement the Query trait.
 //!
 //! Some Endpoints are already provided to you. But if you need some that are
 //! not implemented you are not constrained to modified this crated, you can
