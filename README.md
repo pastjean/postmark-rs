@@ -37,6 +37,22 @@ async fn send_email(){
 }
 ```
 
+# Releasing a new version
+
+Prerequisite:
+
+```sh
+cargo install cargo-release
+```
+
+On Release:
+
+```sh
+cargo release --dry-run
+# check it does the good thing
+cargo release
+```
+
 # Thanks
 
 This crate is heavily inspired by the article ["Designing Rust bindings for REST APIs](https://plume.benboeckel.net/~/JustAnotherBlog/designing-rust-bindings-for-rest-ap-is) by Ben Boeckel.
