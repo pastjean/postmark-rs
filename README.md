@@ -20,17 +20,17 @@ And use it, see documentation at: https://docs.rs/postmark.
 
 ```rust
 use postmark::reqwest::PostmarkClient;
-use postmark::*;
+use postmark::api::email::{SendEmailRequest,Body};
 
 async fn send_email(){
   let client = PostmarkClient::builder()
    .token("<sometoken>")
    .build();
 
-  let req = api::email::SendEmailRequest::builder()
+  let req = SendEmailRequest::builder()
     .from("me@example.com")
     .to("you@example.com")
-    .body(api::email::Body::Text("Hi, this is me!".to_string()))
+    .body(Body::Text("it's me, Mario!".to_string()))
     .build();
   let resp = req.execute(&client).await;
 }
