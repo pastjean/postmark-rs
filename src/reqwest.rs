@@ -1,5 +1,10 @@
-use crate::{Client, Endpoint, POSTMARK_API_URL};
+use std::convert::TryInto;
+
+use crate::{Client, POSTMARK_API_URL};
 use async_trait::async_trait;
+use bytes::Bytes;
+use http::{Request, Response};
+use thiserror::Error;
 use typed_builder::TypedBuilder;
 
 /// A representation of the asynchronous Postmark API for a single user.
@@ -37,25 +42,50 @@ impl Default for PostmarkClient {
     }
 }
 
+#[derive(Error, Debug)]
+pub enum PostmarkClientError {
+    #[error("error setting auth header: {}", source)]
+    AuthError {
+        #[from]
+        source: http::header::InvalidHeaderValue,
+    },
+    #[error("communication with postmark: {}", source)]
+    Communication {
+        #[from]
+        source: reqwest::Error,
+    },
+    #[error("`http` error: {}", source)]
+    Http {
+        #[from]
+        source: http::Error,
+    },
+}
+
 #[async_trait]
 impl Client for PostmarkClient {
-    type Error = reqwest::Error;
+    type Error = PostmarkClientError;
 
-    async fn execute<R: Endpoint + Send>(&self, req: R) -> Result<R::Response, Self::Error> {
+    async fn execute(&self, req: Request<Bytes>) -> Result<Response<Bytes>, Self::Error> {
         let client = reqwest::Client::builder().build()?;
-
-        let mut r = client
-            .post(format!("{}{}", self.base_url, req.endpoint()))
-            .header("Accept", "application/json")
-            .header("Content-Type", "application/json")
-            .json(req.body());
+        let mut req = req;
 
         if let Some(tok) = &self.token {
-            r = r.header("X-Postmark-Server-Token", tok.clone())
+            req.headers_mut()
+                .append("X-Postmark-Server-Token", tok.try_into()?);
         }
 
-        let resp = r.send().await?.json::<R::Response>().await?;
+        let reqwest_req = req.try_into()?;
+        let reqwest_rsp = client.execute(reqwest_req).await?;
 
-        Ok(resp)
+        let mut rsp = Response::builder()
+            .status(reqwest_rsp.status())
+            .version(reqwest_rsp.version());
+
+        let headers = rsp.headers_mut().unwrap();
+        for (k, v) in reqwest_rsp.headers() {
+            headers.insert(k, v.clone());
+        }
+
+        Ok(rsp.body(reqwest_rsp.bytes().await?)?)
     }
 }

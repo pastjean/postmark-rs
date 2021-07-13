@@ -151,7 +151,7 @@ impl Endpoint for SendEmailRequest {
     type Response = SendEmailResponse;
 
     fn endpoint(&self) -> Cow<'static, str> {
-        "email".into()
+        "/email".into()
     }
 
     fn body(&self) -> &Self::Request {

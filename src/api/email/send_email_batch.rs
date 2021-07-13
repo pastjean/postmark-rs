@@ -13,7 +13,7 @@ impl Endpoint for SendEmailBatchRequest {
     type Response = SendEmailBatchResponse;
 
     fn endpoint(&self) -> Cow<'static, str> {
-        "email/batch".into()
+        "/email/batch".into()
     }
 
     fn body(&self) -> &Self::Request {
