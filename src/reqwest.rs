@@ -25,12 +25,26 @@ use typed_builder::TypedBuilder;
 ///   .token("<sometoken>")
 ///   .build();
 /// ```
-#[derive(TypedBuilder, Debug)]
+#[derive(TypedBuilder)]
 pub struct PostmarkClient {
     #[builder(default, setter(into, strip_option))]
     pub token: Option<String>,
     #[builder(default=POSTMARK_API_URL.into(), setter(into))]
     pub base_url: String,
+}
+
+impl std::fmt::Debug for PostmarkClient {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let Self {
+            token: ref _token,
+            base_url: ref _base_url,
+        } = *self;
+
+        let mut builder = f.debug_struct("PostmarkClient");
+        builder.field("token", &_token.as_ref().map(|_| "***"));
+        builder.field("base_url", &(*_base_url));
+        builder.finish()
+    }
 }
 
 impl Default for PostmarkClient {
