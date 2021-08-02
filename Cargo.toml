@@ -13,16 +13,21 @@ version = "0.3.2-alpha.0"
 edition = "2018"
 
 [dependencies]
-async-trait = "0.1.50"
+async-trait = "0.1.51"
 bytes = "1.0"
 http = "0.2"
+reqwest = { version = "0.11.4", optional = true, default-features = false }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = { version = "1.0" }
 thiserror = "1.0"
 typed-builder = "0.9.0"
-reqwest = { version = "0.11.4", optional = true, default-features = false }
+url = "2.2"
 
 [features]
 default = ["reqwest-native-tls"]
 reqwest-native-tls = ["reqwest/native-tls", "reqwest"]
 reqwest-rustls-tls = ["reqwest/rustls-tls", "reqwest"]
+
+[dev-dependencies]
+httptest = "0.15.2"
+tokio = { version = "1.9", default-features = false, features = ["rt", "macros"] }

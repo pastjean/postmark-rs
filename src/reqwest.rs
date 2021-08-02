@@ -21,7 +21,7 @@ use typed_builder::TypedBuilder;
 /// ```
 /// # use postmark::reqwest::PostmarkClient;
 /// let client = PostmarkClient::builder()
-///   .base_url("https://api.postmarkapp.com/")
+///   .base_url("https://api.postmarkapp.com")
 ///   .token("<sometoken>")
 ///   .build();
 /// ```
@@ -73,6 +73,11 @@ pub enum PostmarkClientError {
         #[from]
         source: http::Error,
     },
+    #[error("`Url` error: {}", source)]
+    UrlParseError {
+        #[from]
+        source: url::ParseError,
+    },
 }
 
 #[async_trait]
@@ -88,7 +93,16 @@ impl Client for PostmarkClient {
                 .append("X-Postmark-Server-Token", tok.try_into()?);
         }
 
-        let reqwest_req = req.try_into()?;
+        let base_url: url::Url = self.base_url.parse()?;
+
+        let url = match req.uri().path_and_query() {
+            Some(path) => base_url.join(path.as_str())?,
+            None => base_url,
+        };
+
+        *req.uri_mut() = url.as_str().parse().unwrap();
+
+        let reqwest_req: reqwest::Request = req.try_into()?;
         let reqwest_rsp = client.execute(reqwest_req).await?;
 
         let mut rsp = Response::builder()

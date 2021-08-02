@@ -90,8 +90,7 @@ where
 
         let response = client.execute(http_req).await.map_err(QueryError::client)?;
 
-        let data = serde_json::from_slice::<T::Response>(response.body())?;
-        Ok(data)
+        Ok(serde_json::from_slice(response.body())?)
     }
 }
 

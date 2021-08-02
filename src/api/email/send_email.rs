@@ -159,3 +159,47 @@ impl Endpoint for SendEmailRequest {
         self
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use httptest::matchers::request;
+    use httptest::{responders::*, Expectation, Server};
+    use serde_json::json;
+
+    use super::{Body, SendEmailRequest};
+    use crate::reqwest::PostmarkClient;
+    use crate::Query;
+
+    #[tokio::test]
+    pub async fn send_email_test() {
+        let server = Server::run();
+
+        server.expect(
+            Expectation::matching(request::method_path("POST", "/email")).respond_with(
+                json_encoded(json!({
+                    "To": "receiver@example.com",
+                    "SubmittedAt": "2014-02-17T07:25:01.4178645-05:00",
+                    "MessageID": "0a129aee-e1cd-480d-b08d-4f48548ff48d",
+                    "ErrorCode": 0,
+                    "Message": "OK"
+                })),
+            ),
+        );
+
+        let client = PostmarkClient::builder()
+            .base_url(server.url("/").to_string())
+            .token("token")
+            .build();
+
+        let req = SendEmailRequest::builder()
+            .from("pa@example.com")
+            .to("mathieu@example.com")
+            .body(Body::Text("hello matt".into()))
+            .subject("hello")
+            .build();
+
+        req.execute(&client)
+            .await
+            .expect("Should get a response and be able to json decode it");
+    }
+}
