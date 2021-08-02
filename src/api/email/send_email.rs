@@ -139,11 +139,12 @@ impl Default for TrackLink {
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "PascalCase")]
 pub struct SendEmailResponse {
-    pub to: Option<String>,
-    pub submitted_at: Option<String>,
-    pub message_id: Option<String>,
-    pub error_code: Option<i64>,
-    pub message: Option<String>,
+    pub to: String,
+    pub submitted_at: String,
+    #[serde(rename = "MessageID")]
+    pub message_id: String,
+    pub error_code: i64,
+    pub message: String,
 }
 
 impl Endpoint for SendEmailRequest {
