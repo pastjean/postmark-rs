@@ -40,3 +40,76 @@ pub struct Bounce {
     pub count: i64,
     pub type_field: Option<String>,
 }
+
+#[cfg(test)]
+mod tests {
+    use httptest::matchers::request;
+    use httptest::{responders::*, Expectation, Server};
+    use serde_json::json;
+
+    use super::DeliveryStatsRequest;
+    use crate::reqwest::PostmarkClient;
+    use crate::Query;
+
+    #[tokio::test]
+    pub async fn send_get_deliverystats() {
+        let server = Server::run();
+
+        server.expect(
+            Expectation::matching(request::method_path("GET", "/deliverystats")).respond_with(
+                json_encoded(json!({
+                  "InactiveMails": 192,
+                  "Bounces": [
+                    {
+                      "Name": "All",
+                      "Count": 253
+                    },
+                    {
+                      "Type": "HardBounce",
+                      "Name": "Hard bounce",
+                      "Count": 195
+                    },
+                    {
+                      "Type": "Transient",
+                      "Name": "Message delayed",
+                      "Count": 10
+                    },
+                    {
+                      "Type": "AutoResponder",
+                      "Name": "Auto responder",
+                      "Count": 14
+                    },
+                    {
+                      "Type": "SpamNotification",
+                      "Name": "Spam notification",
+                      "Count": 3
+                    },
+                    {
+                      "Type": "SoftBounce",
+                      "Name": "Soft bounce",
+                      "Count": 30
+                    },
+                    {
+                      "Type": "SpamComplaint",
+                      "Name": "Spam complaint",
+                      "Count": 1
+                    }
+                  ]
+                })),
+            ),
+        );
+
+        let client = PostmarkClient::builder()
+            .base_url(server.url("/").to_string())
+            .build();
+
+        let req = DeliveryStatsRequest::default();
+
+        let resp = req
+            .execute(&client)
+            .await
+            .expect("Should get a response and be able to json decode it");
+
+        assert_eq!(resp.inactive_mails, 192);
+    }
+}

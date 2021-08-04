@@ -135,14 +135,19 @@ impl Default for TrackLink {
     }
 }
 
-/// Response for the [`SendEmailRequest`] Endpoint
+/// Response for the [`SendEmailRequest`] Endpoint.
+///
+/// On a success all fields will be filled, `error_code` will be 0 and
+/// message "OK".
+/// On a failure Option fields will be empty and details will be held
+/// in error_code and message.
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "PascalCase")]
 pub struct SendEmailResponse {
-    pub to: String,
-    pub submitted_at: String,
+    pub to: Option<String>,
+    pub submitted_at: Option<String>,
     #[serde(rename = "MessageID")]
-    pub message_id: String,
+    pub message_id: Option<String>,
     pub error_code: i64,
     pub message: String,
 }
@@ -188,7 +193,34 @@ mod tests {
 
         let client = PostmarkClient::builder()
             .base_url(server.url("/").to_string())
-            .token("token")
+            .build();
+
+        let req = SendEmailRequest::builder()
+            .from("pa@example.com")
+            .to("mathieu@example.com")
+            .body(Body::Text("hello matt".into()))
+            .subject("hello")
+            .build();
+
+        req.execute(&client)
+            .await
+            .expect("Should get a response and be able to json decode it");
+    }
+
+    #[tokio::test]
+    pub async fn send_email_test_should_not_error_on_postmark_error() {
+        let server = Server::run();
+
+        server.expect(
+            Expectation::matching(request::method_path("POST", "/email")).respond_with(
+                json_encoded(json!({
+                    "ErrorCode": 406,
+                    "Message": "You tried to send to a recipient that has been marked as inactive. Found inactive addresses: example@example.com. Inactive recipients are ones that have generated a hard bounce, a spam complaint, or a manual suppression. "                })),
+            ),
+        );
+
+        let client = PostmarkClient::builder()
+            .base_url(server.url("/").to_string())
             .build();
 
         let req = SendEmailRequest::builder()
