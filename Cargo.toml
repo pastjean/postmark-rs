@@ -3,8 +3,8 @@ name = "postmark"
 description = "Postmark rust client"
 license = "MIT/Apache-2.0"
 authors = ["Pierre-Alexandre St-Jean <pa@braver.health>"]
-repository = "https://github.com/braverhealth/postmark-rust"
-homepage = "https://github.com/braverhealth/postmark-rust"
+repository = "https://github.com/pastjean/postmark-rs"
+homepage = "https://github.com/pastjean/postmark-rs"
 documentation = "https://docs.rs/postmark"
 keywords = ["postmark", "email", "e-mail", "http"]
 readme = "README.md"
@@ -13,15 +13,15 @@ version = "0.4.1-alpha.0"
 edition = "2018"
 
 [dependencies]
-async-trait = "0.1.51"
-bytes = "1.0"
-http = "0.2"
+async-trait = { version = "0.1.51" }
+bytes = { version = "1.0" }
+http = { version = "0.2" }
 reqwest = { version = "0.11.4", optional = true, default-features = false }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = { version = "1.0" }
-thiserror = "1.0"
-typed-builder = "0.9.0"
-url = "2.2"
+thiserror = { version = "1.0" }
+typed-builder = { version = "0.9.0"}
+url = { version = "2.2"}
 
 [features]
 default = []
@@ -29,7 +29,8 @@ reqwest-native-tls = ["reqwest/native-tls", "reqwest"]
 reqwest-rustls-tls = ["reqwest/rustls-tls", "reqwest"]
 
 [dev-dependencies]
-httptest = "0.15.2"
-tokio = { version = "1.9", default-features = false, features = ["rt", "macros"] }
-# Hack to get the reqwest client in tests
+httptest = { version = "0.15.2" }
+tokio    = { version = "1.10", default-features = false, features = ["rt", "macros"] }
+
+# Getting all features for testing
 postmark = { path = ".", features = ["reqwest"] }
