@@ -22,11 +22,15 @@ serde_json = { version = "1.0" }
 thiserror = { version = "1.0" }
 typed-builder = { version = "0.9"}
 url = { version = "2.2"}
+indexmap = { version = "1.8", features = ["serde"], optional = true }
+uuid = { version = "1", features = ["serde"], optional = true }
 
 [features]
 default = []
 reqwest-native-tls = ["reqwest/native-tls", "reqwest"]
 reqwest-rustls-tls = ["reqwest/rustls-tls", "reqwest"]
+indexmap = ["dep:indexmap"]
+uuid = ["dep:uuid"]
 
 [dev-dependencies]
 httptest = { version = "0.15" }
