@@ -15,6 +15,7 @@ use super::send_email::{Header, Attachment, TrackLink, SendEmailResponse};
 /// ```
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub struct TemplateModel {
+    #[serde(flatten)]
     model: HashMap<String, serde_json::Value>,
 }
 
@@ -97,7 +98,6 @@ pub struct SendEmailWithTemplateRequest {
     pub template_alias: Option<String>,
 
     /// The template model.
-    #[serde(flatten)]
     #[builder(default, setter(into))]
     pub template_model: TemplateModel,
 
