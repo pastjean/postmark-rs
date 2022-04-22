@@ -1,9 +1,9 @@
 # Postmark
 
-[![CI](https://github.com/braverhealth/postmark-rust/workflows/ci/badge.svg)](https://github.com/braverhealth/postmark-rust/actions?query=workflow%3Aci)
+[![CI](https://github.com/pastjean/postmark-rust/workflows/ci/badge.svg)](https://github.com/pastjean/postmark-rust/actions?query=workflow%3Aci)
 [![crates.io](https://img.shields.io/crates/v/postmark.svg)](https://crates.io/crates/postmark)
 [![Documentation](https://docs.rs/postmark/badge.svg)](https://docs.rs/postmark)
-[![License](https://img.shields.io/crates/l/postmark.svg)](https://github.com/braverhealth/postmark-rust#license)
+[![License](https://img.shields.io/crates/l/postmark.svg)](https://github.com/pastjean/postmark-rust#license)
 
 A rust library to query Postmark API.
 
