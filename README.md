@@ -1,6 +1,6 @@
 # Postmark
 
-[![CI](https://github.com/pastjean/postmark-rust/workflows/ci/badge.svg)](https://github.com/pastjean/postmark-rust/actions?query=workflow%3Aci)
+[![ci](https://github.com/pastjean/postmark-rs/actions/workflows/ci.yml/badge.svg)](https://github.com/pastjean/postmark-rs/actions/workflows/ci.yml)
 [![crates.io](https://img.shields.io/crates/v/postmark.svg)](https://crates.io/crates/postmark)
 [![Documentation](https://docs.rs/postmark/badge.svg)](https://docs.rs/postmark)
 [![License](https://img.shields.io/crates/l/postmark.svg)](https://github.com/pastjean/postmark-rust#license)
