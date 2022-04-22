@@ -1,15 +1,18 @@
 use crate::Endpoint;
 use serde::{Deserialize, Serialize};
-use std::{borrow::Cow, collections::{HashMap, BTreeMap}};
+use std::{
+    borrow::Cow,
+    collections::{BTreeMap, HashMap},
+};
 use typed_builder::TypedBuilder;
 
-use super::send_email::{Header, Attachment, TrackLink, SendEmailResponse};
+use super::send_email::{Attachment, Header, SendEmailResponse, TrackLink};
 
 /// The template model. It is essentially a serde-serializable hashmap.
 ///
 /// ```
 /// # use postmark::api::email::TemplateModel;
-/// let mut model = TemplateModel::new();
+/// let mut model = TemplateModel::default();
 /// model.insert("name", "Ferris");
 /// model.insert("favorite_food", ["algae", "seaweed", "shrimp", "cpp"]);
 /// ```
@@ -20,19 +23,18 @@ pub struct TemplateModel {
 }
 
 impl TemplateModel {
-    fn new() -> Self { Self { model: HashMap::new() } }
-
     pub fn insert<K, V>(&mut self, key: K, value: V)
     where
         K: Into<String>,
-        V: Serialize
+        V: Serialize,
     {
-        self.model.insert(key.into(), serde_json::to_value(value).unwrap());
+        self.model
+            .insert(key.into(), serde_json::to_value(value).unwrap());
     }
 
     pub fn remove<K>(&mut self, key: K)
     where
-        K: Into<String>
+        K: Into<String>,
     {
         self.model.remove(&key.into());
     }
@@ -44,20 +46,35 @@ impl TemplateModel {
 
 impl<K: Into<String>, V: Serialize> From<HashMap<K, V>> for TemplateModel {
     fn from(model: HashMap<K, V>) -> Self {
-        Self { model: model.into_iter().map(|(k, v)| (k.into(), serde_json::to_value(v).unwrap())).collect() }
+        Self {
+            model: model
+                .into_iter()
+                .map(|(k, v)| (k.into(), serde_json::to_value(v).unwrap()))
+                .collect(),
+        }
     }
 }
 
 impl<K: Into<String>, V: Serialize> From<BTreeMap<K, V>> for TemplateModel {
     fn from(model: BTreeMap<K, V>) -> Self {
-        Self { model: model.into_iter().map(|(k, v)| (k.into(), serde_json::to_value(v).unwrap())).collect() }
+        Self {
+            model: model
+                .into_iter()
+                .map(|(k, v)| (k.into(), serde_json::to_value(v).unwrap()))
+                .collect(),
+        }
     }
 }
 
 #[cfg(feature = "indexmap")]
 impl<K: Into<String>, V: Serialize> From<indexmap::IndexMap<K, V>> for TemplateModel {
     fn from(model: indexmap::IndexMap<K, V>) -> Self {
-        Self { model: model.into_iter().map(|(k, v)| (k.into(), serde_json::to_value(v).unwrap())).collect() }
+        Self {
+            model: model
+                .into_iter()
+                .map(|(k, v)| (k.into(), serde_json::to_value(v).unwrap()))
+                .collect(),
+        }
     }
 }
 
@@ -65,9 +82,9 @@ impl<K: Into<String>, V: Serialize> From<indexmap::IndexMap<K, V>> for TemplateM
 ///
 /// ```
 /// # use postmark::api::email::{SendEmailWithTemplateRequest, TemplateModel};
-/// let mut model = TemplateModel::new();
+/// let mut model = TemplateModel::default();
 /// model.insert("name", "Ferris");
-/// 
+///
 /// let req = SendEmailWithTemplateRequest::builder()
 ///   .from("me@example.com")
 ///   .to("you@example.com")
@@ -152,8 +169,7 @@ pub struct SendEmailWithTemplateRequest {
     pub message_stream: Option<String>,
 }
 
-impl Endpoint for SendEmailWithTemplateRequest
-{
+impl Endpoint for SendEmailWithTemplateRequest {
     type Request = SendEmailWithTemplateRequest;
     type Response = SendEmailResponse;
 
@@ -183,22 +199,21 @@ mod tests {
         let server = Server::run();
 
         server.expect(
-            Expectation::matching(request::method_path("POST", "/email/withTemplate")).respond_with(
-                json_encoded(json!({
+            Expectation::matching(request::method_path("POST", "/email/withTemplate"))
+                .respond_with(json_encoded(json!({
                     "To": "receiver@example.com",
                     "SubmittedAt": "2014-02-17T07:25:01.4178645-05:00",
                     "MessageID": "0a129aee-e1cd-480d-b08d-4f48548ff48d",
                     "ErrorCode": 0_i64,
                     "Message": "OK"
-                })),
-            ),
+                }))),
         );
 
         let client = PostmarkClient::builder()
             .base_url(server.url("/").to_string())
             .build();
 
-        let mut model = TemplateModel::new();
+        let mut model = TemplateModel::default();
         model.insert("name", "Ferris");
         model.insert("favorite_food", ["algae", "seaweed", "shrimp", "cpp"]);
 
