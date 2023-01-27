@@ -25,7 +25,7 @@ use typed_builder::TypedBuilder;
 ///   .token("<sometoken>")
 ///   .build();
 /// ```
-#[derive(TypedBuilder)]
+#[derive(TypedBuilder, Clone)]
 pub struct PostmarkClient {
     #[builder(default, setter(into, strip_option))]
     pub token: Option<String>,
