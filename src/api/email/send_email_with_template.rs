@@ -96,7 +96,7 @@ impl<K: Into<String>, V: Serialize> From<indexmap::IndexMap<K, V>> for TemplateM
 #[derive(TypedBuilder)]
 pub struct SendEmailWithTemplateRequest {
     /// The sender email address. Must have a registered and confirmed Sender Signature.
-    /// To include a name, use the format "Full Name <sender@domain.com>" for the address.
+    /// To include a name, use the format `Full Name <sender@domain.com>` for the address.
     #[builder(setter(into))]
     pub from: String,
 
