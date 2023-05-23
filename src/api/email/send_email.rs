@@ -88,11 +88,18 @@ pub struct SendEmailRequest {
 
 /// The body of a email message
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(untagged)]
 pub enum Body {
     #[serde(rename = "TextBody")]
     Text(String),
     #[serde(rename = "HtmlBody")]
     Html(String),
+    HtmlAndText {
+        #[serde(rename = "HtmlBody")]
+        html: String,
+        #[serde(rename = "TextBody")]
+        text: String,
+    },
 }
 
 impl Default for Body {
