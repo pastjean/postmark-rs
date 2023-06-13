@@ -1,4 +1,4 @@
-use crate::Endpoint;
+use crate::{api::Body, Endpoint};
 use serde::{Deserialize, Serialize};
 use std::{borrow::Cow, collections::HashMap};
 use typed_builder::TypedBuilder;
@@ -27,11 +27,7 @@ pub struct SendEmailRequest {
     pub to: String,
 
     /// The body of the message
-<<<<<<< HEAD
-    // -> THIS DOES NOT WORK #[serde(flatten)]
-=======
     // #[serde(flatten)]
->>>>>>> main
     pub body: Body,
 
     /// Cc recipient email address. Multiple addresses are comma separated. Max 50.
@@ -88,31 +84,6 @@ pub struct SendEmailRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(into, strip_option))]
     pub message_stream: Option<String>,
-}
-
-/// The body of a email message
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(untagged)]
-pub enum Body {
-    #[serde(rename = "TextBody")]
-    Text(String),
-    #[serde(rename = "HtmlBody")]
-    Html(String),
-    HtmlAndText(HtmlAndText),
-}
-
-impl Default for Body {
-    fn default() -> Self {
-        Body::Text("".into())
-    }
-}
-
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct HtmlAndText {
-    #[serde(flatten, rename = "HtmlBody")]
-    pub html: String,
-    #[serde(flatten, rename = "TextBody")]
-    pub text: String,
 }
 
 /// A custom headers to include in a email.

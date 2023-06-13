@@ -1,4 +1,4 @@
-use crate::Endpoint;
+use crate::{api::Body, Endpoint};
 use serde::{Deserialize, Serialize};
 use std::{borrow::Cow, collections::HashMap};
 use typed_builder::TypedBuilder;
@@ -25,63 +25,58 @@ pub struct CreateTemplateRequest {
     /// a standard template). Allowed characters are numbers, ASCII letters, and 
     /// ‘.’, ‘-’, ‘_’ characters, and the string has to start with a letter.
     #[builder(setter(into))]
-    pub alias: String,
+    pub alias: Option<String>,
 
-    /// The body of the message
+    /// The body of the message mau come in either or both of two types, HtmlBody or 
+    /// TextBody.
+    /// 
+    /// HtmlBody is required if TextBody is not specified. See our template language
+    /// documentation for more information on the [syntax for this field]
+    /// (https://postmarkapp.com/support/article/1077-template-syntax). A content
+    /// placeholder is required to be present for a layout template, and can be
+    /// placed only once in the HtmlBody.
+    /// 
+    /// TextBody is required if HtmlBody is not specified. A content
+    /// placeholder is required to be present for a layout template, and can be
+    /// placed only once in the TextBody.
     pub body: Body,
 
-    /// Cc recipient email address. Multiple addresses are comma separated. Max 50.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[builder(default, setter(into, strip_option))]
-    pub cc: Option<String>,
-
-    /// Bcc recipient email address. Multiple addresses are comma separated. Max 50.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[builder(default, setter(into, strip_option))]
-    pub bcc: Option<String>,
-
-    /// Email subject
+    /// The content to use for the Subject when this template is used to send email. 
+    /// Subject is only required on standard templates. See our template language
+    /// documentation for more information on the [syntax for this field]
+    /// (https://postmarkapp.com/support/article/1077-template-syntax). Subjects are
+    ///  not allowed for layout templates and will result in an API error.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(into, strip_option))]
     pub subject: Option<String>,
 
-    /// Email tag that allows you to categorize outgoing emails and get detailed statistics.
+    /// Available when creating a template. To set if a template is standard template
+    /// or layout template. Possible options: Standard or Layout. Defaults to Standard.
+    /// After creation, it's not possible to change a template type.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(into, strip_option))]
-    pub tag: Option<String>,
+    pub template_type: Option<TemplateType>,
 
-    /// Reply To override email address. Defaults to the Reply To set in the sender signature.
+    /// An optional string to specify which Layout Template to use (via layout alias)
+    /// for an existing Layout Template when creating a standard template. Allowed
+    /// characters are numbers, ASCII letters, and ‘.’, ‘-’, ‘_’ characters, and the
+    /// string has to start with a letter.The API will throw an error if LayoutTemplate
+    /// is present and the template type is a Layout. This field can also be set to
+    /// null by using an empty string "".
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(into, strip_option))]
-    pub reply_to: Option<String>,
+    pub layout_template: Option<String>,
+   
+}
 
-    /// List of custom headers to include.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[builder(default, setter(into, strip_option))]
-    pub headers: Option<Vec<Header>>,
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub enum TemplateType {
+    Standard,
+    Layout,
+}
 
-    /// Activate open tracking for this email.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[builder(default, setter(into, strip_option))]
-    pub track_opens: Option<bool>,
-
-    /// Activate link tracking for links in the HTML or Text bodies of this email.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[builder(default, setter(into, strip_option))]
-    pub track_links: Option<TrackLink>,
-
-    /// List of attachments
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[builder(default, setter(into, strip_option))]
-    pub attachments: Option<Vec<Attachment>>,
-
-    /// Custom metadata key/value pairs.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[builder(default, setter(into, strip_option))]
-    pub metadata: Option<HashMap<String, String>>,
-
-    /// Set message stream ID that's used for sending. If not provided, message will default to the "outbound" transactional stream.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[builder(default, setter(into, strip_option))]
-    pub message_stream: Option<String>,
+impl Default for TemplateType {
+    fn default() -> Self {
+        TemplateType::Standard
+    }
 }
