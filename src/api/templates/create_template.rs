@@ -7,7 +7,7 @@ use typed_builder::TypedBuilder;
 ///
 /// ```
 /// # use postmark::api::email::{SendEmailRequest, Body};
-/// let req = SendEmailRequest::builder()
+/// let req = CreateTemplateRequest::builder()
 ///   .from("me@example.com")
 ///   .to("you@example.com")
 ///   .body(Body::Text("Hi, this is me!".to_string()))
@@ -17,17 +17,17 @@ use typed_builder::TypedBuilder;
 #[serde(rename_all = "PascalCase")]
 #[derive(TypedBuilder)]
 pub struct CreateTemplateRequest {
-    /// The sender email address. Must have a registered and confirmed Sender Signature.
-    /// To include a name, use the format `Full Name <sender@domain.com>` for the address.
+    /// Name of template.
     #[builder(setter(into))]
-    pub from: String,
+    pub name: String,
 
-    /// Recipient email address. Multiple addresses are comma separated. Max 50.
+    /// An optional string you can provide to identify this template (if creating 
+    /// a standard template). Allowed characters are numbers, ASCII letters, and 
+    /// ‘.’, ‘-’, ‘_’ characters, and the string has to start with a letter.
     #[builder(setter(into))]
-    pub to: String,
+    pub alias: String,
 
     /// The body of the message
-    // -> THIS DOES NOT WORK #[serde(flatten)]
     pub body: Body,
 
     /// Cc recipient email address. Multiple addresses are comma separated. Max 50.
