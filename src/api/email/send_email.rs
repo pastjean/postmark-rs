@@ -90,15 +90,15 @@ pub struct SendEmailRequest {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum Body {
-    Text{
+    Text {
         #[serde(rename = "TextBody")]
         text: String,
     },
-    Html{
+    Html {
         #[serde(rename = "HtmlBody")]
         html: String,
     },
-    HtmlAndText{
+    HtmlAndText {
         #[serde(rename = "HtmlBody")]
         html: String,
         #[serde(rename = "TextBody")]
@@ -108,7 +108,7 @@ pub enum Body {
 
 impl Default for Body {
     fn default() -> Self {
-        Body::Text{text: "".into()}
+        Body::Text { text: "".into() }
     }
 }
 
@@ -340,7 +340,6 @@ mod tests {
         req.execute(&client)
             .await
             .expect("Should get a response and be able to json decode it");
-
     }
 
     #[tokio::test]
