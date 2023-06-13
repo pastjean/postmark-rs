@@ -27,7 +27,11 @@ pub struct SendEmailRequest {
     pub to: String,
 
     /// The body of the message
+<<<<<<< HEAD
     // -> THIS DOES NOT WORK #[serde(flatten)]
+=======
+    // #[serde(flatten)]
+>>>>>>> main
     pub body: Body,
 
     /// Cc recipient email address. Multiple addresses are comma separated. Max 50.
@@ -94,18 +98,21 @@ pub enum Body {
     Text(String),
     #[serde(rename = "HtmlBody")]
     Html(String),
-    HtmlAndText {
-        #[serde(rename = "HtmlBody")]
-        html: String,
-        #[serde(rename = "TextBody")]
-        text: String,
-    },
+    HtmlAndText(HtmlAndText),
 }
 
 impl Default for Body {
     fn default() -> Self {
         Body::Text("".into())
     }
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct HtmlAndText {
+    #[serde(flatten, rename = "HtmlBody")]
+    pub html: String,
+    #[serde(flatten, rename = "TextBody")]
+    pub text: String,
 }
 
 /// A custom headers to include in a email.
