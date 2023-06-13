@@ -27,7 +27,7 @@ pub struct SendEmailRequest {
     pub to: String,
 
     /// The body of the message
-    #[serde(flatten)]
+    // -> THIS DOES NOT WORK #[serde(flatten)]
     pub body: Body,
 
     /// Cc recipient email address. Multiple addresses are comma separated. Max 50.
