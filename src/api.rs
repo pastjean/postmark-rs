@@ -2,3 +2,4 @@
 //! by Postmark api sections
 pub mod bounce;
 pub mod email;
+pub mod templates;
