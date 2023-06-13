@@ -127,6 +127,14 @@ impl Body {
     }
 }
 
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct HtmlAndText {
+    #[serde(flatten, rename = "HtmlBody")]
+    pub html: String,
+    #[serde(flatten, rename = "TextBody")]
+    pub text: String,
+}
+
 /// A custom headers to include in a email.
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "PascalCase")]
