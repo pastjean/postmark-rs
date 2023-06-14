@@ -53,7 +53,7 @@ pub struct CreateTemplateRequest {
     /// Available when creating a template. To set if a template is standard template
     /// or layout template. Possible options: Standard or Layout. Defaults to Standard.
     /// After creation, it's not possible to change a template type.
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(rename = "TemplateType", skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(into, strip_option))]
     pub template_type: Option<TemplateType>,
 
@@ -78,5 +78,42 @@ pub enum TemplateType {
 impl Default for TemplateType {
     fn default() -> Self {
         TemplateType::Standard
+    }
+}
+
+/// Response for the [`CreateTemplateRequest`] Endpoint.
+///
+/// On a success all fields will be filled, `error_code` will be 0 and
+/// message "OK".
+/// On a failure Option fields will be empty and details will be held
+/// in error_code and message.
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "PascalCase")]
+pub struct CreateTemplateResponse {
+    /// ID of template
+    #[serde(rename = "TemplateID")]
+    pub template_id: String,
+    /// Name of template
+    pub name: String,
+    /// Indicates that this template may be used for sending email.
+    pub active: bool,
+    /// Template alias (or None if not specified).
+    pub alias: Option<String>,
+    /// Type of template. Possible options: Standard or Layout.
+    pub template_type: TemplateType,
+    /// Alias of layout used.
+    pub layout_template: Option<String>,
+}
+
+impl Endpoint for CreateTemplateRequest {
+    type Request = CreateTemplateRequest;
+    type Response = CreateTemplateResponse;
+
+    fn endpoint(&self) -> Cow<'static, str> {
+        "/templates".into()
+    }
+
+    fn body(&self) -> &Self::Request {
+        self
     }
 }

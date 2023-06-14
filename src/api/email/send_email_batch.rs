@@ -1,7 +1,9 @@
 use std::borrow::Cow;
 
 use super::send_email::{SendEmailRequest, SendEmailResponse};
-use crate::{api::Body, Endpoint};
+use crate::{Endpoint};
+
+use crate::api::Body;
 
 /// Send multiple emails at once
 pub type SendEmailBatchRequest = Vec<SendEmailRequest>;
@@ -28,6 +30,7 @@ mod tests {
     use serde_json::json;
 
     use crate::api::email::*;
+    use crate::api::Body;
     use crate::reqwest::PostmarkClient;
     use crate::Query;
 
@@ -56,7 +59,7 @@ mod tests {
 
         let req_builder = SendEmailRequest::builder()
             .from("pa@example.com")
-            .body(Body::text("hello matt".into()))
+            .body(Body::Text("hello matt".into()))
             .subject("hello");
 
         let req: SendEmailBatchRequest = vec![
