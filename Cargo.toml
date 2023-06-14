@@ -9,7 +9,7 @@ documentation = "https://docs.rs/postmark"
 keywords = ["postmark", "email", "e-mail", "http"]
 readme = "README.md"
 categories = ["api-bindings", "email", "web-programming::http-client"]
-version = "0.7.1"
+version = "0.8.0"
 edition = "2018"
 
 [dependencies]
