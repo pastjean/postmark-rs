@@ -1,7 +1,7 @@
 name: Release-plz
 # release-plz creates a pull request with the new versions, where it prepares the next release.
 # release-plz releases the unpublished packages.
-
+# see: https://marcoieni.github.io/release-plz/github/index.html for more example and configurations
 permissions:
   pull-requests: write
   contents: write
