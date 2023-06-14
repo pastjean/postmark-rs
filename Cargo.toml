@@ -26,8 +26,9 @@ indexmap = { version = "1.8", features = ["serde"], optional = true }
 
 [features]
 default = []
-reqwest-native-tls = ["dep:reqwest", "reqwest/native-tls"]
-reqwest-rustls-tls = ["dep:reqwest", "reqwest/rustls-tls"]
+reqwest = ["dep:reqwest"]
+reqwest-native-tls = ["reqwest", "reqwest/native-tls"]
+reqwest-rustls-tls = ["reqwest", "reqwest/rustls-tls"]
 indexmap = ["dep:indexmap"]
 
 [dev-dependencies]

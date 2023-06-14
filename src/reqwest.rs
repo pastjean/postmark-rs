@@ -42,7 +42,7 @@ impl std::fmt::Debug for PostmarkClient {
 
         let mut builder = f.debug_struct("PostmarkClient");
         builder.field("token", &_token.as_ref().map(|_| "***"));
-        builder.field("base_url", &(*_base_url));
+        builder.field("base_url", _base_url);
         builder.finish()
     }
 }
