@@ -57,7 +57,7 @@ mod tests {
 
         let req_builder = SendEmailRequest::builder()
             .from("pa@example.com")
-            .body(Body::Text("hello matt".into()))
+            .body(Body::text("hello matt".into()))
             .subject("hello");
 
         let req: SendEmailBatchRequest = vec![

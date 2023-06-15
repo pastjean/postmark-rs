@@ -30,7 +30,7 @@
 //! let req = api::email::SendEmailRequest::builder()
 //!   .from("me@example.com")
 //!   .to("you@example.com")
-//!   .body(api::email::Body::Text("Hi, this is me!".to_string()))
+//!   .body(api::email::Body::text("Hi, this is me!".to_string()))
 //!   .build();
 //! let resp = req.execute(&client).await;
 //! resp.unwrap();

@@ -7,22 +7,44 @@ pub mod bounce;
 pub mod email;
 pub mod templates;
 
-/// The body of a email message. 
-/// 
-/// The body may come either or both of two types, text and html.
+/// The body of a email message
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum Body {
-    #[serde(rename = "TextBody")]
-    Text(String),
-    #[serde(rename = "HtmlBody")]
-    Html(String),
-    HtmlAndText(HtmlAndText),
+    Text {
+        #[serde(rename = "TextBody")]
+        text: String,
+    },
+    Html {
+        #[serde(rename = "HtmlBody")]
+        html: String,
+    },
+    HtmlAndText {
+        #[serde(rename = "HtmlBody")]
+        html: String,
+        #[serde(rename = "TextBody")]
+        text: String,
+    },
 }
 
 impl Default for Body {
     fn default() -> Self {
-        Body::Text("".into())
+        Body::Text { text: "".into() }
+    }
+}
+
+impl Body {
+    /// Constructor to create a text-only [`Body`] enum
+    pub fn text(text: String) -> Self {
+        Body::Text { text }
+    }
+    /// Constructor to create a html-only [`Body`] enum
+    pub fn html(html: String) -> Self {
+        Body::Html { html }
+    }
+    /// Constructor to create a text and html [`Body`] enum
+    pub fn html_and_text(html: String, text: String) -> Self {
+        Body::HtmlAndText { html, text }
     }
 }
 

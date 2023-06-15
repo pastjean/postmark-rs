@@ -9,25 +9,26 @@ documentation = "https://docs.rs/postmark"
 keywords = ["postmark", "email", "e-mail", "http"]
 readme = "README.md"
 categories = ["api-bindings", "email", "web-programming::http-client"]
-version = "0.7.1"
+version = "0.8.1"
 edition = "2018"
 
 [dependencies]
-async-trait = { version = "0.1.51" }
-bytes = { version = "1.0" }
+async-trait = { version = "0.1" }
+bytes = { version = "1.4" }
 http = { version = "0.2" }
 reqwest = { version = "0.11", optional = true, default-features = false }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = { version = "1.0" }
 thiserror = { version = "1.0" }
-typed-builder = { version = "0.9"}
-url = { version = "2.2"}
+typed-builder = { version = "0.14"}
+url = { version = "2.4"}
 indexmap = { version = "1.8", features = ["serde"], optional = true }
 
 [features]
 default = []
-reqwest-native-tls = ["reqwest/native-tls", "reqwest"]
-reqwest-rustls-tls = ["reqwest/rustls-tls", "reqwest"]
+reqwest = ["dep:reqwest"]
+reqwest-native-tls = ["reqwest", "reqwest/native-tls"]
+reqwest-rustls-tls = ["reqwest", "reqwest/rustls-tls"]
 indexmap = ["dep:indexmap"]
 
 [dev-dependencies]
