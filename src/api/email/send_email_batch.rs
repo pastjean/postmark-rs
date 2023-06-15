@@ -3,8 +3,6 @@ use std::borrow::Cow;
 use super::send_email::{SendEmailRequest, SendEmailResponse};
 use crate::{Endpoint};
 
-use crate::api::Body;
-
 /// Send multiple emails at once
 pub type SendEmailBatchRequest = Vec<SendEmailRequest>;
 /// Response for [`SendEmailBatchRequest`]

@@ -1,4 +1,4 @@
-use crate::{api::Body, Endpoint};
+use crate::{api::Body, api::templates::create_template::TemplateType, Endpoint};
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 use typed_builder::TypedBuilder;
@@ -16,7 +16,7 @@ use typed_builder::TypedBuilder;
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 #[serde(rename_all = "PascalCase")]
 #[derive(TypedBuilder)]
-pub struct CreateTemplateRequest {
+pub struct EditTemplateRequest {
     /// Name of template.
     #[builder(setter(into))]
     pub name: String,
@@ -50,13 +50,6 @@ pub struct CreateTemplateRequest {
     #[builder(default, setter(into, strip_option))]
     pub subject: Option<String>,
 
-    /// Available when creating a template. To set if a template is standard template
-    /// or layout template. Possible options: Standard or Layout. Defaults to Standard.
-    /// After creation, it's not possible to change a template type.
-    #[serde(rename = "TemplateType", skip_serializing_if = "Option::is_none")]
-    #[builder(default, setter(into, strip_option))]
-    pub template_type: Option<TemplateType>,
-
     /// An optional string to specify which Layout Template to use (via layout alias)
     /// for an existing Layout Template when creating a standard template. Allowed
     /// characters are numbers, ASCII letters, and ‘.’, ‘-’, ‘_’ characters, and the
@@ -69,19 +62,7 @@ pub struct CreateTemplateRequest {
    
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
-pub enum TemplateType {
-    Standard,
-    Layout,
-}
-
-impl Default for TemplateType {
-    fn default() -> Self {
-        TemplateType::Standard
-    }
-}
-
-/// Response for the [`EditTemplateRequest`] Endpoint.
+/// Response for the [`CreateTemplateRequest`] Endpoint.
 ///
 /// On a success all fields will be filled, `error_code` will be 0 and
 /// message "OK".
@@ -89,7 +70,7 @@ impl Default for TemplateType {
 /// in error_code and message.
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "PascalCase")]
-pub struct CreateTemplateResponse {
+pub struct EditTemplateResponse {
     /// ID of template
     pub template_id: String,
     /// Name of template
@@ -98,18 +79,18 @@ pub struct CreateTemplateResponse {
     pub active: bool,
     /// Template alias (or None if not specified).
     pub alias: Option<String>,
-    /// Type of template. Possible options: Standard or Layout.
-    pub template_type: TemplateType,
-    /// Alias of layout used.
-    pub layout_template: Option<String>,
 }
 
-impl Endpoint for CreateTemplateRequest {
-    type Request = CreateTemplateRequest;
-    type Response = CreateTemplateResponse;
+impl Endpoint for EditTemplateRequest {
+    type Request = EditTemplateRequest;
+    type Response = EditTemplateResponse;
 
     fn endpoint(&self) -> Cow<'static, str> {
-        "/templates".into()
+        "/templates/{templateIdOrAlias}".into()
+    }
+
+    fn method(&self) -> http::Method {
+        http::Method::PUT
     }
 
     fn body(&self) -> &Self::Request {
