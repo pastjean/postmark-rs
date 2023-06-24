@@ -1,15 +1,16 @@
-use crate::{api::Body, api::templates::create_template::TemplateType, Endpoint};
+use crate::{api::Body, Endpoint};
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 use typed_builder::TypedBuilder;
 
-/// Send a Single email
+/// Edit an existing e-mail template
 ///
 /// ```
-/// # use postmark::api::email::{SendEmailRequest, Body};
-/// let req = CreateTemplateRequest::builder()
-///   .from("me@example.com")
-///   .to("you@example.com")
+/// use postmark::api::templates::{Body, EditTemplateRequest};
+/// let req = EditTemplateRequest::builder()
+///   .name("Old template name")
+///   .alias("New template alias")
+///   .subject("Greetings!")
 ///   .body(Body::Text("Hi, this is me!".to_string()))
 ///   .build();
 /// ```
@@ -72,6 +73,7 @@ pub struct EditTemplateRequest {
 #[serde(rename_all = "PascalCase")]
 pub struct EditTemplateResponse {
     /// ID of template
+    #[serde(rename = "TemplateID")]
     pub template_id: String,
     /// Name of template
     pub name: String,

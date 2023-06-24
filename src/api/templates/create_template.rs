@@ -3,13 +3,13 @@ use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 use typed_builder::TypedBuilder;
 
-/// Send a Single email
+/// Create a new e-mail template
 ///
 /// ```
-/// # use postmark::api::email::{SendEmailRequest, Body};
+/// use postmark::api::templates::{Body, CreateTemplateRequest, TemplateType};
 /// let req = CreateTemplateRequest::builder()
-///   .from("me@example.com")
-///   .to("you@example.com")
+///   .name("A great template")
+///   .template_type(TemplateType::Standard)
 ///   .body(Body::Text("Hi, this is me!".to_string()))
 ///   .build();
 /// ```
@@ -91,6 +91,7 @@ impl Default for TemplateType {
 #[serde(rename_all = "PascalCase")]
 pub struct CreateTemplateResponse {
     /// ID of template
+    #[serde(rename = "TemplateID")]
     pub template_id: String,
     /// Name of template
     pub name: String,

@@ -1,3 +1,4 @@
+//! You'll find in templates sending related endpoints.
 mod create_template;
 mod edit_template;
 
