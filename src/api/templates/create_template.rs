@@ -22,27 +22,27 @@ pub struct CreateTemplateRequest {
     #[builder(setter(into))]
     pub name: String,
 
-    /// An optional string you can provide to identify this template (if creating 
-    /// a standard template). Allowed characters are numbers, ASCII letters, and 
+    /// An optional string you can provide to identify this template (if creating
+    /// a standard template). Allowed characters are numbers, ASCII letters, and
     /// ‘.’, ‘-’, ‘_’ characters, and the string has to start with a letter.
     #[builder(default, setter(into, strip_option))]
     pub alias: Option<String>,
 
-    /// The body of the message mau come in either or both of two types, HtmlBody or 
+    /// The body of the message mau come in either or both of two types, HtmlBody or
     /// TextBody.
-    /// 
+    ///
     /// HtmlBody is required if TextBody is not specified. See our template language
     /// documentation for more information on the [syntax for this field]
     /// (https://postmarkapp.com/support/article/1077-template-syntax). A content
     /// placeholder is required to be present for a layout template, and can be
     /// placed only once in the HtmlBody.
-    /// 
+    ///
     /// TextBody is required if HtmlBody is not specified. A content
     /// placeholder is required to be present for a layout template, and can be
     /// placed only once in the TextBody.
     pub body: Body,
 
-    /// The content to use for the Subject when this template is used to send email. 
+    /// The content to use for the Subject when this template is used to send email.
     /// Subject is only required on standard templates. See our template language
     /// documentation for more information on the [syntax for this field]
     /// (https://postmarkapp.com/support/article/1077-template-syntax). Subjects are
@@ -67,7 +67,6 @@ pub struct CreateTemplateRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(into, strip_option))]
     pub layout_template: Option<String>,
-   
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
