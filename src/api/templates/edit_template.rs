@@ -6,12 +6,12 @@ use typed_builder::TypedBuilder;
 /// Edit an existing e-mail template
 ///
 /// ```
-/// use postmark::api::templates::{Body, EditTemplateRequest};
+/// use postmark::api::{Body, templates::EditTemplateRequest};
 /// let req = EditTemplateRequest::builder()
 ///   .name("Old template name")
 ///   .alias("New template alias")
 ///   .subject("Greetings!")
-///   .body(Body::Text("Hi, this is me!".to_string()))
+///   .body(Body::text("Hi, this is me!".to_string()))
 ///   .build();
 /// ```
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
@@ -25,7 +25,7 @@ pub struct EditTemplateRequest {
     /// An optional string you can provide to identify this template (if creating 
     /// a standard template). Allowed characters are numbers, ASCII letters, and 
     /// ‘.’, ‘-’, ‘_’ characters, and the string has to start with a letter.
-    #[builder(setter(into))]
+    #[builder(default, setter(into, strip_option))]
     pub alias: Option<String>,
 
     /// The body of the message mau come in either or both of two types, HtmlBody or 

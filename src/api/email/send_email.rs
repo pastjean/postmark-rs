@@ -6,7 +6,7 @@ use typed_builder::TypedBuilder;
 /// Send a Single email
 ///
 /// ```
-/// # use postmark::api::email::{SendEmailRequest, Body};
+/// # use postmark::api::{Body, email::SendEmailRequest};
 /// let req = SendEmailRequest::builder()
 ///   .from("me@example.com")
 ///   .to("you@example.com")
