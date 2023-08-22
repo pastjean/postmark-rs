@@ -30,7 +30,7 @@ async fn send_email(){
   let req = SendEmailRequest::builder()
     .from("me@example.com")
     .to("you@example.com")
-    .body(Body::Text("it's me, Mario!".to_string()))
+    .body(Body::text("it's me, Mario!".to_string()))
     .build();
   let resp = req.execute(&client).await;
 }
