@@ -40,6 +40,7 @@ pub struct CreateTemplateRequest {
     /// TextBody is required if HtmlBody is not specified. A content
     /// placeholder is required to be present for a layout template, and can be
     /// placed only once in the TextBody.
+    #[serde(flatten)]
     pub body: Body,
 
     /// The content to use for the Subject when this template is used to send email.
@@ -116,4 +117,111 @@ impl Endpoint for CreateTemplateRequest {
     fn body(&self) -> &Self::Request {
         self
     }
+}
+
+#[cfg(test)]
+mod tests {
+    use httptest::matchers::request;
+    use httptest::{responders::*, Expectation, Server};
+    use serde_json::json;
+
+    use super::*;
+    use crate::reqwest::PostmarkClient;
+    use crate::Query;
+
+    const NAME: &str = "Onboarding Email";
+    const ALIAS: &str = "my-template-alias";
+    const TEXT_BODY: &str = "Welcome, {{name}}, you are a Postmark user.";
+    const HTML_BODY: &str = "<html><body><strong>Welcome</strong>, {{name}}, you are a Postmark user.</body></html>";
+    const SUBJ: &str = "Welcome to Postmark!";
+    const LAYOUT_TEMPL: &str = "my-layout";
+
+    #[tokio::test]
+    pub async fn create_template_test_with_text() {
+        let server = Server::run();
+
+        server.expect(
+            Expectation::matching(request::method_path("POST", "/templates")).respond_with(
+                json_encoded(json!({
+                    "TemplateID": "12345",
+                    "Name": NAME,
+                    "Active": true,
+                    "Alias": ALIAS,
+                    "TemplateType": "Standard",
+                    "LayoutTemplate": LAYOUT_TEMPL,
+                })),
+            ),
+        );
+
+        let client = PostmarkClient::builder()
+            .base_url(server.url("/").to_string())
+            .build();
+
+        let req = CreateTemplateRequest::builder()
+            .name(NAME)
+            .alias(ALIAS)
+            .body(Body::text(TEXT_BODY.into()))
+            .subject(SUBJ)
+            .layout_template(LAYOUT_TEMPL)
+            .build();
+
+        assert_eq!(
+            serde_json::to_value(&req).unwrap(),
+            json!({
+                "Name": NAME,
+                "Alias": ALIAS,
+                "TextBody": TEXT_BODY,
+                "Subject": SUBJ,
+                "LayoutTemplate": LAYOUT_TEMPL,
+            })
+        );
+
+        req.execute(&client)
+            .await
+            .expect("Should get a response and be able to json decode it");
+    }
+
+    #[tokio::test]
+    pub async fn send_email_test_with_html() {
+        let server = Server::run();
+
+        server.expect(
+            Expectation::matching(request::method_path("POST", "/templates")).respond_with(
+                json_encoded(json!({
+                    "TemplateID": "12345",
+                    "Name": NAME,
+                    "Active": true,
+                    "TemplateType": "Layout",
+                })),
+            ),
+        );
+
+        let client = PostmarkClient::builder()
+            .base_url(server.url("/").to_string())
+            .build();
+
+        let req = CreateTemplateRequest::builder()
+            .name(NAME)
+            .body(Body::html(HTML_BODY.into()))
+            .subject(SUBJ)
+            .template_type(TemplateType::Layout)
+            .build();
+
+        assert_eq!(
+            serde_json::to_value(&req).unwrap(),
+            json!({
+                "Name": NAME,
+                "Alias": serde_json::Value::Null,
+                "HtmlBody": HTML_BODY,
+                "Subject": SUBJ,
+                "TemplateType": "Layout",
+            })
+        );
+
+        req.execute(&client)
+            .await
+            .expect("Should get a response and be able to json decode it");
+    }
+
+
 }
