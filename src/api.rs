@@ -1,9 +1,9 @@
 //! You'll find in `api` all the different predefined endpoints organized
 //! by Postmark api sections.
-//! 
-//! In addition, some structures that are common to multiple endpoint API 
-//! sections are included in here, specifically the definition of text 
-//! and HTML based bodies. 
+//!
+//! In addition, some structures that are common to multiple endpoint API
+//! sections are included in here, specifically the definition of text
+//! and HTML based bodies.
 
 use serde::{Deserialize, Serialize};
 

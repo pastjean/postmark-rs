@@ -132,7 +132,8 @@ mod tests {
     const NAME: &str = "Onboarding Email";
     const ALIAS: &str = "my-template-alias";
     const TEXT_BODY: &str = "Welcome, {{name}}, you are a Postmark user.";
-    const HTML_BODY: &str = "<html><body><strong>Welcome</strong>, {{name}}, you are a Postmark user.</body></html>";
+    const HTML_BODY: &str =
+        "<html><body><strong>Welcome</strong>, {{name}}, you are a Postmark user.</body></html>";
     const SUBJ: &str = "Welcome to Postmark!";
     const LAYOUT_TEMPL: &str = "my-layout";
 
@@ -222,6 +223,4 @@ mod tests {
             .await
             .expect("Should get a response and be able to json decode it");
     }
-
-
 }
