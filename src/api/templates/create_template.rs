@@ -70,16 +70,11 @@ pub struct CreateTemplateRequest {
     pub layout_template: Option<String>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Default, Clone, Serialize, Deserialize, PartialEq)]
 pub enum TemplateType {
+    #[default]
     Standard,
     Layout,
-}
-
-impl Default for TemplateType {
-    fn default() -> Self {
-        TemplateType::Standard
-    }
 }
 
 /// Response for the [`EditTemplateRequest`] Endpoint.
