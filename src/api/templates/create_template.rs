@@ -3,6 +3,8 @@ use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 use typed_builder::TypedBuilder;
 
+use super::TemplateType;
+
 /// Create a new e-mail template
 ///
 /// ```
@@ -70,12 +72,6 @@ pub struct CreateTemplateRequest {
     pub layout_template: Option<String>,
 }
 
-#[derive(Debug, Default, Clone, Serialize, Deserialize, PartialEq)]
-pub enum TemplateType {
-    #[default]
-    Standard,
-    Layout,
-}
 
 /// Response for the [`EditTemplateRequest`] Endpoint.
 ///
@@ -87,8 +83,8 @@ pub enum TemplateType {
 #[serde(rename_all = "PascalCase")]
 pub struct CreateTemplateResponse {
     /// ID of template
-    #[serde(rename = "TemplateID")]
-    pub template_id: String,
+//    #[serde(rename = "TemplateID")]
+    pub template_id: isize,
     /// Name of template
     pub name: String,
     /// Indicates that this template may be used for sending email.
@@ -139,7 +135,7 @@ mod tests {
         server.expect(
             Expectation::matching(request::method_path("POST", "/templates")).respond_with(
                 json_encoded(json!({
-                    "TemplateID": "12345",
+                    "TemplateId": 12345,
                     "Name": NAME,
                     "Active": true,
                     "Alias": ALIAS,
@@ -178,13 +174,13 @@ mod tests {
     }
 
     #[tokio::test]
-    pub async fn send_email_test_with_html() {
+    pub async fn create_template_test_with_html() {
         let server = Server::run();
 
         server.expect(
             Expectation::matching(request::method_path("POST", "/templates")).respond_with(
                 json_encoded(json!({
-                    "TemplateID": "12345",
+                    "TemplateId": 12345,
                     "Name": NAME,
                     "Active": true,
                     "TemplateType": "Layout",
@@ -211,6 +207,47 @@ mod tests {
                 "HtmlBody": HTML_BODY,
                 "Subject": SUBJ,
                 "TemplateType": "Layout",
+            })
+        );
+
+        req.execute(&client)
+            .await
+            .expect("Should get a response and be able to json decode it");
+    }
+
+    #[tokio::test]
+    pub async fn create_template_test_with_text_and_html() {
+        let server = Server::run();
+
+        server.expect(
+            Expectation::matching(request::method_path("POST", "/templates")).respond_with(
+                json_encoded(json!({
+                    "TemplateId": 12345,
+                    "Name": NAME,
+                    "Active": true,
+                    "TemplateType": "Standard",
+                })),
+            ),
+        );
+
+        let client = PostmarkClient::builder()
+            .base_url(server.url("/").to_string())
+            .build();
+
+        let req = CreateTemplateRequest::builder()
+            .name(NAME)
+            .body(Body::html_and_text(HTML_BODY.into(), TEXT_BODY.into()))
+            .subject(SUBJ)
+            .build();
+
+        assert_eq!(
+            serde_json::to_value(&req).unwrap(),
+            json!({
+                "Name": NAME,
+                "Alias": serde_json::Value::Null,
+                "HtmlBody": HTML_BODY,
+                "TextBody": TEXT_BODY,
+                "Subject": SUBJ,
             })
         );
 

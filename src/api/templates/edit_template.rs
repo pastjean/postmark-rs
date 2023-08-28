@@ -72,8 +72,8 @@ pub struct EditTemplateRequest {
 #[serde(rename_all = "PascalCase")]
 pub struct EditTemplateResponse {
     /// ID of template
-    #[serde(rename = "TemplateID")]
-    pub template_id: String,
+//    #[serde(rename = "TemplateID")]
+    pub template_id: isize,
     /// Name of template
     pub name: String,
     /// Indicates that this template may be used for sending email.
