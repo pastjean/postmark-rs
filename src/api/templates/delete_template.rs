@@ -31,7 +31,7 @@ pub struct DeleteTemplateRequest {
 #[serde(rename_all = "PascalCase")]
 pub struct DeleteTemplateResponse {
     /// ID of template
-//    #[serde(rename = "TemplateID")]
+    //    #[serde(rename = "TemplateID")]
     pub template_id: isize,
     /// Name of template
     pub name: String,
