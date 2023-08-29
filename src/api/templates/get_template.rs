@@ -134,4 +134,39 @@ mod tests {
             .await
             .expect("Should get a response and be able to json decode it");
     }
+
+    #[tokio::test]
+    pub async fn get_template_test_by_alias() {
+        let server = Server::run();
+
+        server.expect(
+            Expectation::matching(request::method_path("GET", "/templates/my-template-alias"))
+                .respond_with(json_encoded(json!({
+                    "TemplateId": 12345,
+                    "Name": NAME,
+                    "Subject": SUBJ,
+                    "HtmlBody": HTML_BODY,
+                    "TextBody": TEXT_BODY,
+                    "AssociatedServerId": 67890,
+                    "Active": true,
+                    "Alias": ALIAS,
+                    "TemplateType": "Standard",
+                    "LayoutTemplate": LAYOUT_TEMPL,
+                }))),
+        );
+
+        let client = PostmarkClient::builder()
+            .base_url(server.url("/").to_string())
+            .build();
+
+        let req = GetTemplateRequest::builder()
+            .id(TemplateIdOrAlias::Alias(String::from(ALIAS)))
+            .build();
+
+        print!("{}\n", req.endpoint());
+
+        req.execute(&client)
+            .await
+            .expect("Should get a response and be able to json decode it");
+    }
 }
