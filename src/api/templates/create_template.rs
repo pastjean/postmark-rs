@@ -72,7 +72,7 @@ pub struct CreateTemplateRequest {
     pub layout_template: Option<String>,
 }
 
-/// Response for the [`EditTemplateRequest`] Endpoint.
+/// Response for the [`CreateTemplateRequest`] Endpoint.
 ///
 /// On a success all fields will be filled, `error_code` will be 0 and
 /// message "OK".
@@ -82,7 +82,6 @@ pub struct CreateTemplateRequest {
 #[serde(rename_all = "PascalCase")]
 pub struct CreateTemplateResponse {
     /// ID of template
-    //    #[serde(rename = "TemplateID")]
     pub template_id: isize,
     /// Name of template
     pub name: String,

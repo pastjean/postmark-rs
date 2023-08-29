@@ -1,4 +1,4 @@
-use crate::{api::Body, Endpoint};
+use crate::Endpoint;
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 use typed_builder::TypedBuilder;
@@ -21,7 +21,7 @@ pub struct DeleteTemplateRequest {
     pub id: TemplateIdOrAlias,
 }
 
-/// Response for the [`EditTemplateRequest`] Endpoint.
+/// Response for the [`DeleteTemplateRequest`] Endpoint.
 ///
 /// On a success all fields will be filled, `error_code` will be 0 and
 /// message "OK".
@@ -30,26 +30,10 @@ pub struct DeleteTemplateRequest {
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "PascalCase")]
 pub struct DeleteTemplateResponse {
-    /// ID of template
-    //    #[serde(rename = "TemplateID")]
-    pub template_id: isize,
-    /// Name of template
-    pub name: String,
-    /// The content to use for the Subject when this template is used to send email.
-    pub subject: String,
-    /// The content to use for the HtmlBody and/or TextBody when this template is
-    /// used to send email.
-    pub body: Body,
-    /// The ID of the Server with which this template is associated.
-    pub associated_server_id: isize,
-    /// Indicates that this template may be used for sending email.
-    pub active: bool,
-    /// Template alias (or None if not specified).
-    pub alias: Option<String>,
-    /// Type of template. Possible options: Standard or Layout.
-    pub template_type: TemplateType,
-    /// Alias of layout used.
-    pub layout_template: Option<String>,
+    /// [API Error codes]: https://postmarkapp.com/developer/api/overview#error-codes
+    pub error_code: i64,
+    /// Associated success or error message.
+    pub message: String,
 }
 
 impl Endpoint for DeleteTemplateRequest {
@@ -57,7 +41,7 @@ impl Endpoint for DeleteTemplateRequest {
     type Response = DeleteTemplateResponse;
 
     fn endpoint(&self) -> Cow<'static, str> {
-        format!("/template/{}", self.id).into()
+        format!("/templates/{}", self.id).into()
     }
 
     fn body(&self) -> &Self::Request {
@@ -66,5 +50,76 @@ impl Endpoint for DeleteTemplateRequest {
 
     fn method(&self) -> http::Method {
         http::Method::DELETE
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use httptest::matchers::request;
+    use httptest::{responders::*, Expectation, Server};
+    use serde_json::json;
+
+    use super::*;
+    use crate::reqwest::PostmarkClient;
+    use crate::Query;
+
+    const ALIAS: &str = "my-template-alias";
+
+    #[tokio::test]
+    pub async fn delete_template_test_by_template_id() {
+        let server = Server::run();
+
+        server.expect(
+            Expectation::matching(request::method_path("DELETE", "/templates/12345")).respond_with(
+                json_encoded(json!({
+                    "ErrorCode": 0,
+                    "Message": "OK"
+                })),
+            ),
+        );
+
+        let client = PostmarkClient::builder()
+            .base_url(server.url("/").to_string())
+            .build();
+
+        let req = DeleteTemplateRequest::builder()
+            .id(TemplateIdOrAlias::TemplateId(12345))
+            .build();
+
+        print!("{}\n", req.endpoint());
+
+        req.execute(&client)
+            .await
+            .expect("Should get a response and be able to json decode it");
+    }
+
+    #[tokio::test]
+    pub async fn delete_template_test_by_alias() {
+        let server = Server::run();
+
+        server.expect(
+            Expectation::matching(request::method_path(
+                "DELETE",
+                "/templates/my-template-alias",
+            ))
+            .respond_with(json_encoded(json!({
+                "ErrorCode": 0,
+                "Message": "OK"
+            }))),
+        );
+
+        let client = PostmarkClient::builder()
+            .base_url(server.url("/").to_string())
+            .build();
+
+        let req = DeleteTemplateRequest::builder()
+            .id(TemplateIdOrAlias::Alias(String::from(ALIAS)))
+            .build();
+
+        print!("{}\n", req.endpoint());
+
+        req.execute(&client)
+            .await
+            .expect("Should get a response and be able to json decode it");
     }
 }

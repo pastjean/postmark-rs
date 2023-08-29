@@ -72,7 +72,6 @@ pub struct EditTemplateRequest {
 #[serde(rename_all = "PascalCase")]
 pub struct EditTemplateResponse {
     /// ID of template
-    //    #[serde(rename = "TemplateID")]
     pub template_id: isize,
     /// Name of template
     pub name: String,
