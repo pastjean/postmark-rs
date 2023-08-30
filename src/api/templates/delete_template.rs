@@ -122,4 +122,32 @@ mod tests {
             .await
             .expect("Should get a response and be able to json decode it");
     }
+
+    #[tokio::test]
+    pub async fn delete_template_test_should_not_error_on_postmark_error() {
+        let server = Server::run();
+
+        server.expect(
+            Expectation::matching(request::method_path(
+                "DELETE", 
+                "/templates/12345"
+            )).respond_with(
+                json_encoded(json!({
+                    "ErrorCode": 1101,
+                    "Message": "The TemplateId,  LayoutTemplate, or Alias references a Template that does not exist, or is not associated with the Server specified for this request."                })),
+            ),
+        );
+
+        let client = PostmarkClient::builder()
+            .base_url(server.url("/").to_string())
+            .build();
+
+        let req = DeleteTemplateRequest::builder()
+            .id(TemplateIdOrAlias::TemplateId(12345))
+            .build();
+
+        req.execute(&client)
+            .await
+            .expect("Should get a response and be able to json decode it");
+    }
 }
