@@ -13,7 +13,7 @@ use super::*;
 ///   .id(TemplateIdOrAlias::TemplateId(12345))
 ///   .build();
 /// ```
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize)]
 #[serde(rename_all = "PascalCase")]
 #[derive(TypedBuilder)]
 pub struct GetTemplateRequest {

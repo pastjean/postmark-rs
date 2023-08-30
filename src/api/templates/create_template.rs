@@ -16,7 +16,7 @@ use super::TemplateType;
 ///   .body(Body::text("Hi, this is me!".to_string()))
 ///   .build();
 /// ```
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, PartialEq, Serialize)]
 #[serde(rename_all = "PascalCase")]
 #[derive(TypedBuilder)]
 pub struct CreateTemplateRequest {
