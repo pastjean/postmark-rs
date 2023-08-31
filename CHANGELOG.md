@@ -6,6 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.0](https://github.com/pastjean/postmark-rs/compare/v0.8.1...v0.9.0) - 2023-08-31
+
+### Other
+- Add a manual test (that is skipped) ([#17](https://github.com/pastjean/postmark-rs/pull/17))
+- Implement edit and create template endpoints ([#13](https://github.com/pastjean/postmark-rs/pull/13))
+- Update README.md ([#14](https://github.com/pastjean/postmark-rs/pull/14))
+
 ## [0.8.1](https://github.com/pastjean/postmark-rs/compare/v0.8.0...v0.8.1) - 2023-06-14
 
 ### Other
