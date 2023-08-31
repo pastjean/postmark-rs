@@ -28,6 +28,7 @@ mod tests {
     use serde_json::json;
 
     use crate::api::email::*;
+    use crate::api::Body;
     use crate::reqwest::PostmarkClient;
     use crate::Query;
 

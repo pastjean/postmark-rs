@@ -1,4 +1,4 @@
-use crate::Endpoint;
+use crate::{api::Body, Endpoint};
 use serde::{Deserialize, Serialize};
 use std::{borrow::Cow, collections::HashMap};
 use typed_builder::TypedBuilder;
@@ -6,7 +6,7 @@ use typed_builder::TypedBuilder;
 /// Send a Single email
 ///
 /// ```
-/// # use postmark::api::email::{SendEmailRequest, Body};
+/// # use postmark::api::{Body, email::SendEmailRequest};
 /// let req = SendEmailRequest::builder()
 ///   .from("me@example.com")
 ///   .to("you@example.com")
@@ -84,55 +84,6 @@ pub struct SendEmailRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(into, strip_option))]
     pub message_stream: Option<String>,
-}
-
-/// The body of a email message
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(untagged)]
-pub enum Body {
-    Text {
-        #[serde(rename = "TextBody")]
-        text: String,
-    },
-    Html {
-        #[serde(rename = "HtmlBody")]
-        html: String,
-    },
-    HtmlAndText {
-        #[serde(rename = "HtmlBody")]
-        html: String,
-        #[serde(rename = "TextBody")]
-        text: String,
-    },
-}
-
-impl Default for Body {
-    fn default() -> Self {
-        Body::Text { text: "".into() }
-    }
-}
-
-impl Body {
-    /// Constructor to create a text-only [`Body`] enum
-    pub fn text(text: String) -> Self {
-        Body::Text { text }
-    }
-    /// Constructor to create a html-only [`Body`] enum
-    pub fn html(html: String) -> Self {
-        Body::Html { html }
-    }
-    /// Constructor to create a text and html [`Body`] enum
-    pub fn html_and_text(html: String, text: String) -> Self {
-        Body::HtmlAndText { html, text }
-    }
-}
-
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct HtmlAndText {
-    #[serde(flatten, rename = "HtmlBody")]
-    pub html: String,
-    #[serde(flatten, rename = "TextBody")]
-    pub text: String,
 }
 
 /// A custom headers to include in a email.
