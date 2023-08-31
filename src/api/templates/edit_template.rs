@@ -7,7 +7,7 @@ use super::*;
 
 /// Edit an existing e-mail template. The `id` field is used to identify the template
 /// to be edited; this field will not impose any changes on the template. Other fields,
-/// such as `alias` and `subject`, will change the values in the template. 
+/// such as `alias` and `subject`, will change the values in the template.
 ///
 /// ```
 /// use postmark::api::{Body, templates::{EditTemplateRequest, TemplateIdOrAlias}};
@@ -23,7 +23,6 @@ use super::*;
 #[serde(rename_all = "PascalCase")]
 #[derive(TypedBuilder)]
 pub struct EditTemplateRequest {
-
     /// ID of template or template alias. This id or alias is used to identify the
     /// correct template to edit.
     #[serde(skip)]
@@ -37,7 +36,7 @@ pub struct EditTemplateRequest {
     /// a standard template). Allowed characters are numbers, ASCII letters, and
     /// ‘.’, ‘-’, ‘_’ characters, and the string has to start with a letter. This
     /// field will set or change the alias whereas the id field using the alias
-    /// option will identify template by its current alias. 
+    /// option will identify template by its current alias.
     #[builder(default, setter(into, strip_option))]
     pub alias: Option<String>,
 
@@ -78,10 +77,8 @@ pub struct EditTemplateRequest {
 
 /// Response for the [`CreateTemplateRequest`] Endpoint.
 ///
-/// On a success all fields will be filled, `error_code` will be 0 and
-/// message "OK".
-/// On a failure Option fields will be empty and details will be held
-/// in error_code and message.
+/// On success (2XX HTML code response), the identifying information for the template
+/// is returned.
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "PascalCase")]
 pub struct EditTemplateResponse {
@@ -100,7 +97,7 @@ impl Endpoint for EditTemplateRequest {
     type Response = EditTemplateResponse;
 
     fn endpoint(&self) -> Cow<'static, str> {
-        format!{"/templates/{}", self.id}.into()
+        format! {"/templates/{}", self.id}.into()
     }
 
     fn method(&self) -> http::Method {
@@ -178,13 +175,12 @@ mod tests {
         let server = Server::run();
 
         server.expect(
-            Expectation::matching(request::method_path("PUT", "/templates/old-alias")).respond_with(
-                json_encoded(json!({
+            Expectation::matching(request::method_path("PUT", "/templates/old-alias"))
+                .respond_with(json_encoded(json!({
                     "TemplateId": 12345,
                     "Name": NAME,
                     "Active": true,
-                })),
-            ),
+                }))),
         );
 
         let client = PostmarkClient::builder()
@@ -255,4 +251,3 @@ mod tests {
             .expect("Should get a response and be able to json decode it");
     }
 }
-

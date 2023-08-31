@@ -5,7 +5,8 @@ use typed_builder::TypedBuilder;
 
 use super::*;
 
-/// Create a new e-mail template
+/// Get an e-mail template. The template may be specified by its template id or alias
+/// using the [`TemplateIdOrAlias`] enumeration.
 ///
 /// ```
 /// use postmark::api::{Body, templates::{GetTemplateRequest, TemplateIdOrAlias}};
@@ -21,24 +22,10 @@ pub struct GetTemplateRequest {
     pub id: TemplateIdOrAlias,
 }
 
-// impl GetTemplateRequest {
-//     fn template_id_or_alias(&self) -> String {
-//         match self.template_id {
-//             Some(id) => id.to_string(),
-//             None => match &self.alias {
-//                 Some(alias) => alias.to_string(),
-//                 None => String::from(""),
-//             }
-//         }
-//     }
-// }
-
-/// Response for the [`EditTemplateRequest`] Endpoint.
+/// Response for the [`GetTemplateRequest`] Endpoint.
 ///
-/// On a success all fields will be filled, will be 0 and
-/// message "OK".
-/// On a failure Option fields will be empty and details will be held
-/// in error_code and message.
+/// On success (2XX HTML code response), all information for the template
+/// is returned.
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "PascalCase")]
 pub struct GetTemplateResponse {

@@ -74,10 +74,8 @@ pub struct CreateTemplateRequest {
 
 /// Response for the [`CreateTemplateRequest`] Endpoint.
 ///
-/// On a success all fields will be filled, `error_code` will be 0 and
-/// message "OK".
-/// On a failure Option fields will be empty and details will be held
-/// in error_code and message.
+/// On success (2XX HTML code response), the identifying information for the template
+/// is returned.
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "PascalCase")]
 pub struct CreateTemplateResponse {

@@ -5,7 +5,8 @@ use typed_builder::TypedBuilder;
 
 use super::*;
 
-/// Create a new e-mail template
+/// Delete an existing e-mail template. The template may be specified by its template id or alias
+/// using the [`TemplateIdOrAlias`] enumeration.
 ///
 /// ```
 /// use postmark::api::{Body, templates::{DeleteTemplateRequest, TemplateIdOrAlias}};
@@ -23,8 +24,7 @@ pub struct DeleteTemplateRequest {
 
 /// Response for the [`DeleteTemplateRequest`] Endpoint.
 ///
-/// On a success all fields will be filled, `error_code` will be 0 and
-/// message "OK".
+/// On a success, `error_code` will be 0 and message "OK".
 /// On a failure Option fields will be empty and details will be held
 /// in error_code and message.
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
