@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.1](https://github.com/pastjean/postmark-rs/compare/v0.9.0...v0.9.1) - 2023-09-05
+
+### Other
+- Return send email with template to exported status ([#21](https://github.com/pastjean/postmark-rs/pull/21))
+
 ## [0.9.0](https://github.com/pastjean/postmark-rs/compare/v0.8.1...v0.9.0) - 2023-08-31
 
 ### Other
