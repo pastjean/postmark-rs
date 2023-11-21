@@ -20,9 +20,9 @@ reqwest = { version = "0.11", optional = true, default-features = false }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = { version = "1.0" }
 thiserror = { version = "1.0" }
-typed-builder = { version = "0.14" }
+typed-builder = { version = "0.18" }
 url = { version = "2.4" }
-indexmap = { version = "1.8", features = ["serde"], optional = true }
+indexmap = { version = "2.1", features = ["serde"], optional = true }
 
 [features]
 default = []
