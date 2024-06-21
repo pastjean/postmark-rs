@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.1](https://github.com/pastjean/postmark-rs/compare/v0.10.0...v0.10.1) - 2024-06-21
+
+### Other
+- Update dependencies to latest version from 2024-06-21
+
 ## [0.10.0](https://github.com/pastjean/postmark-rs/compare/v0.9.2...v0.10.0) - 2023-11-21
 
 ### Other
