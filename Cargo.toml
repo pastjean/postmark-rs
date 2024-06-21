@@ -14,15 +14,15 @@ edition = "2018"
 
 [dependencies]
 async-trait = { version = "0.1" }
-bytes = { version = "1.4" }
-http = { version = "0.2" }
-reqwest = { version = "0.11", optional = true, default-features = false }
+bytes = { version = "1.6" }
+http = { version = "1.1" }
+reqwest = { version = "0.12", optional = true, default-features = false }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = { version = "1.0" }
 thiserror = { version = "1.0" }
 typed-builder = { version = "0.18" }
-url = { version = "2.4" }
-indexmap = { version = "2.1", features = ["serde"], optional = true }
+url = { version = "2.5" }
+indexmap = { version = "2.2", features = ["serde"], optional = true }
 
 [features]
 default = []
@@ -32,8 +32,8 @@ reqwest-rustls-tls = ["reqwest", "reqwest/rustls-tls"]
 indexmap = ["dep:indexmap"]
 
 [dev-dependencies]
-httptest = { version = "0.15" }
-tokio = { version = "1.14", default-features = false, features = [
+httptest = { version = "0.16" }
+tokio = { version = "1.38", default-features = false, features = [
     "rt",
     "macros",
 ] }
