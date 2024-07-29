@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.2](https://github.com/pastjean/postmark-rs/compare/v0.10.1...v0.10.2) - 2024-07-29
+
+### Other
+- Implement send batch email with templates ([#27](https://github.com/pastjean/postmark-rs/pull/27))
+
 ## [0.10.1](https://github.com/pastjean/postmark-rs/compare/v0.10.0...v0.10.1) - 2024-06-21
 
 ### Other
