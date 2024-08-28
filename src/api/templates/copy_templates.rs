@@ -1,19 +1,19 @@
 use std::borrow::Cow;
 
-use crate::api::server::ServerIdOrName;
-use crate::api::templates::{TemplateAction, TemplateType};
-use crate::Endpoint;
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
+
+use crate::api::templates::{TemplateAction, TemplateType};
+use crate::Endpoint;
 
 #[derive(Debug, Clone, PartialEq, Serialize)]
 #[serde(rename_all = "PascalCase")]
 #[derive(TypedBuilder)]
 pub struct CopyTemplatesRequest {
     #[serde(rename = "SourceServerID")]
-    pub source_server_id: ServerIdOrName,
+    pub source_server_id: isize,
     #[serde(rename = "DestinationServerID")]
-    pub destination_server_id: ServerIdOrName,
+    pub destination_server_id: isize,
     #[builder(default = true)]
     pub perform_changes: bool,
 }
@@ -67,8 +67,8 @@ mod tests {
     pub async fn push_templates() {
         let server = Server::run();
 
-        const SOURCE_SERVER: ServerIdOrName = ServerIdOrName::ServerId(12345);
-        const DESTINATION_SERVER: ServerIdOrName = ServerIdOrName::ServerId(23456);
+        const SOURCE_SERVER: isize = 12345;
+        const DESTINATION_SERVER: isize = 23456;
 
         server.expect(
             Expectation::matching(request::method_path("PUT", "/templates/push")).respond_with(

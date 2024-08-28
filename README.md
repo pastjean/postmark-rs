@@ -24,7 +24,7 @@ use postmark::api::email::{SendEmailRequest,Body};
 
 async fn send_email(){
   let client = PostmarkClient::builder()
-   .token("<sometoken>")
+   .server_token("<sometoken>")
    .build();
 
   let req = SendEmailRequest::builder()
