@@ -26,7 +26,7 @@ impl fmt::Display for StreamIdOrName {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             StreamIdOrName::StreamId(id) => write!(f, "{}", id),
-            StreamIdOrName::StreamName(alias) => write!(f, "{}", alias),
+            StreamIdOrName::StreamName(name) => write!(f, "{}", name),
         }
     }
 }
