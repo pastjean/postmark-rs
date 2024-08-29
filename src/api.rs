@@ -12,6 +12,7 @@ pub mod email;
 pub mod message_streams;
 pub mod server;
 pub mod templates;
+pub mod webhooks;
 
 /// The body of a email message
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]

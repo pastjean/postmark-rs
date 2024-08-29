@@ -19,14 +19,12 @@ pub enum SuppressionStatusType {
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub enum StreamIdOrName {
     StreamId(String),
-    StreamName(String),
 }
 
 impl fmt::Display for StreamIdOrName {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             StreamIdOrName::StreamId(id) => write!(f, "{}", id),
-            StreamIdOrName::StreamName(name) => write!(f, "{}", name),
         }
     }
 }

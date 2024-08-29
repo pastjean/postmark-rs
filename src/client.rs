@@ -88,14 +88,7 @@ where
             .header("Content-Type", "application/json")
             .body(body.into())?;
 
-        println!("{:?}", http_req.clone());
-
-        let response = client
-            .execute(http_req.clone())
-            .await
-            .map_err(QueryError::client)?;
-
-        println!("{:?}", response.clone());
+        let response = client.execute(http_req).await.map_err(QueryError::client)?;
 
         Ok(serde_json::from_slice(response.body())?)
     }
