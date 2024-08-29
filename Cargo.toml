@@ -23,6 +23,7 @@ thiserror = { version = "1.0" }
 typed-builder = { version = "0.18" }
 url = { version = "2.5" }
 indexmap = { version = "2.2", features = ["serde"], optional = true }
+time = { version = "0.3.17", features = ["serde-human-readable", "macros"] }
 
 [features]
 default = []

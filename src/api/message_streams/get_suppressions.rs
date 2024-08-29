@@ -5,6 +5,8 @@ use crate::Endpoint;
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
 
+use time::OffsetDateTime;
+
 #[derive(Debug, Clone, PartialEq, Serialize)]
 #[serde(rename_all = "PascalCase")]
 #[derive(TypedBuilder)]
@@ -19,13 +21,14 @@ pub struct GetSuppressionResponse {
     pub suppressions: Vec<GetSuppression>,
 }
 
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "PascalCase")]
 pub struct GetSuppression {
     pub email_address: String,
     pub suppression_reason: String,
     pub origin: String,
-    pub created_at: String,
+    #[serde(with = "time::serde::rfc3339")]
+    pub created_at: OffsetDateTime,
 }
 
 impl Endpoint for GetSuppressionRequest {
