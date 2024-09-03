@@ -14,6 +14,26 @@ pub enum ServerIdOrName {
     ServerName(String),
 }
 
+#[derive(Debug, Default, Clone, Serialize, Deserialize, PartialEq)]
+pub enum DeliveryType {
+    #[default]
+    Live,
+    Sandbox,
+}
+
+#[derive(Debug, Default, Clone, Serialize, Deserialize, PartialEq)]
+pub enum ServerColor {
+    #[default]
+    Purple,
+    Blue,
+    Turquoise,
+    Green,
+    Red,
+    Yellow,
+    Grey,
+    Orange,
+}
+
 impl fmt::Display for ServerIdOrName {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {

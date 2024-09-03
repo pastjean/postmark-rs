@@ -1,5 +1,6 @@
 use std::borrow::Cow;
 
+use crate::api::server::{DeliveryType, ServerColor};
 use crate::Endpoint;
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
@@ -10,6 +11,12 @@ use typed_builder::TypedBuilder;
 pub struct CreateServerRequest {
     #[builder(setter(into))]
     pub name: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(into, strip_option))]
+    pub color: Option<ServerColor>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(into, strip_option))]
+    pub delivery_type: Option<DeliveryType>,
     #[builder(default = true)]
     pub smtp_api_activated: bool,
 }
