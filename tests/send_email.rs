@@ -19,7 +19,7 @@ async fn send_email() {
 
     let client = PostmarkClient::builder()
         .base_url("https://api.postmarkapp.com/")
-        .token(api_token)
+        .server_token(api_token)
         .build();
 
     println!("Created client");

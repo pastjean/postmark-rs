@@ -24,7 +24,7 @@
 //! # async fn send_email(){
 //! let client = PostmarkClient::builder()
 //!   .base_url("https://api.postmarkapp.com/")
-//!   .token("<sometoken>")
+//!   .server_token("<sometoken>")
 //!   .build();
 //!
 //! let req = api::email::SendEmailRequest::builder()

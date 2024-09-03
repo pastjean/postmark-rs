@@ -22,13 +22,15 @@ use typed_builder::TypedBuilder;
 /// # use postmark::reqwest::PostmarkClient;
 /// let client = PostmarkClient::builder()
 ///   .base_url("https://api.postmarkapp.com")
-///   .token("<sometoken>")
+///   .server_token("<sometoken>")
 ///   .build();
 /// ```
 #[derive(TypedBuilder, Clone)]
 pub struct PostmarkClient {
     #[builder(default, setter(into, strip_option))]
-    pub token: Option<String>,
+    pub server_token: Option<String>,
+    #[builder(default, setter(into, strip_option))]
+    pub account_token: Option<String>,
     #[builder(default=POSTMARK_API_URL.into(), setter(into))]
     pub base_url: String,
 }
@@ -36,12 +38,14 @@ pub struct PostmarkClient {
 impl std::fmt::Debug for PostmarkClient {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let Self {
-            token: ref _token,
+            server_token: ref _server_token,
+            account_token: ref _account_token,
             base_url: ref _base_url,
         } = *self;
 
         let mut builder = f.debug_struct("PostmarkClient");
-        builder.field("token", &_token.as_ref().map(|_| "***"));
+        builder.field("server_token", &_server_token.as_ref().map(|_| "***"));
+        builder.field("account_token", &_account_token.as_ref().map(|_| "***"));
         builder.field("base_url", _base_url);
         builder.finish()
     }
@@ -51,7 +55,8 @@ impl Default for PostmarkClient {
     fn default() -> Self {
         Self {
             base_url: POSTMARK_API_URL.into(),
-            token: None,
+            server_token: None,
+            account_token: None,
         }
     }
 }
@@ -88,9 +93,14 @@ impl Client for PostmarkClient {
         let client = reqwest::Client::builder().build()?;
         let mut req = req;
 
-        if let Some(tok) = &self.token {
+        if let Some(tok) = &self.server_token {
             req.headers_mut()
                 .append("X-Postmark-Server-Token", tok.try_into()?);
+        }
+
+        if let Some(tok) = &self.account_token {
+            req.headers_mut()
+                .append("X-Postmark-Account-Token", tok.try_into()?);
         }
 
         let base_url: url::Url = self.base_url.parse()?;
