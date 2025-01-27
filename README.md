@@ -19,8 +19,10 @@ postmark = "x.y.z"
 And use it, see documentation at: https://docs.rs/postmark.
 
 ```rust
+use postmark::api::email::SendEmailRequest;
+use postmark::api::Body;
 use postmark::reqwest::PostmarkClient;
-use postmark::api::email::{SendEmailRequest,Body};
+use postmark::Query;
 
 async fn send_email(){
   let client = PostmarkClient::builder()
