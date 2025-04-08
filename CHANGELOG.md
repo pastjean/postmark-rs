@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.11.2](https://github.com/pastjean/postmark-rs/compare/v0.11.1...v0.11.2) - 2025-04-08
+
+### Other
+
+- Add error_for_status fn ([#37](https://github.com/pastjean/postmark-rs/pull/37))
+
 ## [0.11.1](https://github.com/pastjean/postmark-rs/compare/v0.11.0...v0.11.1) - 2025-01-27
 
 ### Other
