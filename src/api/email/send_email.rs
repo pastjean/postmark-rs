@@ -137,6 +137,16 @@ pub struct SendEmailResponse {
     pub message: String,
 }
 
+impl SendEmailResponse {
+    pub fn error_for_status(self) -> Result<Self, SendEmailResponse> {
+        if self.error_code == 0 {
+            Ok(self)
+        } else {
+            Err(self)
+        }
+    }
+}
+
 impl Endpoint for SendEmailRequest {
     type Request = SendEmailRequest;
     type Response = SendEmailResponse;
@@ -319,5 +329,81 @@ mod tests {
         req.execute(&client)
             .await
             .expect("Should get a response and be able to json decode it");
+    }
+
+    #[tokio::test]
+    pub async fn send_email_test_error_for_status_success() {
+        let server = Server::run();
+
+        server.expect(
+            Expectation::matching(request::method_path("POST", "/email")).respond_with(
+                json_encoded(json!({
+                    "To": "receiver@example.com",
+                    "SubmittedAt": "2014-02-17T07:25:01.4178645-05:00",
+                    "MessageID": "0a129aee-e1cd-480d-b08d-4f48548ff48d",
+                    "ErrorCode": 0,
+                    "Message": "OK"
+                })),
+            ),
+        );
+
+        let client = PostmarkClient::builder()
+            .base_url(server.url("/").to_string())
+            .build();
+
+        let req = SendEmailRequest::builder()
+            .from(FROM)
+            .to(TO)
+            .body(Body::text(TEXT_BODY.into()))
+            .subject(SUBJ)
+            .build();
+
+        let resp = req
+            .execute(&client)
+            .await
+            .expect("Should get a response")
+            .error_for_status()
+            .expect("Should succeed with error_code 0");
+
+        assert_eq!(resp.error_code, 0);
+        assert_eq!(resp.message, "OK");
+        assert_eq!(resp.to, Some("receiver@example.com".to_string()));
+    }
+
+    #[tokio::test]
+    pub async fn send_email_test_error_for_status_failure_invalid_email_from() {
+        let server = Server::run();
+
+        server.expect(
+            Expectation::matching(request::method_path("POST", "/email")).respond_with(
+                json_encoded(json!({
+                    "ErrorCode": 300,
+                    "Message": "Invalid 'From' address: 'invalid-email'."
+                })),
+            ),
+        );
+
+        let client = PostmarkClient::builder()
+            .base_url(server.url("/").to_string())
+            .build();
+
+        let req = SendEmailRequest::builder()
+            .from("invalid-email")
+            .to(TO)
+            .body(Body::text(TEXT_BODY.into()))
+            .subject(SUBJ)
+            .build();
+
+        let resp = req
+            .execute(&client)
+            .await
+            .expect("Should get a response")
+            .error_for_status();
+
+        assert!(resp.is_err(), "Should fail with error_code 300");
+        if let Err(err_resp) = resp {
+            assert_eq!(err_resp.error_code, 300);
+            assert_eq!(err_resp.message, "Invalid 'From' address: 'invalid-email'.");
+        }
     }
 }
