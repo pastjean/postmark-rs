@@ -6,6 +6,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.11.3](https://github.com/pastjean/postmark-rs/compare/v0.11.2...v0.11.3) - 2025-04-28
+
+### Fixed
+
+- fix missing closing parenthesis in readme
+- fix the license readme button link
+
+### Other
+
+- Make sure the license mit 'or' apache 2.0 is clear
+
 ## [0.11.2](https://github.com/pastjean/postmark-rs/compare/v0.11.1...v0.11.2) - 2025-04-08
 
 ### Other
