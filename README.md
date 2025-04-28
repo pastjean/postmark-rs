@@ -56,8 +56,13 @@ cargo release
 
 # Thanks
 
-This crate is heavily inspired by the article ["Designing Rust bindings for REST APIs](https://plume.benboeckel.net/~/JustAnotherBlog/designing-rust-bindings-for-rest-ap-is) by Ben Boeckel.
+This crate's API design is heavily inspired by the article ["Designing Rust bindings for REST APIs](https://plume.benboeckel.net/~/JustAnotherBlog/designing-rust-bindings-for-rest-ap-is) by Ben Boeckel.
 
 # License
 
-postmark is distributed under the terms of both the MIT license and the Apache License (Version 2.0).
+postmark-rs is dual-licensed under either:
+
+- MIT License ([LICENSE-MIT](LICENSE-MIT)
+- Apache License, Version 2.0 ([LICENSE-APACHE](LICENSE-APACHE)
+
+at your option.
