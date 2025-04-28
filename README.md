@@ -3,7 +3,7 @@
 [![ci](https://github.com/pastjean/postmark-rs/actions/workflows/ci.yml/badge.svg)](https://github.com/pastjean/postmark-rs/actions/workflows/ci.yml)
 [![crates.io](https://img.shields.io/crates/v/postmark.svg)](https://crates.io/crates/postmark)
 [![Documentation](https://docs.rs/postmark/badge.svg)](https://docs.rs/postmark)
-[![License](https://img.shields.io/crates/l/postmark.svg)](https://github.com/pastjean/postmark-rust#license)
+[![License](https://img.shields.io/crates/l/postmark.svg)](#license)
 
 A rust library to query Postmark API.
 
