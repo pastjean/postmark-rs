@@ -62,7 +62,7 @@ This crate's API design is heavily inspired by the article ["Designing Rust bind
 
 postmark-rs is dual-licensed under either:
 
-- MIT License ([LICENSE-MIT](LICENSE-MIT)
-- Apache License, Version 2.0 ([LICENSE-APACHE](LICENSE-APACHE)
+- MIT License ([LICENSE-MIT](LICENSE-MIT))
+- Apache License, Version 2.0 ([LICENSE-APACHE](LICENSE-APACHE))
 
 at your option.
