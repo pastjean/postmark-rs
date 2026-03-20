@@ -57,7 +57,7 @@ pub struct DomainSummary {
     pub return_path_domain_verified: bool,
     /// Unique ID of the domain.
     #[serde(rename = "ID")]
-    pub id: i64,
+    pub id: isize,
 }
 
 /// Full domain details as returned by get, create, edit, and verify endpoints.
@@ -117,5 +117,5 @@ pub struct DomainDetails {
     pub return_path_domain_cname_value: String,
     /// Unique ID of the domain.
     #[serde(rename = "ID")]
-    pub id: i64,
+    pub id: isize,
 }

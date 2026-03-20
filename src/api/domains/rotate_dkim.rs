@@ -19,7 +19,7 @@ use typed_builder::TypedBuilder;
 pub struct RotateDkimRequest {
     /// Unique ID of the domain whose DKIM keys should be rotated.
     #[serde(skip)]
-    pub domain_id: i64,
+    pub domain_id: isize,
 }
 
 /// Response for the [`RotateDkimRequest`] endpoint.
@@ -60,7 +60,7 @@ pub struct RotateDkimResponse {
     pub dkim_update_status: DkimUpdateStatus,
     /// Unique ID of the domain.
     #[serde(rename = "ID")]
-    pub id: i64,
+    pub id: isize,
 }
 
 impl Endpoint for RotateDkimRequest {
@@ -87,7 +87,7 @@ mod tests {
 
     use super::*;
 
-    const DOMAIN_ID: i64 = 36735;
+    const DOMAIN_ID: isize = 36735;
 
     #[tokio::test]
     pub async fn rotate_dkim() {

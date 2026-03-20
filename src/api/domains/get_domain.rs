@@ -19,7 +19,7 @@ use typed_builder::TypedBuilder;
 pub struct GetDomainRequest {
     /// Unique ID of the domain to retrieve.
     #[serde(skip)]
-    pub domain_id: i64,
+    pub domain_id: isize,
 }
 
 impl Endpoint for GetDomainRequest {
@@ -50,7 +50,7 @@ mod tests {
 
     use super::*;
 
-    const DOMAIN_ID: i64 = 36735;
+    const DOMAIN_ID: isize = 36735;
 
     #[tokio::test]
     pub async fn get_domain() {

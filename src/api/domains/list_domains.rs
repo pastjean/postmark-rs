@@ -20,10 +20,10 @@ use typed_builder::TypedBuilder;
 pub struct ListDomainsRequest {
     /// Number of records to return per request. Max 500.
     #[serde(skip)]
-    pub count: i64,
+    pub count: isize,
     /// Number of records to skip.
     #[serde(skip)]
-    pub offset: i64,
+    pub offset: isize,
 }
 
 /// Response for the [`ListDomainsRequest`] endpoint.
@@ -31,7 +31,7 @@ pub struct ListDomainsRequest {
 #[serde(rename_all = "PascalCase")]
 pub struct ListDomainsResponse {
     /// Total number of domains matching the query. May exceed the number returned in a single call.
-    pub total_count: i64,
+    pub total_count: isize,
     /// List of domain summaries.
     pub domains: Vec<DomainSummary>,
 }

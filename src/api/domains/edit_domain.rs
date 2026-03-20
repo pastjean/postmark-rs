@@ -20,7 +20,7 @@ use typed_builder::TypedBuilder;
 pub struct EditDomainRequest {
     /// Unique ID of the domain to edit.
     #[serde(skip)]
-    pub domain_id: i64,
+    pub domain_id: isize,
     /// Custom Return-Path domain. Must be a subdomain of your From Email domain
     /// with a CNAME record pointing to `pm.mtasv.net`.
     #[builder(setter(into))]
@@ -55,7 +55,7 @@ mod tests {
 
     use super::*;
 
-    const DOMAIN_ID: i64 = 36736;
+    const DOMAIN_ID: isize = 36736;
 
     #[tokio::test]
     pub async fn edit_domain() {

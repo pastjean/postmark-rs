@@ -19,7 +19,7 @@ use typed_builder::TypedBuilder;
 pub struct VerifyDkimRequest {
     /// Unique ID of the domain whose DKIM keys should be verified.
     #[serde(skip)]
-    pub domain_id: i64,
+    pub domain_id: isize,
 }
 
 impl Endpoint for VerifyDkimRequest {
@@ -50,7 +50,7 @@ mod tests {
 
     use super::*;
 
-    const DOMAIN_ID: i64 = 36735;
+    const DOMAIN_ID: isize = 36735;
 
     #[tokio::test]
     pub async fn verify_dkim() {

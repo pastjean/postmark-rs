@@ -18,7 +18,7 @@ use typed_builder::TypedBuilder;
 pub struct DeleteDomainRequest {
     /// Unique ID of the domain to delete.
     #[serde(skip)]
-    pub domain_id: i64,
+    pub domain_id: isize,
 }
 
 /// Response for the [`DeleteDomainRequest`] endpoint.
@@ -62,7 +62,7 @@ mod tests {
 
     use super::*;
 
-    const DOMAIN_ID: i64 = 36735;
+    const DOMAIN_ID: isize = 36735;
 
     #[tokio::test]
     pub async fn delete_domain() {
@@ -83,9 +83,7 @@ mod tests {
             .base_url(server.url("/").to_string())
             .build();
 
-        let req = DeleteDomainRequest::builder()
-            .domain_id(DOMAIN_ID)
-            .build();
+        let req = DeleteDomainRequest::builder().domain_id(DOMAIN_ID).build();
 
         let resp = req
             .execute(&client)
