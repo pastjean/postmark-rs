@@ -3,17 +3,25 @@
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
+mod archive_message_stream;
+mod create_message_stream;
 mod create_suppression;
 mod delete_suppression;
+mod edit_message_stream;
 mod get_message_stream;
 mod get_suppressions;
 mod list_message_streams;
+mod unarchive_message_stream;
 
+pub use archive_message_stream::*;
+pub use create_message_stream::*;
 pub use create_suppression::*;
 pub use delete_suppression::*;
+pub use edit_message_stream::*;
 pub use get_message_stream::*;
 pub use get_suppressions::*;
 pub use list_message_streams::*;
+pub use unarchive_message_stream::*;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Default)]
 pub enum SuppressionStatusType {
