@@ -100,7 +100,7 @@ mod tests {
             .stream_id(StreamIdOrName::StreamId(String::from(STREAM_ID)))
             .build();
 
-        print!("{}\n", req.endpoint());
+        println!("{}", req.endpoint());
 
         req.execute(&client)
             .await

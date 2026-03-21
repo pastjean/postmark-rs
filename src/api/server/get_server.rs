@@ -94,7 +94,7 @@ mod tests {
             .server_id(ServerIdOrName::ServerId(SERVER_ID))
             .build();
 
-        print!("{}\n", req.endpoint());
+        println!("{}", req.endpoint());
 
         req.execute(&client)
             .await
