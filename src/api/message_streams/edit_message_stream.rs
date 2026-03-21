@@ -1,6 +1,8 @@
 use std::borrow::Cow;
 
-use crate::api::message_streams::{MessageStream, StreamIdOrName, SubscriptionManagementConfiguration};
+use crate::api::message_streams::{
+    MessageStream, StreamIdOrName, SubscriptionManagementConfiguration,
+};
 use crate::Endpoint;
 use serde::Serialize;
 use typed_builder::TypedBuilder;

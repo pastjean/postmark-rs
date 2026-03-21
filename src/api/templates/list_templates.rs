@@ -110,6 +110,9 @@ mod tests {
         assert_eq!(resp.total_count, 2);
         assert_eq!(resp.templates.len(), 2);
         assert_eq!(resp.templates[0].template_id, 1234);
-        assert_eq!(resp.templates[0].alias.as_deref(), Some("password-recovery"));
+        assert_eq!(
+            resp.templates[0].alias.as_deref(),
+            Some("password-recovery")
+        );
     }
 }

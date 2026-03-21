@@ -35,8 +35,8 @@ mod tests {
     use httptest::{responders::*, Expectation, Server};
     use serde_json::json;
 
-    use crate::reqwest::PostmarkClient;
     use crate::api::message_streams::MessageStreamType;
+    use crate::reqwest::PostmarkClient;
     use crate::Query;
 
     use super::*;

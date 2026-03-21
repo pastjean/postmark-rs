@@ -52,8 +52,8 @@ mod tests {
         let server = Server::run();
 
         server.expect(
-            Expectation::matching(request::method_path("PUT", "/bounces/42/activate")).respond_with(
-                json_encoded(json!({
+            Expectation::matching(request::method_path("PUT", "/bounces/42/activate"))
+                .respond_with(json_encoded(json!({
                     "Message": "Bounce activated",
                     "Bounce": {
                         "ID": 42,
@@ -72,8 +72,7 @@ mod tests {
                         "Content": null,
                         "Subject": null
                     }
-                })),
-            ),
+                }))),
         );
 
         let client = PostmarkClient::builder()

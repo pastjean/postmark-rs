@@ -111,7 +111,13 @@ mod tests {
             .expect("Should get a response and be able to json decode it");
 
         assert_eq!(resp.suppressions.len(), 3);
-        assert_eq!(resp.suppressions[0].status, SuppressionCreateStatusType::Suppressed);
-        assert_eq!(resp.suppressions[1].status, SuppressionCreateStatusType::Failed);
+        assert_eq!(
+            resp.suppressions[0].status,
+            SuppressionCreateStatusType::Suppressed
+        );
+        assert_eq!(
+            resp.suppressions[1].status,
+            SuppressionCreateStatusType::Failed
+        );
     }
 }
