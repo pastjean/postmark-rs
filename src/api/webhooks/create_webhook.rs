@@ -25,11 +25,11 @@ pub struct CreateWebhookResponse {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 #[serde(rename_all = "PascalCase")]
 pub struct Triggers {
-    pub subscription_change: TriggerConfig,
+    pub subscription_change: SubscriptionChangeTriggerConfig,
 }
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 #[serde(rename_all = "PascalCase")]
-pub struct TriggerConfig {
+pub struct SubscriptionChangeTriggerConfig {
     pub enabled: bool,
 }
 
@@ -112,7 +112,7 @@ mod tests {
             .url(String::from(WEBHOOK_URL))
             .message_stream(String::from("broadcast"))
             .triggers(Triggers {
-                subscription_change: TriggerConfig { enabled: true },
+                subscription_change: SubscriptionChangeTriggerConfig { enabled: true },
             })
             .build();
 

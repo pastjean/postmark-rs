@@ -1,9 +1,9 @@
 use std::borrow::Cow;
 
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use typed_builder::TypedBuilder;
 
-use crate::api::server::ServerIdOrName;
+use crate::api::server::{Server, ServerIdOrName};
 use crate::Endpoint;
 
 #[derive(Debug, Clone, PartialEq, Serialize)]
@@ -14,18 +14,9 @@ pub struct GetServerRequest {
     pub server_id: ServerIdOrName,
 }
 
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "PascalCase")]
-pub struct GetServerResponse {
-    #[serde(rename = "ID")]
-    pub id: isize,
-    pub name: String,
-    pub api_tokens: Vec<String>,
-}
-
 impl Endpoint for GetServerRequest {
     type Request = GetServerRequest;
-    type Response = GetServerResponse;
+    type Response = Server;
 
     fn endpoint(&self) -> Cow<'static, str> {
         format!("/servers/{}", self.server_id).into()
@@ -93,8 +84,6 @@ mod tests {
         let req = GetServerRequest::builder()
             .server_id(ServerIdOrName::ServerId(SERVER_ID))
             .build();
-
-        println!("{}", req.endpoint());
 
         req.execute(&client)
             .await
