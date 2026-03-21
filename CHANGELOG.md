@@ -21,6 +21,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.11.5](https://github.com/pastjean/postmark-rs/compare/v0.11.4...v0.11.5) - 2026-03-21
+
+### Fixed
+
+- fix clippy warnings in api modules
+- fix domains endpoint casing + SPF response shape
+
+### Other
+
+- Change IDs from i64 to isize to match the rest of the codebase
+- Add functionality for domains
+
 ## [0.11.3](https://github.com/pastjean/postmark-rs/compare/v0.11.2...v0.11.3) - 2025-04-28
 
 ### Fixed
