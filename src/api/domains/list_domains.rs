@@ -69,8 +69,8 @@ mod tests {
         let server = Server::run();
 
         server.expect(
-            Expectation::matching(request::method_path("GET", "/domains"))
-                .respond_with(json_encoded(json!({
+            Expectation::matching(request::method_path("GET", "/domains")).respond_with(
+                json_encoded(json!({
                     "TotalCount": 2,
                     "Domains": [
                         {
@@ -90,7 +90,8 @@ mod tests {
                             "ID": 81605
                         }
                     ]
-                }))),
+                })),
+            ),
         );
 
         let client = PostmarkClient::builder()

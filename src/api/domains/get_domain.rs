@@ -57,30 +57,27 @@ mod tests {
         let server = Server::run();
 
         server.expect(
-            Expectation::matching(request::method_path(
-                "GET",
-                format!("/domains/{DOMAIN_ID}"),
-            ))
-            .respond_with(json_encoded(json!({
-                "Name": "postmarkapp.com",
-                "SPFVerified": true,
-                "SPFHost": "postmarkapp.com",
-                "SPFTextValue": "v=spf1 a mx include:spf.mtasv.net ~all",
-                "DKIMVerified": false,
-                "WeakDKIM": false,
-                "DKIMHost": "jan2013pm._domainkey.postmarkapp.com",
-                "DKIMTextValue": "k=rsa;p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDJ...",
-                "DKIMPendingHost": "20131031155228pm._domainkey.postmarkapp.com",
-                "DKIMPendingTextValue": "k=rsa;p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCFn...",
-                "DKIMRevokedHost": "",
-                "DKIMRevokedTextValue": "",
-                "SafeToRemoveRevokedKeyFromDNS": false,
-                "DKIMUpdateStatus": "Pending",
-                "ReturnPathDomain": "pm-bounces.postmarkapp.com",
-                "ReturnPathDomainVerified": false,
-                "ReturnPathDomainCNAMEValue": "pm.mtasv.net",
-                "ID": 36735
-            }))),
+            Expectation::matching(request::method_path("GET", format!("/domains/{DOMAIN_ID}")))
+                .respond_with(json_encoded(json!({
+                    "Name": "postmarkapp.com",
+                    "SPFVerified": true,
+                    "SPFHost": "postmarkapp.com",
+                    "SPFTextValue": "v=spf1 a mx include:spf.mtasv.net ~all",
+                    "DKIMVerified": false,
+                    "WeakDKIM": false,
+                    "DKIMHost": "jan2013pm._domainkey.postmarkapp.com",
+                    "DKIMTextValue": "k=rsa;p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDJ...",
+                    "DKIMPendingHost": "20131031155228pm._domainkey.postmarkapp.com",
+                    "DKIMPendingTextValue": "k=rsa;p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCFn...",
+                    "DKIMRevokedHost": "",
+                    "DKIMRevokedTextValue": "",
+                    "SafeToRemoveRevokedKeyFromDNS": false,
+                    "DKIMUpdateStatus": "Pending",
+                    "ReturnPathDomain": "pm-bounces.postmarkapp.com",
+                    "ReturnPathDomainVerified": false,
+                    "ReturnPathDomainCNAMEValue": "pm.mtasv.net",
+                    "ID": 36735
+                }))),
         );
 
         let client = PostmarkClient::builder()

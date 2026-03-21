@@ -140,9 +140,7 @@ mod tests {
             .base_url(server.url("/").to_string())
             .build();
 
-        let req = CreateDomainRequest::builder()
-            .name("newdomain.com")
-            .build();
+        let req = CreateDomainRequest::builder().name("newdomain.com").build();
 
         assert_eq!(
             serde_json::to_value(&req).unwrap(),

@@ -68,7 +68,7 @@ impl Endpoint for RotateDkimRequest {
     type Response = RotateDkimResponse;
 
     fn endpoint(&self) -> Cow<'static, str> {
-        format!("/domains/{}/rotateDKIM", self.domain_id).into()
+        format!("/domains/{}/rotatedkim", self.domain_id).into()
     }
 
     fn body(&self) -> &Self::Request {
@@ -96,7 +96,7 @@ mod tests {
         server.expect(
             Expectation::matching(request::method_path(
                 "POST",
-                format!("/domains/{DOMAIN_ID}/rotateDKIM"),
+                format!("/domains/{DOMAIN_ID}/rotatedkim"),
             ))
             .respond_with(json_encoded(json!({
                 "Name": "postmarkapp.com",

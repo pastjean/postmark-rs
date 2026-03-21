@@ -1,8 +1,7 @@
 use std::borrow::Cow;
 
-use crate::api::domains::DomainDetails;
 use crate::Endpoint;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
 
 /// Verify SPF record for the specified domain.
@@ -22,12 +21,27 @@ pub struct VerifySpfRequest {
     pub domain_id: isize,
 }
 
+/// Response for the [`VerifySpfRequest`] endpoint.
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "PascalCase")]
+pub struct VerifySpfResponse {
+    /// Host name used for the SPF configuration.
+    #[serde(rename = "SPFHost")]
+    pub spf_host: String,
+    /// Whether SPF DNS text record has been setup correctly.
+    #[serde(rename = "SPFVerified")]
+    pub spf_verified: bool,
+    /// Value that can be optionally set up with your DNS host for SPF verification.
+    #[serde(rename = "SPFTextValue")]
+    pub spf_text_value: String,
+}
+
 impl Endpoint for VerifySpfRequest {
     type Request = VerifySpfRequest;
-    type Response = DomainDetails;
+    type Response = VerifySpfResponse;
 
     fn endpoint(&self) -> Cow<'static, str> {
-        format!("/domains/{}/verifySPF", self.domain_id).into()
+        format!("/domains/{}/verifyspf", self.domain_id).into()
     }
 
     fn body(&self) -> &Self::Request {
@@ -59,27 +73,12 @@ mod tests {
         server.expect(
             Expectation::matching(request::method_path(
                 "POST",
-                format!("/domains/{DOMAIN_ID}/verifySPF"),
+                format!("/domains/{DOMAIN_ID}/verifyspf"),
             ))
             .respond_with(json_encoded(json!({
-                "Name": "postmarkapp.com",
-                "SPFVerified": true,
                 "SPFHost": "postmarkapp.com",
+                "SPFVerified": true,
                 "SPFTextValue": "v=spf1 a mx include:spf.mtasv.net ~all",
-                "DKIMVerified": false,
-                "WeakDKIM": false,
-                "DKIMHost": "jan2013pm._domainkey.postmarkapp.com",
-                "DKIMTextValue": "k=rsa;p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDJ...",
-                "DKIMPendingHost": "20131031155228pm._domainkey.postmarkapp.com",
-                "DKIMPendingTextValue": "k=rsa;p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCFn...",
-                "DKIMRevokedHost": "",
-                "DKIMRevokedTextValue": "",
-                "SafeToRemoveRevokedKeyFromDNS": false,
-                "DKIMUpdateStatus": "Pending",
-                "ReturnPathDomain": "pm-bounces.postmarkapp.com",
-                "ReturnPathDomainVerified": false,
-                "ReturnPathDomainCNAMEValue": "pm.mtasv.net",
-                "ID": 36735
             }))),
         );
 
@@ -94,8 +93,7 @@ mod tests {
             .await
             .expect("Should get a response and be able to json decode it");
 
-        assert_eq!(resp.name, "postmarkapp.com");
-        assert_eq!(resp.spf_verified, true);
-        assert_eq!(resp.id, DOMAIN_ID);
+        assert!(resp.spf_verified);
+        assert_eq!(resp.spf_host, "postmarkapp.com");
     }
 }
