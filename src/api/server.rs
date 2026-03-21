@@ -3,6 +3,7 @@
 pub use create_server::*;
 pub use delete_server::*;
 pub use edit_server::*;
+pub use edit_server_by_id::*;
 pub use get_current_server::*;
 pub use get_server::*;
 pub use list_servers::*;
@@ -12,6 +13,7 @@ use std::fmt;
 mod create_server;
 mod delete_server;
 mod edit_server;
+mod edit_server_by_id;
 mod get_current_server;
 mod get_server;
 mod list_servers;

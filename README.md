@@ -38,6 +38,34 @@ async fn send_email(){
 }
 ```
 
+# API coverage
+
+Detailed endpoint matrix and examples:
+
+- `docs/api/postmark-endpoints.md`
+- `docs/api/examples/`
+- `docs/api/compatibility.md`
+
+Current high-level status:
+
+| Section | Status |
+|---|---|
+| Email | implemented |
+| Bulk | implemented |
+| Bounce | implemented |
+| Templates | implemented |
+| Server | implemented |
+| Servers | implemented |
+| Message Streams | implemented |
+| Domains | implemented |
+| Sender Signatures | implemented (non-deprecated) |
+| Stats | implemented |
+| Triggers: Inbound rules | implemented |
+| Webhooks | implemented |
+| Suppressions | implemented |
+| Data Removal | implemented |
+| Messages | not implemented |
+
 # Releasing a new version
 
 Prerequisite:
