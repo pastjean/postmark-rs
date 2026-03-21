@@ -3,9 +3,11 @@
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
+mod create_suppression;
 mod delete_suppression;
 mod get_suppressions;
 
+pub use create_suppression::*;
 pub use delete_suppression::*;
 pub use get_suppressions::*;
 
@@ -13,6 +15,13 @@ pub use get_suppressions::*;
 pub enum SuppressionStatusType {
     #[default]
     Deleted,
+    Failed,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Default)]
+pub enum SuppressionCreateStatusType {
+    #[default]
+    Suppressed,
     Failed,
 }
 
