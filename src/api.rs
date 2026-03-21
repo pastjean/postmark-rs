@@ -8,6 +8,7 @@
 use serde::{Deserialize, Serialize};
 
 pub mod bounce;
+pub mod domains;
 pub mod email;
 pub mod message_streams;
 pub mod server;
