@@ -8,6 +8,7 @@ mod delete_template;
 mod edit_template;
 mod get_template;
 mod list_templates;
+mod validate_template;
 
 pub use copy_templates::*;
 pub use create_template::*;
@@ -15,6 +16,7 @@ pub use delete_template::*;
 pub use edit_template::*;
 pub use get_template::*;
 pub use list_templates::*;
+pub use validate_template::*;
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize, PartialEq)]
 pub enum TemplateType {
