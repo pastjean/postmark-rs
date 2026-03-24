@@ -4,6 +4,7 @@ use crate::Endpoint;
 use crate::api::webhooks::WebhookId;
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
+use url::form_urlencoded::Serializer;
 
 #[derive(Debug, Clone, PartialEq, Serialize, TypedBuilder)]
 #[serde(rename_all = "PascalCase")]
@@ -23,7 +24,7 @@ pub struct ListWebhooksResponse {
 #[serde(rename_all = "PascalCase")]
 pub struct Webhook {
     #[serde(rename = "ID")]
-    pub id: WebhookId,
+    pub webhook_id: WebhookId,
     pub url: String,
     pub message_stream: String,
     pub http_auth: Option<WebhookHttpAuth>,
@@ -81,9 +82,16 @@ impl Endpoint for ListWebhooksRequest {
     type Response = ListWebhooksResponse;
 
     fn endpoint(&self) -> Cow<'static, str> {
-        match &self.message_stream {
-            Some(message_stream) => format!("/webhooks?MessageStream={message_stream}").into(),
-            None => "/webhooks".into(),
+        let mut serializer = Serializer::new(String::new());
+        if let Some(message_stream) = self.message_stream.as_deref() {
+            serializer.append_pair("MessageStream", message_stream);
+        }
+
+        let query = serializer.finish();
+        if query.is_empty() {
+            "/webhooks".into()
+        } else {
+            format!("/webhooks?{query}").into()
         }
     }
 
@@ -162,7 +170,7 @@ mod tests {
             .expect("Should get a response and be able to json decode it");
 
         assert_eq!(resp.webhooks.len(), 1);
-        assert_eq!(resp.webhooks[0].id, 1234567);
+        assert_eq!(resp.webhooks[0].webhook_id, 1234567);
         assert_eq!(resp.webhooks[0].message_stream, "outbound");
     }
 }

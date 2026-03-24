@@ -18,7 +18,7 @@ pub struct ListInboundRuleTriggersRequest {
 #[serde(rename_all = "PascalCase")]
 pub struct InboundRule {
     #[serde(rename = "ID")]
-    pub id: InboundRuleTriggerId,
+    pub trigger_id: InboundRuleTriggerId,
     pub rule: String,
 }
 

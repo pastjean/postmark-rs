@@ -10,7 +10,7 @@ use typed_builder::TypedBuilder;
 pub struct DeleteWebhookRequest {
     #[builder(setter(into))]
     #[serde(skip)]
-    pub id: WebhookId,
+    pub webhook_id: WebhookId,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -25,7 +25,7 @@ impl Endpoint for DeleteWebhookRequest {
     type Response = DeleteWebhookResponse;
 
     fn endpoint(&self) -> Cow<'static, str> {
-        format!("/webhooks/{}", self.id).into()
+        format!("/webhooks/{}", self.webhook_id).into()
     }
 
     fn body(&self) -> &Self::Request {
@@ -65,7 +65,7 @@ mod tests {
             .base_url(server.url("/").to_string())
             .build();
 
-        let req = DeleteWebhookRequest::builder().id(1234).build();
+        let req = DeleteWebhookRequest::builder().webhook_id(1234).build();
 
         let resp = req
             .execute(&client)

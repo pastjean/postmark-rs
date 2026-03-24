@@ -51,6 +51,6 @@ mod tests {
             .rule("someone@example.com".to_string())
             .build();
         let resp = req.execute(&client).await.expect("json decode");
-        assert_eq!(resp.id, 15);
+        assert_eq!(resp.trigger_id, 15);
     }
 }

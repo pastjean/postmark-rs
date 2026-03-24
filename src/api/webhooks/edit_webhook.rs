@@ -10,7 +10,7 @@ use typed_builder::TypedBuilder;
 pub struct EditWebhookRequest {
     #[builder(setter(into))]
     #[serde(skip)]
-    pub id: WebhookId,
+    pub webhook_id: WebhookId,
     #[builder(default, setter(into, strip_option))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub url: Option<String>,
@@ -30,7 +30,7 @@ impl Endpoint for EditWebhookRequest {
     type Response = Webhook;
 
     fn endpoint(&self) -> Cow<'static, str> {
-        format!("/webhooks/{}", self.id).into()
+        format!("/webhooks/{}", self.webhook_id).into()
     }
 
     fn body(&self) -> &Self::Request {
@@ -82,7 +82,7 @@ mod tests {
             .build();
 
         let req = EditWebhookRequest::builder()
-            .id(1234567)
+            .webhook_id(1234567)
             .url("https://www.example.com/webhooks")
             .build();
 
@@ -91,7 +91,7 @@ mod tests {
             .await
             .expect("Should get a response and be able to json decode it");
 
-        assert_eq!(resp.id, 1234567);
+        assert_eq!(resp.webhook_id, 1234567);
         assert_eq!(resp.url, "https://www.example.com/webhooks");
     }
 }

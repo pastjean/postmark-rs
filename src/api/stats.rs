@@ -3,6 +3,7 @@
 use std::borrow::Cow;
 
 use serde::Serialize;
+use url::form_urlencoded::Serializer;
 
 mod stats_outbound;
 pub use stats_outbound::*;
@@ -12,27 +13,44 @@ pub struct StatsQuery {
     pub tag: Option<String>,
     pub fromdate: Option<String>,
     pub todate: Option<String>,
-    pub messagestream: Option<String>,
+    pub message_stream: Option<String>,
 }
 
 pub(crate) fn stats_endpoint(path: &str, query: &StatsQuery) -> Cow<'static, str> {
-    let mut params: Vec<String> = Vec::new();
-    if let Some(tag) = &query.tag {
-        params.push(format!("tag={tag}"));
+    let mut serializer = Serializer::new(String::new());
+    if let Some(tag) = query.tag.as_deref() {
+        serializer.append_pair("tag", tag);
     }
-    if let Some(fromdate) = &query.fromdate {
-        params.push(format!("fromdate={fromdate}"));
+    if let Some(fromdate) = query.fromdate.as_deref() {
+        serializer.append_pair("fromdate", fromdate);
     }
-    if let Some(todate) = &query.todate {
-        params.push(format!("todate={todate}"));
+    if let Some(todate) = query.todate.as_deref() {
+        serializer.append_pair("todate", todate);
     }
-    if let Some(messagestream) = &query.messagestream {
-        params.push(format!("messagestream={messagestream}"));
+    if let Some(message_stream) = query.message_stream.as_deref() {
+        serializer.append_pair("MessageStream", message_stream);
     }
 
-    if params.is_empty() {
+    let query_string = serializer.finish();
+    if query_string.is_empty() {
         path.to_string().into()
     } else {
-        format!("{path}?{}", params.join("&")).into()
+        format!("{path}?{query_string}").into()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn stats_endpoint_uses_message_stream_pascal_case_param() {
+        let query = StatsQuery {
+            message_stream: Some("outbound".to_string()),
+            ..StatsQuery::default()
+        };
+
+        let endpoint = stats_endpoint("/stats/outbound", &query);
+        assert_eq!(endpoint.as_ref(), "/stats/outbound?MessageStream=outbound");
     }
 }

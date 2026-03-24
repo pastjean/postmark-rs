@@ -10,7 +10,7 @@ use typed_builder::TypedBuilder;
 pub struct GetWebhookRequest {
     #[builder(setter(into))]
     #[serde(skip)]
-    pub id: WebhookId,
+    pub webhook_id: WebhookId,
 }
 
 impl Endpoint for GetWebhookRequest {
@@ -18,7 +18,7 @@ impl Endpoint for GetWebhookRequest {
     type Response = Webhook;
 
     fn endpoint(&self) -> Cow<'static, str> {
-        format!("/webhooks/{}", self.id).into()
+        format!("/webhooks/{}", self.webhook_id).into()
     }
 
     fn body(&self) -> &Self::Request {
@@ -72,14 +72,14 @@ mod tests {
             .base_url(server.url("/").to_string())
             .build();
 
-        let req = GetWebhookRequest::builder().id(1234567).build();
+        let req = GetWebhookRequest::builder().webhook_id(1234567).build();
 
         let resp = req
             .execute(&client)
             .await
             .expect("Should get a response and be able to json decode it");
 
-        assert_eq!(resp.id, 1234567);
+        assert_eq!(resp.webhook_id, 1234567);
         assert_eq!(resp.url, "https://www.example.com/webhook-test-tracking");
     }
 }

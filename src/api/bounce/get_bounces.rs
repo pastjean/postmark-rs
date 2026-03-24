@@ -7,7 +7,7 @@ use url::form_urlencoded::Serializer;
 #[derive(Debug, Clone, PartialEq, Serialize, TypedBuilder)]
 #[builder(field_defaults(default, setter(strip_option)))]
 #[serde(rename_all = "PascalCase")]
-pub struct GetBouncesRequest {
+pub struct ListBouncesWithFiltersRequest {
     pub count: Option<i64>,
     pub offset: Option<i64>,
     pub r#type: Option<String>,
@@ -20,7 +20,7 @@ pub struct GetBouncesRequest {
     pub to_date: Option<String>,
 }
 
-impl Default for GetBouncesRequest {
+impl Default for ListBouncesWithFiltersRequest {
     fn default() -> Self {
         Self::builder().build()
     }
@@ -28,24 +28,24 @@ impl Default for GetBouncesRequest {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "PascalCase")]
-pub struct GetBouncesResponse {
+pub struct ListBouncesWithFiltersResponse {
     pub total_count: i64,
-    pub bounces: Vec<GetBouncesBounce>,
+    pub bounces: Vec<ListBouncesWithFiltersEntry>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "PascalCase")]
-pub struct GetBouncesBounce {
+pub struct ListBouncesWithFiltersEntry {
     #[serde(rename = "ID")]
-    pub id: i64,
+    pub bounce_id: i64,
     #[serde(rename = "Type")]
     pub type_field: Option<String>,
     pub email: String,
 }
 
-impl Endpoint for GetBouncesRequest {
-    type Request = GetBouncesRequest;
-    type Response = GetBouncesResponse;
+impl Endpoint for ListBouncesWithFiltersRequest {
+    type Request = ListBouncesWithFiltersRequest;
+    type Response = ListBouncesWithFiltersResponse;
 
     fn endpoint(&self) -> Cow<'static, str> {
         let mut serializer = Serializer::new(String::new());
@@ -131,7 +131,7 @@ mod tests {
             .base_url(server.url("/").to_string())
             .build();
 
-        let req = GetBouncesRequest::default();
+        let req = ListBouncesWithFiltersRequest::default();
 
         let resp = req
             .execute(&client)
@@ -139,12 +139,12 @@ mod tests {
             .expect("Should get a response and be able to json decode it");
 
         assert_eq!(resp.total_count, 1);
-        assert_eq!(resp.bounces[0].id, 777);
+        assert_eq!(resp.bounces[0].bounce_id, 777);
     }
 
     #[tokio::test]
     async fn get_bounces_with_filters_sets_query_path() {
-        let req = GetBouncesRequest::builder()
+        let req = ListBouncesWithFiltersRequest::builder()
             .count(10)
             .offset(20)
             .r#type(String::from("HardBounce"))
