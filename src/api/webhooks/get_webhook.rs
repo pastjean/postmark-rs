@@ -1,15 +1,15 @@
 use std::borrow::Cow;
 
+use crate::api::webhooks::Webhook;
+use crate::Endpoint;
 use serde::Serialize;
 use typed_builder::TypedBuilder;
 
-use crate::api::webhooks::Webhook;
-use crate::Endpoint;
-
 #[derive(Debug, Clone, PartialEq, Serialize, TypedBuilder)]
+#[serde(rename_all = "PascalCase")]
 pub struct GetWebhookRequest {
     #[serde(skip)]
-    pub webhook_id: isize,
+    pub id: isize,
 }
 
 impl Endpoint for GetWebhookRequest {
@@ -17,7 +17,7 @@ impl Endpoint for GetWebhookRequest {
     type Response = Webhook;
 
     fn endpoint(&self) -> Cow<'static, str> {
-        format!("/webhooks/{}", self.webhook_id).into()
+        format!("/webhooks/{}", self.id).into()
     }
 
     fn body(&self) -> &Self::Request {
@@ -31,13 +31,54 @@ impl Endpoint for GetWebhookRequest {
 
 #[cfg(test)]
 mod tests {
+    use httptest::matchers::request;
+    use httptest::{responders::*, Expectation, Server};
+    use serde_json::json;
+
+    use crate::reqwest::PostmarkClient;
+    use crate::Query;
+
     use super::*;
 
-    #[test]
-    fn get_webhook_uses_get_path() {
-        let req = GetWebhookRequest::builder().webhook_id(77).build();
+    #[tokio::test]
+    pub async fn get_webhook() {
+        let server = Server::run();
 
-        assert_eq!(req.method(), http::Method::GET);
-        assert_eq!(req.endpoint(), "/webhooks/77");
+        server.expect(
+            Expectation::matching(request::method_path("GET", "/webhooks/1234567")).respond_with(
+                json_encoded(json!({
+                    "ID": 1234567,
+                    "Url": "https://www.example.com/webhook-test-tracking",
+                    "MessageStream": "outbound",
+                    "HttpAuth": {
+                        "Username": "user",
+                        "Password": "pass"
+                    },
+                    "HttpHeaders": [{"Name": "name", "Value": "value"}],
+                    "Triggers": {
+                        "Open": {"Enabled": true, "PostFirstOpenOnly": false},
+                        "Click": {"Enabled": true},
+                        "Delivery": {"Enabled": true},
+                        "Bounce": {"Enabled": false, "IncludeContent": false},
+                        "SpamComplaint": {"Enabled": false, "IncludeContent": false},
+                        "SubscriptionChange": {"Enabled": true}
+                    }
+                })),
+            ),
+        );
+
+        let client = PostmarkClient::builder()
+            .base_url(server.url("/").to_string())
+            .build();
+
+        let req = GetWebhookRequest::builder().id(1234567).build();
+
+        let resp = req
+            .execute(&client)
+            .await
+            .expect("Should get a response and be able to json decode it");
+
+        assert_eq!(resp.id, 1234567);
+        assert_eq!(resp.url, "https://www.example.com/webhook-test-tracking");
     }
 }

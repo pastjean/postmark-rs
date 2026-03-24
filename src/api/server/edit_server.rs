@@ -1,28 +1,33 @@
 use std::borrow::Cow;
 
+use crate::api::server::{DeliveryType, Server, ServerColor};
+use crate::Endpoint;
 use serde::Serialize;
 use typed_builder::TypedBuilder;
-
-use crate::api::server::{GetServerResponse, ServerIdOrName};
-use crate::Endpoint;
 
 #[derive(Debug, Clone, PartialEq, Serialize, TypedBuilder)]
 #[serde(rename_all = "PascalCase")]
 pub struct EditServerRequest {
-    #[serde(skip)]
-    pub server_id: ServerIdOrName,
-    #[builder(setter(into))]
-    pub name: String,
+    #[builder(default, setter(into, strip_option))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[builder(default, setter(into, strip_option))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub color: Option<ServerColor>,
+    #[builder(default, setter(into, strip_option))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub delivery_type: Option<DeliveryType>,
+    #[builder(default, setter(into, strip_option))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub smtp_api_activated: Option<bool>,
 }
-
-pub type EditServerResponse = GetServerResponse;
 
 impl Endpoint for EditServerRequest {
     type Request = EditServerRequest;
-    type Response = EditServerResponse;
+    type Response = Server;
 
     fn endpoint(&self) -> Cow<'static, str> {
-        format!("/servers/{}", self.server_id).into()
+        "/server".into()
     }
 
     fn body(&self) -> &Self::Request {
@@ -37,7 +42,7 @@ impl Endpoint for EditServerRequest {
 #[cfg(test)]
 mod tests {
     use httptest::matchers::request;
-    use httptest::{responders::*, Expectation, Server};
+    use httptest::{responders::*, Expectation, Server as HttpServer};
     use serde_json::json;
 
     use crate::reqwest::PostmarkClient;
@@ -46,15 +51,16 @@ mod tests {
     use super::*;
 
     #[tokio::test]
-    async fn edit_server_puts_to_servers_id_or_name() {
-        let server = Server::run();
+    pub async fn edit_server() {
+        let server = HttpServer::run();
 
         server.expect(
-            Expectation::matching(request::method_path("PUT", "/servers/12345")).respond_with(
+            Expectation::matching(request::method_path("PUT", "/server")).respond_with(
                 json_encoded(json!({
-                    "ID": 12345,
-                    "Name": "New Name",
-                    "ApiTokens": ["token"]
+                  "ID": 1,
+                  "Name": "Staging Testing",
+                  "ApiTokens": ["server token"],
+                  "SmtpApiActivated": true
                 })),
             ),
         );
@@ -63,32 +69,9 @@ mod tests {
             .base_url(server.url("/").to_string())
             .build();
 
-        let req = EditServerRequest::builder()
-            .server_id(ServerIdOrName::ServerId(12345))
-            .name("New Name")
-            .build();
+        let req = EditServerRequest::builder().name("Staging Testing").build();
 
-        assert_eq!(req.method(), http::Method::PUT);
-        assert_eq!(req.endpoint(), "/servers/12345");
-        assert_eq!(
-            serde_json::to_value(&req).unwrap(),
-            json!({
-                "Name": "New Name"
-            })
-        );
-
-        req.execute(&client)
-            .await
-            .expect("Should decode edit server response");
-    }
-
-    #[test]
-    fn edit_server_endpoint_supports_server_name() {
-        let req = EditServerRequest::builder()
-            .server_id(ServerIdOrName::ServerName("staging".into()))
-            .name("New Name")
-            .build();
-
-        assert_eq!(req.endpoint(), "/servers/staging");
+        let resp = req.execute(&client).await.expect("json decode");
+        assert_eq!(resp.id, 1);
     }
 }

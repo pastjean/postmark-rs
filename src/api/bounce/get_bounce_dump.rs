@@ -1,17 +1,14 @@
-use crate::Endpoint;
-use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 
-#[derive(Debug, Clone, PartialEq, Serialize)]
+use crate::Endpoint;
+use serde::{Deserialize, Serialize};
+use typed_builder::TypedBuilder;
+
+#[derive(Debug, Clone, PartialEq, Serialize, TypedBuilder)]
+#[serde(rename_all = "PascalCase")]
 pub struct GetBounceDumpRequest {
     #[serde(skip)]
-    pub bounce_id: i64,
-}
-
-impl GetBounceDumpRequest {
-    pub fn new(bounce_id: i64) -> Self {
-        Self { bounce_id }
-    }
+    pub bounce_id: isize,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -21,7 +18,7 @@ pub struct GetBounceDumpResponse {
 }
 
 impl Endpoint for GetBounceDumpRequest {
-    type Request = ();
+    type Request = GetBounceDumpRequest;
     type Response = GetBounceDumpResponse;
 
     fn endpoint(&self) -> Cow<'static, str> {
@@ -29,7 +26,7 @@ impl Endpoint for GetBounceDumpRequest {
     }
 
     fn body(&self) -> &Self::Request {
-        &()
+        self
     }
 
     fn method(&self) -> http::Method {
@@ -43,18 +40,19 @@ mod tests {
     use httptest::{responders::*, Expectation, Server};
     use serde_json::json;
 
-    use super::*;
     use crate::reqwest::PostmarkClient;
     use crate::Query;
 
+    use super::*;
+
     #[tokio::test]
-    async fn send_get_bounce_dump() {
+    pub async fn get_bounce_dump() {
         let server = Server::run();
 
         server.expect(
-            Expectation::matching(request::method_path("GET", "/bounces/777/dump")).respond_with(
+            Expectation::matching(request::method_path("GET", "/bounces/42/dump")).respond_with(
                 json_encoded(json!({
-                    "Body": "Raw bounce body"
+                    "Body": "raw mime body"
                 })),
             ),
         );
@@ -63,13 +61,8 @@ mod tests {
             .base_url(server.url("/").to_string())
             .build();
 
-        let req = GetBounceDumpRequest::new(777);
-
-        let resp = req
-            .execute(&client)
-            .await
-            .expect("Should get a response and be able to json decode it");
-
-        assert_eq!(resp.body, "Raw bounce body");
+        let req = GetBounceDumpRequest::builder().bounce_id(42).build();
+        let resp = req.execute(&client).await.expect("json decode");
+        assert_eq!(resp.body, "raw mime body");
     }
 }

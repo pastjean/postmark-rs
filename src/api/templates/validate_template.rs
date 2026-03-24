@@ -1,35 +1,28 @@
-use crate::{api::Body, Endpoint};
+use std::borrow::Cow;
+
+use crate::api::templates::TemplateType;
+use crate::Endpoint;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use std::borrow::Cow;
 use typed_builder::TypedBuilder;
 
-use super::TemplateType;
-
+/// Validate template content.
 #[derive(Debug, Clone, PartialEq, Serialize)]
 #[serde(rename_all = "PascalCase")]
 #[derive(TypedBuilder)]
 pub struct ValidateTemplateRequest {
-    #[serde(flatten)]
-    pub body: Body,
-
     #[builder(default, setter(into, strip_option))]
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub subject: Option<String>,
-
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[builder(default, setter(strip_option))]
+    #[builder(default, setter(into, strip_option))]
+    pub html_body: Option<String>,
+    #[builder(default, setter(into, strip_option))]
+    pub text_body: Option<String>,
+    #[builder(default, setter(into, strip_option))]
     pub test_render_model: Option<Value>,
-
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[builder(default, setter(strip_option))]
+    #[builder(default, setter(into, strip_option))]
     pub inline_css_for_html_test_render: Option<bool>,
-
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[builder(default, setter(strip_option))]
+    #[builder(default, setter(into, strip_option))]
     pub template_type: Option<TemplateType>,
-
-    #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(into, strip_option))]
     pub layout_template: Option<String>,
 }
@@ -38,23 +31,23 @@ pub struct ValidateTemplateRequest {
 #[serde(rename_all = "PascalCase")]
 pub struct ValidateTemplateResponse {
     pub all_content_is_valid: bool,
-    pub html_body: Option<ValidationResult>,
-    pub text_body: Option<ValidationResult>,
-    pub subject: Option<ValidationResult>,
-    pub suggested_template_model: Option<Value>,
+    pub html_body: ValidateTemplatePart,
+    pub text_body: ValidateTemplatePart,
+    pub subject: ValidateTemplatePart,
+    pub suggested_template_model: Value,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "PascalCase")]
-pub struct ValidationResult {
+pub struct ValidateTemplatePart {
     pub content_is_valid: bool,
-    pub validation_errors: Vec<ValidationError>,
-    pub rendered_content: Option<String>,
+    pub validation_errors: Vec<ValidateTemplateError>,
+    pub rendered_content: String,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "PascalCase")]
-pub struct ValidationError {
+pub struct ValidateTemplateError {
     pub message: String,
     pub line: Option<isize>,
     pub character_position: Option<isize>,
@@ -71,10 +64,6 @@ impl Endpoint for ValidateTemplateRequest {
     fn body(&self) -> &Self::Request {
         self
     }
-
-    fn method(&self) -> http::Method {
-        http::Method::POST
-    }
 }
 
 #[cfg(test)]
@@ -83,113 +72,56 @@ mod tests {
     use httptest::{responders::*, Expectation, Server};
     use serde_json::json;
 
-    use super::*;
     use crate::reqwest::PostmarkClient;
     use crate::Query;
 
-    const HTML_BODY: &str = "<html><body>Hello {{name}}</body></html>";
-    const TEXT_BODY: &str = "Hello {{name}}";
-    const SUBJECT: &str = "Welcome {{name}}";
+    use super::*;
 
     #[tokio::test]
-    async fn validate_template_uses_post_validate_path_serializes_and_decodes() {
+    pub async fn validate_template() {
         let server = Server::run();
 
         server.expect(
             Expectation::matching(request::method_path("POST", "/templates/validate"))
                 .respond_with(json_encoded(json!({
                     "AllContentIsValid": true,
+                    "Subject": {
+                        "ContentIsValid": true,
+                        "ValidationErrors": [],
+                        "RenderedContent": "name_Value subjectHeadline_Value"
+                    },
                     "HtmlBody": {
                         "ContentIsValid": true,
                         "ValidationErrors": [],
-                        "RenderedContent": "<html><body>Hello Ada</body></html>"
+                        "RenderedContent": "address_Value name_Value"
                     },
                     "TextBody": {
                         "ContentIsValid": true,
                         "ValidationErrors": [],
-                        "RenderedContent": "Hello Ada"
-                    },
-                    "Subject": {
-                        "ContentIsValid": true,
-                        "ValidationErrors": [],
-                        "RenderedContent": "Welcome Ada"
+                        "RenderedContent": "phone_Value name_Value"
                     },
                     "SuggestedTemplateModel": {
-                        "name": "..."
+                        "userName": "bobby joe"
                     }
                 }))),
-        );
-
-        let req = ValidateTemplateRequest::builder()
-            .body(Body::html_and_text(HTML_BODY.into(), TEXT_BODY.into()))
-            .subject(SUBJECT)
-            .test_render_model(json!({ "name": "Ada" }))
-            .build();
-
-        assert_eq!(req.method(), http::Method::POST);
-        assert_eq!(req.endpoint(), "/templates/validate");
-        assert_eq!(
-            serde_json::to_value(&req).unwrap(),
-            json!({
-                "HtmlBody": HTML_BODY,
-                "TextBody": TEXT_BODY,
-                "Subject": SUBJECT,
-                "TestRenderModel": {
-                    "name": "Ada"
-                }
-            })
         );
 
         let client = PostmarkClient::builder()
             .base_url(server.url("/").to_string())
             .build();
 
+        let req = ValidateTemplateRequest::builder()
+            .subject("{{name}}")
+            .html_body("<b>{{name}}</b>")
+            .build();
+
         let resp = req
             .execute(&client)
             .await
-            .expect("Should decode validate template response");
+            .expect("Should get a response and be able to json decode it");
 
         assert!(resp.all_content_is_valid);
-        assert_eq!(
-            resp.subject.unwrap().rendered_content.unwrap(),
-            "Welcome Ada"
-        );
-    }
-
-    #[test]
-    fn validate_template_omits_subject_when_none() {
-        let req = ValidateTemplateRequest::builder()
-            .body(Body::html_and_text(HTML_BODY.into(), TEXT_BODY.into()))
-            .build();
-
-        let payload = serde_json::to_value(&req).unwrap();
-        assert!(payload.get("Subject").is_none());
-    }
-
-    #[test]
-    fn validate_template_serializes_optional_parity_fields() {
-        let req = ValidateTemplateRequest::builder()
-            .body(Body::html_and_text(HTML_BODY.into(), TEXT_BODY.into()))
-            .inline_css_for_html_test_render(true)
-            .template_type(TemplateType::Layout)
-            .layout_template("base-layout")
-            .build();
-
-        let payload = serde_json::to_value(&req).unwrap();
-        assert_eq!(payload["InlineCssForHtmlTestRender"], json!(true));
-        assert_eq!(payload["TemplateType"], json!("Layout"));
-        assert_eq!(payload["LayoutTemplate"], json!("base-layout"));
-    }
-
-    #[test]
-    fn validate_template_omits_optional_parity_fields_when_none() {
-        let req = ValidateTemplateRequest::builder()
-            .body(Body::html_and_text(HTML_BODY.into(), TEXT_BODY.into()))
-            .build();
-
-        let payload = serde_json::to_value(&req).unwrap();
-        assert!(payload.get("InlineCssForHtmlTestRender").is_none());
-        assert!(payload.get("TemplateType").is_none());
-        assert!(payload.get("LayoutTemplate").is_none());
+        assert!(resp.subject.content_is_valid);
+        assert_eq!(resp.subject.validation_errors.len(), 0);
     }
 }

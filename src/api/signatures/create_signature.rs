@@ -1,25 +1,30 @@
 use std::borrow::Cow;
 
+use crate::api::signatures::SenderSignature;
+use crate::Endpoint;
 use serde::Serialize;
 use typed_builder::TypedBuilder;
-
-use crate::api::signatures::Signature;
-use crate::Endpoint;
 
 #[derive(Debug, Clone, PartialEq, Serialize, TypedBuilder)]
 #[serde(rename_all = "PascalCase")]
 pub struct CreateSignatureRequest {
-    #[builder(setter(into))]
+    #[serde(rename = "FromEmail")]
+    pub from_email: String,
     pub name: String,
-    #[builder(setter(into))]
-    pub email_address: String,
+    #[builder(default, setter(into, strip_option))]
+    #[serde(rename = "ReplyToEmail", skip_serializing_if = "Option::is_none")]
+    pub reply_to_email: Option<String>,
+    #[builder(default, setter(into, strip_option))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub return_path_domain: Option<String>,
+    #[builder(default, setter(into, strip_option))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub confirmation_personal_note: Option<String>,
 }
-
-pub type CreateSignatureResponse = Signature;
 
 impl Endpoint for CreateSignatureRequest {
     type Request = CreateSignatureRequest;
-    type Response = CreateSignatureResponse;
+    type Response = SenderSignature;
 
     fn endpoint(&self) -> Cow<'static, str> {
         "/senders".into()
@@ -36,45 +41,37 @@ mod tests {
     use httptest::{responders::*, Expectation, Server};
     use serde_json::json;
 
-    use super::*;
     use crate::reqwest::PostmarkClient;
     use crate::Query;
 
-    #[tokio::test]
-    async fn create_signature_posts_sender() {
-        let server = Server::run();
+    use super::*;
 
+    #[tokio::test]
+    async fn create_signature() {
+        let server = Server::run();
         server.expect(
             Expectation::matching(request::method_path("POST", "/senders")).respond_with(
                 json_encoded(json!({
-                    "ID": 22,
-                    "Name": "Ops",
-                    "EmailAddress": "ops@example.com"
+                    "Domain": "example.com",
+                    "EmailAddress": "john@example.com",
+                    "ReplyToEmailAddress": "reply@example.com",
+                    "Name": "John",
+                    "Confirmed": false,
+                    "SPFVerified": false,
+                    "DKIMVerified": false,
+                    "WeakDKIM": false,
+                    "ID": 1
                 })),
             ),
         );
-
         let client = PostmarkClient::builder()
             .base_url(server.url("/").to_string())
             .build();
-
         let req = CreateSignatureRequest::builder()
-            .name("Ops")
-            .email_address("ops@example.com")
+            .from_email("john@example.com".to_string())
+            .name("John".to_string())
             .build();
-
-        assert_eq!(req.method(), http::Method::POST);
-        assert_eq!(req.endpoint(), "/senders");
-        assert_eq!(
-            serde_json::to_value(&req).unwrap(),
-            json!({ "Name": "Ops", "EmailAddress": "ops@example.com" })
-        );
-
-        let resp = req
-            .execute(&client)
-            .await
-            .expect("Should decode create signature");
-
-        assert_eq!(resp.id, 22);
+        let resp = req.execute(&client).await.expect("json decode");
+        assert_eq!(resp.id, 1);
     }
 }

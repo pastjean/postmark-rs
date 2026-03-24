@@ -106,7 +106,7 @@ pub struct Attachment {
 }
 
 /// Activate link tracking for links in the HTML or Text bodies of this email.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 pub enum TrackLink {
     #[default]
     None,

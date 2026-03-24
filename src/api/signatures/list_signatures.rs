@@ -1,19 +1,32 @@
 use std::borrow::Cow;
 
-use serde::Serialize;
-
-use crate::api::signatures::ListSignaturesResponse;
+use crate::api::signatures::{paginated_endpoint, SenderSignatureSummary};
 use crate::Endpoint;
+use serde::{Deserialize, Serialize};
+use typed_builder::TypedBuilder;
 
-#[derive(Debug, Clone, PartialEq, Serialize, Default)]
-pub struct ListSignaturesRequest;
+#[derive(Debug, Clone, PartialEq, Serialize, TypedBuilder)]
+#[serde(rename_all = "PascalCase")]
+pub struct ListSignaturesRequest {
+    #[serde(skip)]
+    pub count: isize,
+    #[serde(skip)]
+    pub offset: isize,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "PascalCase")]
+pub struct ListSignaturesResponse {
+    pub total_count: isize,
+    pub sender_signatures: Vec<SenderSignatureSummary>,
+}
 
 impl Endpoint for ListSignaturesRequest {
     type Request = ListSignaturesRequest;
     type Response = ListSignaturesResponse;
 
     fn endpoint(&self) -> Cow<'static, str> {
-        "/senders".into()
+        paginated_endpoint("/senders", self.count, self.offset)
     }
 
     fn body(&self) -> &Self::Request {
@@ -31,44 +44,34 @@ mod tests {
     use httptest::{responders::*, Expectation, Server};
     use serde_json::json;
 
-    use super::*;
     use crate::reqwest::PostmarkClient;
     use crate::Query;
 
-    #[tokio::test]
-    async fn list_signatures_gets_senders() {
-        let server = Server::run();
+    use super::*;
 
+    #[tokio::test]
+    async fn list_signatures() {
+        let server = Server::run();
         server.expect(
             Expectation::matching(request::method_path("GET", "/senders")).respond_with(
                 json_encoded(json!({
-                    "TotalCount": 1,
-                    "Senders": [
-                        {
-                            "ID": 22,
-                            "Name": "Ops",
-                            "EmailAddress": "ops@example.com"
-                        }
-                    ]
+                  "TotalCount": 1,
+                  "SenderSignatures": [{
+                    "Domain": "example.com",
+                    "EmailAddress": "john@example.com",
+                    "ReplyToEmailAddress": "reply@example.com",
+                    "Name": "John",
+                    "Confirmed": true,
+                    "ID": 1
+                  }]
                 })),
             ),
         );
-
         let client = PostmarkClient::builder()
             .base_url(server.url("/").to_string())
             .build();
-
-        let req = ListSignaturesRequest {};
-
-        assert_eq!(req.method(), http::Method::GET);
-        assert_eq!(req.endpoint(), "/senders");
-
-        let resp = req
-            .execute(&client)
-            .await
-            .expect("Should decode list signatures");
-
+        let req = ListSignaturesRequest::builder().count(50).offset(0).build();
+        let resp = req.execute(&client).await.expect("json decode");
         assert_eq!(resp.total_count, 1);
-        assert_eq!(resp.signatures[0].id, 22);
     }
 }

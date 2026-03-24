@@ -1,39 +1,27 @@
-use crate::Endpoint;
-use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "PascalCase")]
-pub struct GetBounceResponse {
-    #[serde(rename = "ID")]
-    pub id: i64,
-    #[serde(rename = "Type")]
-    pub type_field: Option<String>,
-    pub email: String,
-}
+use crate::api::bounce::BounceInfo;
+use crate::Endpoint;
+use serde::Serialize;
+use typed_builder::TypedBuilder;
 
-#[derive(Debug, Clone, PartialEq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, TypedBuilder)]
+#[serde(rename_all = "PascalCase")]
 pub struct GetBounceRequest {
     #[serde(skip)]
-    pub bounce_id: i64,
-}
-
-impl GetBounceRequest {
-    pub fn new(bounce_id: i64) -> Self {
-        Self { bounce_id }
-    }
+    pub bounce_id: isize,
 }
 
 impl Endpoint for GetBounceRequest {
-    type Request = ();
-    type Response = GetBounceResponse;
+    type Request = GetBounceRequest;
+    type Response = BounceInfo;
 
     fn endpoint(&self) -> Cow<'static, str> {
         format!("/bounces/{}", self.bounce_id).into()
     }
 
     fn body(&self) -> &Self::Request {
-        &()
+        self
     }
 
     fn method(&self) -> http::Method {
@@ -47,20 +35,33 @@ mod tests {
     use httptest::{responders::*, Expectation, Server};
     use serde_json::json;
 
-    use super::*;
     use crate::reqwest::PostmarkClient;
     use crate::Query;
 
+    use super::*;
+
     #[tokio::test]
-    async fn send_get_bounce() {
+    pub async fn get_bounce() {
         let server = Server::run();
 
         server.expect(
-            Expectation::matching(request::method_path("GET", "/bounces/777")).respond_with(
+            Expectation::matching(request::method_path("GET", "/bounces/42")).respond_with(
                 json_encoded(json!({
-                    "ID": 777,
+                    "ID": 42,
                     "Type": "HardBounce",
-                    "Email": "bounce@example.com"
+                    "TypeCode": 1,
+                    "Name": "Hard bounce",
+                    "Tag": "Invitation",
+                    "MessageID": "0aa96361",
+                    "Description": "The server was unable to deliver your message",
+                    "Details": "relay=none, delay=0.16",
+                    "Email": "zaphod@example.com",
+                    "BouncedAt": "2019-06-18T07:27:19.0000000-04:00",
+                    "DumpAvailable": true,
+                    "Inactive": true,
+                    "CanActivate": true,
+                    "Content": null,
+                    "Subject": null
                 })),
             ),
         );
@@ -69,15 +70,8 @@ mod tests {
             .base_url(server.url("/").to_string())
             .build();
 
-        let req = GetBounceRequest::new(777);
-
-        let resp = req
-            .execute(&client)
-            .await
-            .expect("Should get a response and be able to json decode it");
-
-        assert_eq!(resp.id, 777);
-        assert_eq!(resp.type_field, Some(String::from("HardBounce")));
-        assert_eq!(resp.email, "bounce@example.com");
+        let req = GetBounceRequest::builder().bounce_id(42).build();
+        let resp = req.execute(&client).await.expect("json decode");
+        assert_eq!(resp.id, 42);
     }
 }

@@ -1,22 +1,20 @@
 use std::borrow::Cow;
 
+use crate::Endpoint;
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
-
-use crate::api::server::ServerIdOrName;
-use crate::Endpoint;
 
 #[derive(Debug, Clone, PartialEq, Serialize, TypedBuilder)]
 #[serde(rename_all = "PascalCase")]
 pub struct DeleteServerRequest {
     #[serde(skip)]
-    pub server_id: ServerIdOrName,
+    pub server_id: isize,
 }
 
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "PascalCase")]
 pub struct DeleteServerResponse {
-    pub error_code: i64,
+    pub error_code: isize,
     pub message: String,
 }
 
@@ -40,7 +38,7 @@ impl Endpoint for DeleteServerRequest {
 #[cfg(test)]
 mod tests {
     use httptest::matchers::request;
-    use httptest::{responders::*, Expectation, Server};
+    use httptest::{responders::*, Expectation, Server as HttpServer};
     use serde_json::json;
 
     use crate::reqwest::PostmarkClient;
@@ -49,14 +47,14 @@ mod tests {
     use super::*;
 
     #[tokio::test]
-    async fn delete_server_deletes_by_id() {
-        let server = Server::run();
+    pub async fn delete_server() {
+        let server = HttpServer::run();
 
         server.expect(
-            Expectation::matching(request::method_path("DELETE", "/servers/12345")).respond_with(
+            Expectation::matching(request::method_path("DELETE", "/servers/1")).respond_with(
                 json_encoded(json!({
                     "ErrorCode": 0,
-                    "Message": "OK"
+                    "Message": "Server 1 removed."
                 })),
             ),
         );
@@ -65,24 +63,9 @@ mod tests {
             .base_url(server.url("/").to_string())
             .build();
 
-        let req = DeleteServerRequest::builder()
-            .server_id(ServerIdOrName::ServerId(12345))
-            .build();
+        let req = DeleteServerRequest::builder().server_id(1).build();
 
-        assert_eq!(req.method(), http::Method::DELETE);
-        assert_eq!(req.endpoint(), "/servers/12345");
-
-        req.execute(&client)
-            .await
-            .expect("Should decode delete server response");
-    }
-
-    #[test]
-    fn delete_server_endpoint_supports_server_name() {
-        let req = DeleteServerRequest::builder()
-            .server_id(ServerIdOrName::ServerName("staging".into()))
-            .build();
-
-        assert_eq!(req.endpoint(), "/servers/staging");
+        let resp = req.execute(&client).await.expect("json decode");
+        assert_eq!(resp.error_code, 0);
     }
 }

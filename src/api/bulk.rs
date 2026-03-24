@@ -1,6 +1,7 @@
-//! You'll find in bulk API related endpoints.
-mod get_bulk_email_batch;
-mod send_bulk_email;
+//! Bulk email API endpoints.
 
-pub use get_bulk_email_batch::*;
-pub use send_bulk_email::*;
+mod get_bulk_status;
+mod send_bulk;
+
+pub use get_bulk_status::*;
+pub use send_bulk::*;

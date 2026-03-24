@@ -5,7 +5,7 @@
 [![Documentation](https://docs.rs/postmark/badge.svg)](https://docs.rs/postmark)
 [![License](https://img.shields.io/crates/l/postmark.svg)](#license)
 
-A Rust library to query the Postmark API.
+A rust library to query Postmark API.
 
 # Usage
 
@@ -84,7 +84,7 @@ cargo release
 
 # Thanks
 
-This crate's API design is heavily inspired by the article ["Designing Rust bindings for REST APIs"](https://plume.benboeckel.net/~/JustAnotherBlog/designing-rust-bindings-for-rest-ap-is) by Ben Boeckel.
+This crate's API design is heavily inspired by the article ["Designing Rust bindings for REST APIs](https://plume.benboeckel.net/~/JustAnotherBlog/designing-rust-bindings-for-rest-ap-is) by Ben Boeckel.
 
 # License
 

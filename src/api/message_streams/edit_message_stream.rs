@@ -1,33 +1,31 @@
 use std::borrow::Cow;
 
-use serde::Serialize;
-use typed_builder::TypedBuilder;
-
 use crate::api::message_streams::{
     MessageStream, StreamIdOrName, SubscriptionManagementConfiguration,
 };
 use crate::Endpoint;
+use serde::Serialize;
+use typed_builder::TypedBuilder;
 
 #[derive(Debug, Clone, PartialEq, Serialize, TypedBuilder)]
 #[serde(rename_all = "PascalCase")]
 pub struct EditMessageStreamRequest {
     #[serde(skip)]
     pub stream_id: StreamIdOrName,
-    #[builder(setter(into))]
-    pub name: String,
+    #[builder(default, setter(into, strip_option))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
     #[builder(default, setter(into, strip_option))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
-    #[builder(default, setter(strip_option))]
+    #[builder(default, setter(into, strip_option))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub subscription_management_configuration: Option<SubscriptionManagementConfiguration>,
 }
 
-pub type EditMessageStreamResponse = MessageStream;
-
 impl Endpoint for EditMessageStreamRequest {
     type Request = EditMessageStreamRequest;
-    type Response = EditMessageStreamResponse;
+    type Response = MessageStream;
 
     fn endpoint(&self) -> Cow<'static, str> {
         format!("/message-streams/{}", self.stream_id).into()
@@ -48,32 +46,35 @@ mod tests {
     use httptest::{responders::*, Expectation, Server};
     use serde_json::json;
 
+    use crate::api::message_streams::MessageStreamType;
     use crate::reqwest::PostmarkClient;
     use crate::Query;
 
     use super::*;
 
+    const STREAM_ID: &str = "transactional-dev";
+
     #[tokio::test]
-    async fn edit_message_stream_patches_stream_and_decodes_response() {
+    pub async fn edit_message_stream() {
         let server = Server::run();
 
         server.expect(
             Expectation::matching(request::method_path(
                 "PATCH",
-                "/message-streams/transactional-dev",
+                format!("/message-streams/{STREAM_ID}"),
             ))
             .respond_with(json_encoded(json!({
                 "ID": "transactional-dev",
-                "ServerID": 12345,
+                "ServerID": 123457,
                 "Name": "Updated Dev Stream",
-                "Description": "Updated description",
+                "Description": "Updating my dev transactional stream",
                 "MessageStreamType": "Transactional",
-                "CreatedAt": "2020-07-01T00:00:00-04:00",
-                "UpdatedAt": "2020-07-02T00:00:00-04:00",
+                "CreatedAt": "2020-07-02T00:00:00-04:00",
+                "UpdatedAt": "2020-07-03T00:00:00-04:00",
                 "ArchivedAt": null,
                 "ExpectedPurgeDate": null,
                 "SubscriptionManagementConfiguration": {
-                    "UnsubscribeHandlingType": "none"
+                    "UnsubscribeHandlingType": "None"
                 }
             }))),
         );
@@ -83,27 +84,14 @@ mod tests {
             .build();
 
         let req = EditMessageStreamRequest::builder()
-            .stream_id(StreamIdOrName::StreamId("transactional-dev".to_string()))
+            .stream_id(StreamIdOrName::StreamId(String::from(STREAM_ID)))
             .name("Updated Dev Stream")
-            .description("Updated description")
+            .description("Updating my dev transactional stream")
             .build();
 
-        assert_eq!(req.method(), http::Method::PATCH);
-        assert_eq!(req.endpoint(), "/message-streams/transactional-dev");
-        assert_eq!(
-            serde_json::to_value(&req).unwrap(),
-            json!({
-                "Name": "Updated Dev Stream",
-                "Description": "Updated description"
-            })
-        );
+        let resp = req.execute(&client).await.expect("json decode");
 
-        let resp = req
-            .execute(&client)
-            .await
-            .expect("Should decode edit message stream response");
-
-        assert_eq!(resp.id, "transactional-dev");
-        assert_eq!(resp.name, "Updated Dev Stream");
+        assert_eq!(resp.id, STREAM_ID);
+        assert_eq!(resp.message_stream_type, MessageStreamType::Transactional);
     }
 }

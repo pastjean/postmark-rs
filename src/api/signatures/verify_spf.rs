@@ -3,7 +3,7 @@ use std::borrow::Cow;
 use serde::Serialize;
 use typed_builder::TypedBuilder;
 
-use crate::api::signatures::Signature;
+use crate::api::signatures::SenderSignature;
 use crate::Endpoint;
 
 #[derive(Debug, Clone, PartialEq, Serialize, TypedBuilder)]
@@ -13,7 +13,7 @@ pub struct VerifySignatureSpfRequest {
     pub signature_id: isize,
 }
 
-pub type VerifySignatureSpfResponse = Signature;
+pub type VerifySignatureSpfResponse = SenderSignature;
 
 impl Endpoint for VerifySignatureSpfRequest {
     type Request = ();
@@ -50,8 +50,12 @@ mod tests {
             Expectation::matching(request::method_path("POST", "/senders/22/verifyspf"))
                 .respond_with(json_encoded(json!({
                     "ID": 22,
+                    "Domain": "example.com",
                     "Name": "Ops",
-                    "EmailAddress": "ops@example.com"
+                    "EmailAddress": "ops@example.com",
+                    "Confirmed": true,
+                    "DKIMVerified": false,
+                    "WeakDKIM": false
                 }))),
         );
 

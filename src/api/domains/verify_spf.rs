@@ -1,22 +1,43 @@
 use std::borrow::Cow;
 
-use serde::Serialize;
+use crate::Endpoint;
+use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
 
-use crate::api::domains::Domain;
-use crate::Endpoint;
-
-#[derive(Debug, Clone, PartialEq, Serialize, TypedBuilder)]
+/// Verify SPF record for the specified domain.
+///
+/// ```
+/// use postmark::api::domains::VerifySpfRequest;
+/// let req = VerifySpfRequest::builder()
+///   .domain_id(36735)
+///   .build();
+/// ```
+#[derive(Debug, Clone, PartialEq, Serialize)]
 #[serde(rename_all = "PascalCase")]
-pub struct VerifyDomainSpfRequest {
+#[derive(TypedBuilder)]
+pub struct VerifySpfRequest {
+    /// Unique ID of the domain whose SPF record should be verified.
     #[serde(skip)]
     pub domain_id: isize,
 }
 
-pub type VerifySpfResponse = Domain;
+/// Response for the [`VerifySpfRequest`] endpoint.
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "PascalCase")]
+pub struct VerifySpfResponse {
+    /// Host name used for the SPF configuration.
+    #[serde(rename = "SPFHost")]
+    pub spf_host: String,
+    /// Whether SPF DNS text record has been setup correctly.
+    #[serde(rename = "SPFVerified")]
+    pub spf_verified: bool,
+    /// Value that can be optionally set up with your DNS host for SPF verification.
+    #[serde(rename = "SPFTextValue")]
+    pub spf_text_value: String,
+}
 
-impl Endpoint for VerifyDomainSpfRequest {
-    type Request = ();
+impl Endpoint for VerifySpfRequest {
+    type Request = VerifySpfRequest;
     type Response = VerifySpfResponse;
 
     fn endpoint(&self) -> Cow<'static, str> {
@@ -24,7 +45,7 @@ impl Endpoint for VerifyDomainSpfRequest {
     }
 
     fn body(&self) -> &Self::Request {
-        &()
+        self
     }
 
     fn method(&self) -> http::Method {
@@ -38,36 +59,41 @@ mod tests {
     use httptest::{responders::*, Expectation, Server};
     use serde_json::json;
 
-    use super::*;
     use crate::reqwest::PostmarkClient;
     use crate::Query;
 
+    use super::*;
+
+    const DOMAIN_ID: isize = 36735;
+
     #[tokio::test]
-    async fn verify_spf_posts_verify_spf_path() {
+    pub async fn verify_spf() {
         let server = Server::run();
 
         server.expect(
-            Expectation::matching(request::method_path("POST", "/domains/11/verifyspf"))
-                .respond_with(json_encoded(json!({
-                    "ID": 11,
-                    "Name": "example.com"
-                }))),
+            Expectation::matching(request::method_path(
+                "POST",
+                format!("/domains/{DOMAIN_ID}/verifyspf"),
+            ))
+            .respond_with(json_encoded(json!({
+                "SPFHost": "postmarkapp.com",
+                "SPFVerified": true,
+                "SPFTextValue": "v=spf1 a mx include:spf.mtasv.net ~all",
+            }))),
         );
 
         let client = PostmarkClient::builder()
             .base_url(server.url("/").to_string())
             .build();
 
-        let req = VerifyDomainSpfRequest::builder().domain_id(11).build();
-
-        assert_eq!(req.method(), http::Method::POST);
-        assert_eq!(req.endpoint(), "/domains/11/verifyspf");
+        let req = VerifySpfRequest::builder().domain_id(DOMAIN_ID).build();
 
         let resp = req
             .execute(&client)
             .await
-            .expect("Should decode verify spf");
+            .expect("Should get a response and be able to json decode it");
 
-        assert_eq!(resp.id, 11);
+        assert!(resp.spf_verified);
+        assert_eq!(resp.spf_host, "postmarkapp.com");
     }
 }

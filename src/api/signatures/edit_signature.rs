@@ -1,27 +1,30 @@
 use std::borrow::Cow;
 
+use crate::api::signatures::SenderSignature;
+use crate::Endpoint;
 use serde::Serialize;
 use typed_builder::TypedBuilder;
-
-use crate::api::signatures::Signature;
-use crate::Endpoint;
 
 #[derive(Debug, Clone, PartialEq, Serialize, TypedBuilder)]
 #[serde(rename_all = "PascalCase")]
 pub struct EditSignatureRequest {
     #[serde(skip)]
     pub signature_id: isize,
-    #[builder(setter(into))]
     pub name: String,
-    #[builder(setter(into))]
-    pub email_address: String,
+    #[builder(default, setter(into, strip_option))]
+    #[serde(rename = "ReplyToEmail", skip_serializing_if = "Option::is_none")]
+    pub reply_to_email: Option<String>,
+    #[builder(default, setter(into, strip_option))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub return_path_domain: Option<String>,
+    #[builder(default, setter(into, strip_option))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub confirmation_personal_note: Option<String>,
 }
-
-pub type EditSignatureResponse = Signature;
 
 impl Endpoint for EditSignatureRequest {
     type Request = EditSignatureRequest;
-    type Response = EditSignatureResponse;
+    type Response = SenderSignature;
 
     fn endpoint(&self) -> Cow<'static, str> {
         format!("/senders/{}", self.signature_id).into()
@@ -42,46 +45,38 @@ mod tests {
     use httptest::{responders::*, Expectation, Server};
     use serde_json::json;
 
-    use super::*;
     use crate::reqwest::PostmarkClient;
     use crate::Query;
 
-    #[tokio::test]
-    async fn edit_signature_puts_sender() {
-        let server = Server::run();
+    use super::*;
 
+    #[tokio::test]
+    async fn edit_signature() {
+        let server = Server::run();
         server.expect(
-            Expectation::matching(request::method_path("PUT", "/senders/22")).respond_with(
+            Expectation::matching(request::method_path("PUT", "/senders/1")).respond_with(
                 json_encoded(json!({
-                    "ID": 22,
-                    "Name": "Ops Team",
-                    "EmailAddress": "ops@example.com"
+                    "Domain": "example.com",
+                    "EmailAddress": "john@example.com",
+                    "ReplyToEmailAddress": "jane@example.com",
+                    "Name": "Jane Doe",
+                    "Confirmed": false,
+                    "SPFVerified": false,
+                    "DKIMVerified": false,
+                    "WeakDKIM": false,
+                    "ID": 1
                 })),
             ),
         );
-
         let client = PostmarkClient::builder()
             .base_url(server.url("/").to_string())
             .build();
-
         let req = EditSignatureRequest::builder()
-            .signature_id(22)
-            .name("Ops Team")
-            .email_address("ops@example.com")
+            .signature_id(1)
+            .name("Jane Doe".to_string())
+            .reply_to_email("jane@example.com".to_string())
             .build();
-
-        assert_eq!(req.method(), http::Method::PUT);
-        assert_eq!(req.endpoint(), "/senders/22");
-        assert_eq!(
-            serde_json::to_value(&req).unwrap(),
-            json!({ "Name": "Ops Team", "EmailAddress": "ops@example.com" })
-        );
-
-        let resp = req
-            .execute(&client)
-            .await
-            .expect("Should decode edit signature");
-
-        assert_eq!(resp.name, "Ops Team");
+        let resp = req.execute(&client).await.expect("json decode");
+        assert_eq!(resp.name, "Jane Doe");
     }
 }

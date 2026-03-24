@@ -1,10 +1,11 @@
-//! Message stream management API endpoints.
+//! You'll find in templates sending related endpoints.
 
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
 mod archive_message_stream;
 mod create_message_stream;
+mod create_suppression;
 mod delete_suppression;
 mod edit_message_stream;
 mod get_message_stream;
@@ -14,6 +15,7 @@ mod unarchive_message_stream;
 
 pub use archive_message_stream::*;
 pub use create_message_stream::*;
+pub use create_suppression::*;
 pub use delete_suppression::*;
 pub use edit_message_stream::*;
 pub use get_message_stream::*;
@@ -21,27 +23,40 @@ pub use get_suppressions::*;
 pub use list_message_streams::*;
 pub use unarchive_message_stream::*;
 
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Default)]
+pub enum SuppressionStatusType {
+    #[default]
+    Deleted,
+    Failed,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Default)]
+pub enum SuppressionCreateStatusType {
+    #[default]
+    Suppressed,
+    Failed,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub enum StreamIdOrName {
+    StreamId(String),
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Default)]
 pub enum MessageStreamType {
+    #[default]
     Inbound,
     Broadcasts,
     Transactional,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
-pub enum MessageStreamTypeFilter {
     All,
-    Inbound,
-    Broadcasts,
-    Transactional,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Default)]
 pub enum UnsubscribeHandlingType {
-    #[serde(rename = "none")]
+    #[default]
     None,
-    Postmark,
     Custom,
+    Postmark,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
@@ -64,50 +79,24 @@ pub struct MessageStream {
     pub updated_at: Option<String>,
     pub archived_at: Option<String>,
     pub expected_purge_date: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub subscription_management_configuration: Option<SubscriptionManagementConfiguration>,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
-#[serde(rename_all = "PascalCase")]
-pub struct ArchiveMessageStreamResponse {
-    #[serde(rename = "ID")]
-    pub id: String,
-    #[serde(rename = "ServerID")]
-    pub server_id: isize,
-    pub expected_purge_date: String,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Default)]
-pub enum SuppressionStatusType {
-    #[default]
-    Deleted,
-    Failed,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
-pub enum StreamIdOrName {
-    StreamId(String),
-    StreamName(String),
+    pub subscription_management_configuration: SubscriptionManagementConfiguration,
 }
 
 impl fmt::Display for StreamIdOrName {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             StreamIdOrName::StreamId(id) => write!(f, "{}", id),
-            StreamIdOrName::StreamName(name) => write!(f, "{}", name),
         }
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::StreamIdOrName;
-
-    #[test]
-    fn display_stream_name() {
-        let stream = StreamIdOrName::StreamName("broadcasts-dev".to_string());
-
-        assert_eq!(stream.to_string(), "broadcasts-dev");
+impl fmt::Display for MessageStreamType {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            MessageStreamType::Inbound => write!(f, "Inbound"),
+            MessageStreamType::Broadcasts => write!(f, "Broadcasts"),
+            MessageStreamType::Transactional => write!(f, "Transactional"),
+            MessageStreamType::All => write!(f, "All"),
+        }
     }
 }

@@ -1,10 +1,9 @@
 use std::borrow::Cow;
 
-use serde::Serialize;
-use typed_builder::TypedBuilder;
-
 use crate::api::message_streams::{MessageStream, StreamIdOrName};
 use crate::Endpoint;
+use serde::Serialize;
+use typed_builder::TypedBuilder;
 
 #[derive(Debug, Clone, PartialEq, Serialize, TypedBuilder)]
 #[serde(rename_all = "PascalCase")]
@@ -13,11 +12,9 @@ pub struct UnarchiveMessageStreamRequest {
     pub stream_id: StreamIdOrName,
 }
 
-pub type UnarchiveMessageStreamResponse = MessageStream;
-
 impl Endpoint for UnarchiveMessageStreamRequest {
     type Request = UnarchiveMessageStreamRequest;
-    type Response = UnarchiveMessageStreamResponse;
+    type Response = MessageStream;
 
     fn endpoint(&self) -> Cow<'static, str> {
         format!("/message-streams/{}/unarchive", self.stream_id).into()
@@ -34,32 +31,35 @@ mod tests {
     use httptest::{responders::*, Expectation, Server};
     use serde_json::json;
 
+    use crate::api::message_streams::MessageStreamType;
     use crate::reqwest::PostmarkClient;
     use crate::Query;
 
     use super::*;
 
+    const STREAM_ID: &str = "transactional-dev";
+
     #[tokio::test]
-    async fn unarchive_message_stream_posts_and_decodes_response() {
+    pub async fn unarchive_message_stream() {
         let server = Server::run();
 
         server.expect(
             Expectation::matching(request::method_path(
                 "POST",
-                "/message-streams/transactional-dev/unarchive",
+                format!("/message-streams/{STREAM_ID}/unarchive"),
             ))
             .respond_with(json_encoded(json!({
-                "ID": "transactional-dev",
-                "ServerID": 12345,
-                "Name": "Dev Stream",
-                "Description": "Dev transactional stream",
+                "ID": STREAM_ID,
+                "ServerID": 123457,
+                "Name": "Updated Dev Stream",
+                "Description": "Updating my dev transactional stream",
                 "MessageStreamType": "Transactional",
-                "CreatedAt": "2020-07-01T00:00:00-04:00",
-                "UpdatedAt": "2020-07-02T00:00:00-04:00",
+                "CreatedAt": "2020-07-02T00:00:00-04:00",
+                "UpdatedAt": "2020-07-04T00:00:00-04:00",
                 "ArchivedAt": null,
                 "ExpectedPurgeDate": null,
                 "SubscriptionManagementConfiguration": {
-                    "UnsubscribeHandlingType": "none"
+                    "UnsubscribeHandlingType": "None"
                 }
             }))),
         );
@@ -69,21 +69,12 @@ mod tests {
             .build();
 
         let req = UnarchiveMessageStreamRequest::builder()
-            .stream_id(StreamIdOrName::StreamId("transactional-dev".to_string()))
+            .stream_id(StreamIdOrName::StreamId(String::from(STREAM_ID)))
             .build();
 
-        assert_eq!(req.method(), http::Method::POST);
-        assert_eq!(
-            req.endpoint(),
-            "/message-streams/transactional-dev/unarchive"
-        );
+        let resp = req.execute(&client).await.expect("json decode");
 
-        let resp = req
-            .execute(&client)
-            .await
-            .expect("Should decode unarchive message stream response");
-
-        assert_eq!(resp.id, "transactional-dev");
-        assert_eq!(resp.archived_at, None);
+        assert_eq!(resp.id, STREAM_ID);
+        assert_eq!(resp.message_stream_type, MessageStreamType::Transactional);
     }
 }

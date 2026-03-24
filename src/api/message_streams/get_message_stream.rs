@@ -1,10 +1,9 @@
 use std::borrow::Cow;
 
-use serde::Serialize;
-use typed_builder::TypedBuilder;
-
 use crate::api::message_streams::{MessageStream, StreamIdOrName};
 use crate::Endpoint;
+use serde::Serialize;
+use typed_builder::TypedBuilder;
 
 #[derive(Debug, Clone, PartialEq, Serialize, TypedBuilder)]
 #[serde(rename_all = "PascalCase")]
@@ -13,11 +12,9 @@ pub struct GetMessageStreamRequest {
     pub stream_id: StreamIdOrName,
 }
 
-pub type GetMessageStreamResponse = MessageStream;
-
 impl Endpoint for GetMessageStreamRequest {
     type Request = GetMessageStreamRequest;
-    type Response = GetMessageStreamResponse;
+    type Response = MessageStream;
 
     fn endpoint(&self) -> Cow<'static, str> {
         format!("/message-streams/{}", self.stream_id).into()
@@ -38,31 +35,37 @@ mod tests {
     use httptest::{responders::*, Expectation, Server};
     use serde_json::json;
 
+    use crate::api::message_streams::MessageStreamType;
     use crate::reqwest::PostmarkClient;
     use crate::Query;
 
     use super::*;
 
+    const STREAM_ID: &str = "broadcasts";
+
     #[tokio::test]
-    async fn get_message_stream_gets_stream_and_decodes_response() {
+    pub async fn get_message_stream() {
         let server = Server::run();
 
         server.expect(
-            Expectation::matching(request::method_path("GET", "/message-streams/outbound"))
-                .respond_with(json_encoded(json!({
-                    "ID": "outbound",
-                    "ServerID": 12345,
-                    "Name": "Transactional",
-                    "Description": "Default transactional stream",
-                    "MessageStreamType": "Transactional",
-                    "CreatedAt": "2020-07-01T00:00:00-04:00",
-                    "UpdatedAt": null,
-                    "ArchivedAt": null,
-                    "ExpectedPurgeDate": null,
-                    "SubscriptionManagementConfiguration": {
-                        "UnsubscribeHandlingType": "none"
-                    }
-                }))),
+            Expectation::matching(request::method_path(
+                "GET",
+                format!("/message-streams/{STREAM_ID}"),
+            ))
+            .respond_with(json_encoded(json!({
+                "ID": "broadcasts",
+                "ServerID": 123456,
+                "Name": "Broadcast Stream",
+                "Description": "This is my stream to send broadcast messages",
+                "MessageStreamType": "Broadcasts",
+                "CreatedAt": "2020-07-01T00:00:00-04:00",
+                "UpdatedAt": "2020-07-01T00:00:00-04:00",
+                "ArchivedAt": null,
+                "ExpectedPurgeDate": null,
+                "SubscriptionManagementConfiguration": {
+                    "UnsubscribeHandlingType": "Postmark"
+                }
+            }))),
         );
 
         let client = PostmarkClient::builder()
@@ -70,18 +73,15 @@ mod tests {
             .build();
 
         let req = GetMessageStreamRequest::builder()
-            .stream_id(StreamIdOrName::StreamId("outbound".to_string()))
+            .stream_id(StreamIdOrName::StreamId(String::from(STREAM_ID)))
             .build();
-
-        assert_eq!(req.method(), http::Method::GET);
-        assert_eq!(req.endpoint(), "/message-streams/outbound");
 
         let resp = req
             .execute(&client)
             .await
-            .expect("Should decode get message stream response");
+            .expect("Should get a response and be able to json decode it");
 
-        assert_eq!(resp.id, "outbound");
-        assert_eq!(resp.server_id, 12345);
+        assert_eq!(resp.id, STREAM_ID);
+        assert_eq!(resp.message_stream_type, MessageStreamType::Broadcasts);
     }
 }

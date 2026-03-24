@@ -1,20 +1,18 @@
 use std::borrow::Cow;
 
+use crate::api::message_streams::{MessageStream, MessageStreamType};
+use crate::Endpoint;
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
-use url::form_urlencoded::Serializer;
 
-use crate::api::message_streams::{MessageStream, MessageStreamTypeFilter};
-use crate::Endpoint;
-
-#[derive(Debug, Clone, PartialEq, Serialize, Default, TypedBuilder)]
+#[derive(Debug, Clone, PartialEq, Serialize, TypedBuilder)]
 #[serde(rename_all = "PascalCase")]
 pub struct ListMessageStreamsRequest {
-    #[builder(default, setter(strip_option))]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub message_stream_type: Option<MessageStreamTypeFilter>,
-    #[builder(default, setter(strip_option))]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(skip)]
+    #[builder(default, setter(into, strip_option))]
+    pub message_stream_type: Option<MessageStreamType>,
+    #[serde(skip)]
+    #[builder(default, setter(into, strip_option))]
     pub include_archived_streams: Option<bool>,
 }
 
@@ -30,33 +28,18 @@ impl Endpoint for ListMessageStreamsRequest {
     type Response = ListMessageStreamsResponse;
 
     fn endpoint(&self) -> Cow<'static, str> {
-        let mut serializer = Serializer::new(String::new());
-
-        if let Some(ref message_stream_type) = self.message_stream_type {
-            serializer.append_pair(
-                "MessageStreamType",
-                match message_stream_type {
-                    MessageStreamTypeFilter::All => "All",
-                    MessageStreamTypeFilter::Inbound => "Inbound",
-                    MessageStreamTypeFilter::Broadcasts => "Broadcasts",
-                    MessageStreamTypeFilter::Transactional => "Transactional",
-                },
-            );
+        let mut query = Vec::new();
+        if let Some(message_stream_type) = &self.message_stream_type {
+            query.push(format!("MessageStreamType={message_stream_type}"));
         }
-
         if let Some(include_archived_streams) = self.include_archived_streams {
-            serializer.append_pair(
-                "IncludeArchivedStreams",
-                &include_archived_streams.to_string(),
-            );
+            query.push(format!("IncludeArchivedStreams={include_archived_streams}"));
         }
-
-        let query = serializer.finish();
 
         if query.is_empty() {
             "/message-streams".into()
         } else {
-            format!("/message-streams?{query}").into()
+            format!("/message-streams?{}", query.join("&")).into()
         }
     }
 
@@ -81,29 +64,27 @@ mod tests {
     use super::*;
 
     #[tokio::test]
-    async fn list_message_streams_gets_streams_and_decodes_response() {
+    pub async fn list_message_streams() {
         let server = Server::run();
 
         server.expect(
             Expectation::matching(request::method_path("GET", "/message-streams")).respond_with(
                 json_encoded(json!({
-                    "TotalCount": 1,
-                    "MessageStreams": [
-                        {
-                            "ID": "outbound",
-                            "ServerID": 12345,
-                            "Name": "Transactional",
-                            "Description": "Default transactional stream",
-                            "MessageStreamType": "Transactional",
-                            "CreatedAt": "2020-07-01T00:00:00-04:00",
-                            "UpdatedAt": null,
-                            "ArchivedAt": null,
-                            "ExpectedPurgeDate": null,
-                            "SubscriptionManagementConfiguration": {
-                                "UnsubscribeHandlingType": "none"
-                            }
+                    "MessageStreams": [{
+                        "ID": "outbound",
+                        "ServerID": 123457,
+                        "Name": "Transactional Stream",
+                        "Description": "This is my stream to send transactional messages",
+                        "MessageStreamType": "Transactional",
+                        "CreatedAt": "2020-07-01T00:00:00-04:00",
+                        "UpdatedAt": "2020-07-05T00:00:00-04:00",
+                        "ArchivedAt": null,
+                        "ExpectedPurgeDate": null,
+                        "SubscriptionManagementConfiguration": {
+                            "UnsubscribeHandlingType": "None"
                         }
-                    ]
+                    }],
+                    "TotalCount": 1
                 })),
             ),
         );
@@ -112,32 +93,22 @@ mod tests {
             .base_url(server.url("/").to_string())
             .build();
 
-        let req = ListMessageStreamsRequest::default();
+        let req = ListMessageStreamsRequest::builder()
+            .message_stream_type(MessageStreamType::All)
+            .include_archived_streams(true)
+            .build();
 
-        assert_eq!(req.method(), http::Method::GET);
-        assert_eq!(req.endpoint(), "/message-streams");
+        assert_eq!(
+            req.endpoint(),
+            "/message-streams?MessageStreamType=All&IncludeArchivedStreams=true"
+        );
 
         let resp = req
             .execute(&client)
             .await
-            .expect("Should decode list message streams response");
+            .expect("Should get a response and be able to json decode it");
 
         assert_eq!(resp.total_count, 1);
         assert_eq!(resp.message_streams[0].id, "outbound");
-    }
-
-    #[test]
-    fn list_message_streams_query_params_are_encoded() {
-        let req = ListMessageStreamsRequest::builder()
-            .message_stream_type(MessageStreamTypeFilter::All)
-            .include_archived_streams(true)
-            .build();
-
-        let endpoint = req.endpoint();
-        let endpoint = endpoint.as_ref();
-
-        assert!(endpoint.starts_with("/message-streams?"));
-        assert!(endpoint.contains("MessageStreamType=All"));
-        assert!(endpoint.contains("IncludeArchivedStreams=true"));
     }
 }

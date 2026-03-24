@@ -1,6 +1,6 @@
 use std::borrow::Cow;
 
-use crate::api::server::{DeliveryType, GetServerResponse, ServerColor};
+use crate::api::server::{DeliveryType, Server, ServerColor};
 use crate::Endpoint;
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
@@ -23,7 +23,7 @@ pub struct CreateServerRequest {
 
 impl Endpoint for CreateServerRequest {
     type Request = CreateServerRequest;
-    type Response = GetServerResponse;
+    type Response = Server;
 
     fn endpoint(&self) -> Cow<'static, str> {
         "/servers".into()

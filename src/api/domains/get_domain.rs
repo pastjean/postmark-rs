@@ -1,23 +1,30 @@
 use std::borrow::Cow;
 
+use crate::api::domains::DomainDetails;
+use crate::Endpoint;
 use serde::Serialize;
 use typed_builder::TypedBuilder;
 
-use crate::api::domains::Domain;
-use crate::Endpoint;
-
-#[derive(Debug, Clone, PartialEq, Serialize, TypedBuilder)]
+/// Get all details for a specific domain.
+///
+/// ```
+/// use postmark::api::domains::GetDomainRequest;
+/// let req = GetDomainRequest::builder()
+///   .domain_id(36735)
+///   .build();
+/// ```
+#[derive(Debug, Clone, PartialEq, Serialize)]
 #[serde(rename_all = "PascalCase")]
+#[derive(TypedBuilder)]
 pub struct GetDomainRequest {
+    /// Unique ID of the domain to retrieve.
     #[serde(skip)]
     pub domain_id: isize,
 }
 
-pub type GetDomainResponse = Domain;
-
 impl Endpoint for GetDomainRequest {
     type Request = GetDomainRequest;
-    type Response = GetDomainResponse;
+    type Response = DomainDetails;
 
     fn endpoint(&self) -> Cow<'static, str> {
         format!("/domains/{}", self.domain_id).into()
@@ -38,38 +45,53 @@ mod tests {
     use httptest::{responders::*, Expectation, Server};
     use serde_json::json;
 
-    use super::*;
     use crate::reqwest::PostmarkClient;
     use crate::Query;
 
+    use super::*;
+
+    const DOMAIN_ID: isize = 36735;
+
     #[tokio::test]
-    async fn get_domain_gets_domain_by_id() {
+    pub async fn get_domain() {
         let server = Server::run();
 
         server.expect(
-            Expectation::matching(request::method_path("GET", "/domains/11")).respond_with(
-                json_encoded(json!({
-                    "ID": 11,
-                    "Name": "example.com"
-                })),
-            ),
+            Expectation::matching(request::method_path("GET", format!("/domains/{DOMAIN_ID}")))
+                .respond_with(json_encoded(json!({
+                    "Name": "postmarkapp.com",
+                    "SPFVerified": true,
+                    "SPFHost": "postmarkapp.com",
+                    "SPFTextValue": "v=spf1 a mx include:spf.mtasv.net ~all",
+                    "DKIMVerified": false,
+                    "WeakDKIM": false,
+                    "DKIMHost": "jan2013pm._domainkey.postmarkapp.com",
+                    "DKIMTextValue": "k=rsa;p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDJ...",
+                    "DKIMPendingHost": "20131031155228pm._domainkey.postmarkapp.com",
+                    "DKIMPendingTextValue": "k=rsa;p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCFn...",
+                    "DKIMRevokedHost": "",
+                    "DKIMRevokedTextValue": "",
+                    "SafeToRemoveRevokedKeyFromDNS": false,
+                    "DKIMUpdateStatus": "Pending",
+                    "ReturnPathDomain": "pm-bounces.postmarkapp.com",
+                    "ReturnPathDomainVerified": false,
+                    "ReturnPathDomainCNAMEValue": "pm.mtasv.net",
+                    "ID": 36735
+                }))),
         );
 
         let client = PostmarkClient::builder()
             .base_url(server.url("/").to_string())
             .build();
 
-        let req = GetDomainRequest::builder().domain_id(11).build();
-
-        assert_eq!(req.method(), http::Method::GET);
-        assert_eq!(req.endpoint(), "/domains/11");
+        let req = GetDomainRequest::builder().domain_id(DOMAIN_ID).build();
 
         let resp = req
             .execute(&client)
             .await
-            .expect("Should decode get domain");
+            .expect("Should get a response and be able to json decode it");
 
-        assert_eq!(resp.id, 11);
-        assert_eq!(resp.name, "example.com");
+        assert_eq!(resp.name, "postmarkapp.com");
+        assert_eq!(resp.id, 36735);
     }
 }

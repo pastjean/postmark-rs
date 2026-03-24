@@ -1,30 +1,37 @@
 use std::borrow::Cow;
 
+use crate::api::domains::DomainDetails;
+use crate::Endpoint;
 use serde::Serialize;
 use typed_builder::TypedBuilder;
 
-use crate::api::domains::Domain;
-use crate::Endpoint;
-
-#[derive(Debug, Clone, PartialEq, Serialize, TypedBuilder)]
+/// Verify Return-Path DNS record for the specified domain.
+///
+/// ```
+/// use postmark::api::domains::VerifyReturnPathRequest;
+/// let req = VerifyReturnPathRequest::builder()
+///   .domain_id(36735)
+///   .build();
+/// ```
+#[derive(Debug, Clone, PartialEq, Serialize)]
 #[serde(rename_all = "PascalCase")]
-pub struct VerifyDomainReturnPathRequest {
+#[derive(TypedBuilder)]
+pub struct VerifyReturnPathRequest {
+    /// Unique ID of the domain whose Return-Path DNS record should be verified.
     #[serde(skip)]
     pub domain_id: isize,
 }
 
-pub type VerifyReturnPathResponse = Domain;
-
-impl Endpoint for VerifyDomainReturnPathRequest {
-    type Request = ();
-    type Response = VerifyReturnPathResponse;
+impl Endpoint for VerifyReturnPathRequest {
+    type Request = VerifyReturnPathRequest;
+    type Response = DomainDetails;
 
     fn endpoint(&self) -> Cow<'static, str> {
         format!("/domains/{}/verifyReturnPath", self.domain_id).into()
     }
 
     fn body(&self) -> &Self::Request {
-        &()
+        self
     }
 
     fn method(&self) -> http::Method {
@@ -38,38 +45,58 @@ mod tests {
     use httptest::{responders::*, Expectation, Server};
     use serde_json::json;
 
-    use super::*;
     use crate::reqwest::PostmarkClient;
     use crate::Query;
 
+    use super::*;
+
+    const DOMAIN_ID: isize = 36735;
+
     #[tokio::test]
-    async fn verify_return_path_puts_verify_return_path() {
+    pub async fn verify_return_path() {
         let server = Server::run();
 
         server.expect(
-            Expectation::matching(request::method_path("PUT", "/domains/11/verifyReturnPath"))
-                .respond_with(json_encoded(json!({
-                    "ID": 11,
-                    "Name": "example.com"
-                }))),
+            Expectation::matching(request::method_path(
+                "PUT",
+                format!("/domains/{DOMAIN_ID}/verifyReturnPath"),
+            ))
+            .respond_with(json_encoded(json!({
+                "Name": "postmarkapp.com",
+                "SPFVerified": true,
+                "SPFHost": "postmarkapp.com",
+                "SPFTextValue": "v=spf1 a mx include:spf.mtasv.net ~all",
+                "DKIMVerified": false,
+                "WeakDKIM": false,
+                "DKIMHost": "jan2013pm._domainkey.postmarkapp.com",
+                "DKIMTextValue": "k=rsa;p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDJ...",
+                "DKIMPendingHost": "20131031155228pm._domainkey.postmarkapp.com",
+                "DKIMPendingTextValue": "k=rsa;p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCFn...",
+                "DKIMRevokedHost": "",
+                "DKIMRevokedTextValue": "",
+                "SafeToRemoveRevokedKeyFromDNS": false,
+                "DKIMUpdateStatus": "Pending",
+                "ReturnPathDomain": "pm-bounces.postmarkapp.com",
+                "ReturnPathDomainVerified": false,
+                "ReturnPathDomainCNAMEValue": "pm.mtasv.net",
+                "ID": 36735
+            }))),
         );
 
         let client = PostmarkClient::builder()
             .base_url(server.url("/").to_string())
             .build();
 
-        let req = VerifyDomainReturnPathRequest::builder()
-            .domain_id(11)
+        let req = VerifyReturnPathRequest::builder()
+            .domain_id(DOMAIN_ID)
             .build();
-
-        assert_eq!(req.method(), http::Method::PUT);
-        assert_eq!(req.endpoint(), "/domains/11/verifyReturnPath");
 
         let resp = req
             .execute(&client)
             .await
-            .expect("Should decode verify return path");
+            .expect("Should get a response and be able to json decode it");
 
-        assert_eq!(resp.id, 11);
+        assert_eq!(resp.name, "postmarkapp.com");
+        assert_eq!(resp.id, DOMAIN_ID);
     }
 }
