@@ -4,6 +4,8 @@ use crate::Endpoint;
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
 
+use super::Triggers;
+
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "PascalCase")]
 #[derive(TypedBuilder)]
@@ -20,17 +22,6 @@ pub struct CreateWebhookResponse {
     #[serde(rename = "ID")]
     pub webhook_id: isize,
     pub triggers: Triggers,
-}
-
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
-#[serde(rename_all = "PascalCase")]
-pub struct Triggers {
-    pub subscription_change: TriggerConfig,
-}
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
-#[serde(rename_all = "PascalCase")]
-pub struct TriggerConfig {
-    pub enabled: bool,
 }
 
 impl Endpoint for CreateWebhookRequest {
@@ -112,7 +103,7 @@ mod tests {
             .url(String::from(WEBHOOK_URL))
             .message_stream(String::from("broadcast"))
             .triggers(Triggers {
-                subscription_change: TriggerConfig { enabled: true },
+                subscription_change: super::super::TriggerConfig { enabled: true },
             })
             .build();
 

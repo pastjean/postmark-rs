@@ -1,20 +1,22 @@
-//! Postmark is a HTTP client agnostic rust client to postmark. We
-//! Provide a `reqwest` implementation of a client that can be used pretty
-//! simply by initializing it and passing it into the execute function of a
-//! [`Query`], all [`Endpoint`] implement the Query trait.
+//! Postmark is an HTTP-client-agnostic Rust client for the Postmark API.
+//! This crate provides a `reqwest` client implementation that you initialize
+//! and pass to `execute` on a [`Query`]. All [`Endpoint`]s implement [`Query`].
 //!
-//! Some Endpoints are already provided to you. But if you need some that are
-//! not implemented you are not constrained to modified this crated, you can
-//! implement your own by implementing the [`Endpoint`] trait and it will
-//! work transparently with this library.
+//! Many endpoints are provided out of the box. If you need one that is not
+//! implemented, you can add your own type implementing [`Endpoint`] and use it
+//! with the same client and query flow.
 //!
-//! To use the [`reqwest`] based client, you need to enable the feature `"reqwest"`
-//! You can also implement you own client by implementing the [`Client`] trait
+//! To use the [`reqwest`] client, enable the `"reqwest"` feature.
+//! You can also implement your own client by implementing [`Client`].
 //!
-//! This crate is heavily inspired by the article ["Designing Rust bindings for REST APIs](https://plume.benboeckel.net/~/JustAnotherBlog/designing-rust-bindings-for-rest-ap-is)
+//! This crate is heavily inspired by the article ["Designing Rust bindings for REST APIs"](https://plume.benboeckel.net/~/JustAnotherBlog/designing-rust-bindings-for-rest-ap-is)
 //! by Ben Boeckel and used in the [gitlab](https://crates.io/crates/gitlab) crate.
 //! It allows to have modular clients (someone wants to use something else than
 //! reqwest), and [`Endpoint`]s not supported by the library without needing to fork it.
+//!
+//! Expanded API coverage now includes: bulk, bounce, templates, servers,
+//! message streams, messages, domains, sender signatures, stats, inbound rules,
+//! webhooks, message stream suppressions, and data removals.
 //!
 //! # Example:
 //! ```

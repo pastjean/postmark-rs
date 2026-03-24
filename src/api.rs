@@ -8,9 +8,16 @@
 use serde::{Deserialize, Serialize};
 
 pub mod bounce;
+pub mod bulk;
+pub mod data_removals;
+pub mod domains;
 pub mod email;
+pub mod inbound_rules;
 pub mod message_streams;
+pub mod messages;
 pub mod server;
+pub mod signatures;
+pub mod stats;
 pub mod templates;
 pub mod webhooks;
 
