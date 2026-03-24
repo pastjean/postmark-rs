@@ -1,7 +1,7 @@
 use std::borrow::Cow;
 
-use crate::api::signatures::{paginated_endpoint, SenderSignatureSummary};
 use crate::Endpoint;
+use crate::api::signatures::{SenderSignatureSummary, paginated_endpoint};
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
 
@@ -41,11 +41,11 @@ impl Endpoint for ListSignaturesRequest {
 #[cfg(test)]
 mod tests {
     use httptest::matchers::request;
-    use httptest::{responders::*, Expectation, Server};
+    use httptest::{Expectation, Server, responders::*};
     use serde_json::json;
 
-    use crate::reqwest::PostmarkClient;
     use crate::Query;
+    use crate::reqwest::PostmarkClient;
 
     use super::*;
 

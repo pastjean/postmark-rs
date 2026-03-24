@@ -3,8 +3,8 @@ use std::borrow::Cow;
 use serde::Serialize;
 use typed_builder::TypedBuilder;
 
-use crate::api::signatures::SenderSignature;
 use crate::Endpoint;
+use crate::api::signatures::SenderSignature;
 
 #[derive(Debug, Clone, PartialEq, Serialize, TypedBuilder)]
 #[serde(rename_all = "PascalCase")]
@@ -35,12 +35,12 @@ impl Endpoint for RequestNewSignatureDkimRequest {
 #[cfg(test)]
 mod tests {
     use httptest::matchers::request;
-    use httptest::{responders::*, Expectation, Server};
+    use httptest::{Expectation, Server, responders::*};
     use serde_json::json;
 
     use super::*;
-    use crate::reqwest::PostmarkClient;
     use crate::Query;
+    use crate::reqwest::PostmarkClient;
 
     #[tokio::test]
     async fn request_new_dkim_posts_request_new_dkim_path() {

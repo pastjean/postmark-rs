@@ -1,7 +1,7 @@
 use std::borrow::Cow;
 
-use crate::api::server::Server;
 use crate::Endpoint;
+use crate::api::server::Server;
 use serde::Serialize;
 use typed_builder::TypedBuilder;
 
@@ -29,11 +29,11 @@ impl Endpoint for GetCurrentServerRequest {
 #[cfg(test)]
 mod tests {
     use httptest::matchers::request;
-    use httptest::{responders::*, Expectation, Server as HttpServer};
+    use httptest::{Expectation, Server as HttpServer, responders::*};
     use serde_json::json;
 
-    use crate::reqwest::PostmarkClient;
     use crate::Query;
+    use crate::reqwest::PostmarkClient;
 
     use super::*;
 

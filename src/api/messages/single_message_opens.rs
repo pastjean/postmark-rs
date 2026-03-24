@@ -4,8 +4,8 @@ use serde::Serialize;
 use typed_builder::TypedBuilder;
 use url::form_urlencoded::Serializer;
 
-use crate::api::messages::MessageOpensResponse;
 use crate::Endpoint;
+use crate::api::messages::MessageOpensResponse;
 
 #[derive(Debug, Clone, PartialEq, Serialize, TypedBuilder)]
 #[builder(field_defaults(default, setter(strip_option)))]
@@ -54,12 +54,12 @@ impl Endpoint for SingleMessageOpensRequest {
 #[cfg(test)]
 mod tests {
     use httptest::matchers::request;
-    use httptest::{responders::*, Expectation, Server};
+    use httptest::{Expectation, Server, responders::*};
     use serde_json::json;
 
     use super::*;
-    use crate::reqwest::PostmarkClient;
     use crate::Query;
+    use crate::reqwest::PostmarkClient;
 
     #[tokio::test]
     async fn single_message_opens_gets_events() {

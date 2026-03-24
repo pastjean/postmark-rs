@@ -3,8 +3,8 @@ use std::borrow::Cow;
 use serde::Serialize;
 use typed_builder::TypedBuilder;
 
-use crate::api::server::{Server, ServerIdOrName};
 use crate::Endpoint;
+use crate::api::server::{Server, ServerIdOrName};
 
 #[derive(Debug, Clone, PartialEq, Serialize)]
 #[serde(rename_all = "PascalCase")]
@@ -34,11 +34,11 @@ impl Endpoint for GetServerRequest {
 #[cfg(test)]
 mod tests {
     use httptest::matchers::request;
-    use httptest::{responders::*, Expectation, Server};
+    use httptest::{Expectation, Server, responders::*};
     use serde_json::json;
 
-    use crate::reqwest::PostmarkClient;
     use crate::Query;
+    use crate::reqwest::PostmarkClient;
 
     use super::*;
 

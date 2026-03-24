@@ -2,8 +2,8 @@ use std::borrow::Cow;
 
 use serde::Serialize;
 
-use crate::api::messages::MessageActionResponse;
 use crate::Endpoint;
+use crate::api::messages::MessageActionResponse;
 
 #[derive(Debug, Clone, PartialEq, Serialize)]
 pub struct RetryFailedInboundRequest {
@@ -39,12 +39,12 @@ impl Endpoint for RetryFailedInboundRequest {
 #[cfg(test)]
 mod tests {
     use httptest::matchers::request;
-    use httptest::{responders::*, Expectation, Server};
+    use httptest::{Expectation, Server, responders::*};
     use serde_json::json;
 
     use super::*;
-    use crate::reqwest::PostmarkClient;
     use crate::Query;
+    use crate::reqwest::PostmarkClient;
 
     #[tokio::test]
     async fn retry_failed_inbound_puts_retry() {

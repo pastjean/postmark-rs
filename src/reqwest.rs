@@ -33,6 +33,8 @@ pub struct PostmarkClient {
     pub account_token: Option<String>,
     #[builder(default=POSTMARK_API_URL.into(), setter(into))]
     pub base_url: String,
+    #[builder(default=::reqwest::Client::new(), setter(skip))]
+    client: reqwest::Client,
 }
 
 impl std::fmt::Debug for PostmarkClient {
@@ -41,6 +43,7 @@ impl std::fmt::Debug for PostmarkClient {
             server_token: ref _server_token,
             account_token: ref _account_token,
             base_url: ref _base_url,
+            client: ref _client,
         } = *self;
 
         let mut builder = f.debug_struct("PostmarkClient");
@@ -57,6 +60,7 @@ impl Default for PostmarkClient {
             base_url: POSTMARK_API_URL.into(),
             server_token: None,
             account_token: None,
+            client: reqwest::Client::new(),
         }
     }
 }
@@ -83,6 +87,11 @@ pub enum PostmarkClientError {
         #[from]
         source: url::ParseError,
     },
+    #[error("invalid uri: {}", source)]
+    InvalidUri {
+        #[from]
+        source: http::uri::InvalidUri,
+    },
 }
 
 #[async_trait]
@@ -90,7 +99,6 @@ impl Client for PostmarkClient {
     type Error = PostmarkClientError;
 
     async fn execute(&self, req: Request<Bytes>) -> Result<Response<Bytes>, Self::Error> {
-        let client = reqwest::Client::builder().build()?;
         let mut req = req;
 
         if let Some(tok) = &self.server_token {
@@ -110,10 +118,10 @@ impl Client for PostmarkClient {
             None => base_url,
         };
 
-        *req.uri_mut() = url.as_str().parse().unwrap();
+        *req.uri_mut() = url.as_str().parse()?;
 
         let reqwest_req: reqwest::Request = req.try_into()?;
-        let reqwest_rsp = client.execute(reqwest_req).await?;
+        let reqwest_rsp = self.client.execute(reqwest_req).await?;
 
         let mut rsp = Response::builder()
             .status(reqwest_rsp.status())

@@ -2,8 +2,8 @@ use std::borrow::Cow;
 
 use serde::Serialize;
 
-use crate::api::messages::MessageDump;
 use crate::Endpoint;
+use crate::api::messages::MessageDump;
 
 #[derive(Debug, Clone, PartialEq, Serialize)]
 pub struct OutboundDumpRequest {
@@ -39,12 +39,12 @@ impl Endpoint for OutboundDumpRequest {
 #[cfg(test)]
 mod tests {
     use httptest::matchers::request;
-    use httptest::{responders::*, Expectation, Server};
+    use httptest::{Expectation, Server, responders::*};
     use serde_json::json;
 
     use super::*;
-    use crate::reqwest::PostmarkClient;
     use crate::Query;
+    use crate::reqwest::PostmarkClient;
 
     #[tokio::test]
     async fn outbound_dump_gets_raw_body() {

@@ -187,12 +187,12 @@ mod tests {
     use std::collections::HashMap;
 
     use httptest::matchers::request;
-    use httptest::{responders::*, Expectation, Server};
+    use httptest::{Expectation, Server, responders::*};
     use serde_json::json;
 
     use super::{SendEmailWithTemplateRequest, TemplateModel};
-    use crate::reqwest::PostmarkClient;
     use crate::Query;
+    use crate::reqwest::PostmarkClient;
 
     #[tokio::test]
     pub async fn send_email_test() {

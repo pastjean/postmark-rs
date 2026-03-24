@@ -1,4 +1,4 @@
-use crate::{api::Body, Endpoint};
+use crate::{Endpoint, api::Body};
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 use typed_builder::TypedBuilder;
@@ -71,12 +71,12 @@ impl Endpoint for GetTemplateRequest {
 #[cfg(test)]
 mod tests {
     use httptest::matchers::request;
-    use httptest::{responders::*, Expectation, Server};
+    use httptest::{Expectation, Server, responders::*};
     use serde_json::json;
 
     use super::*;
-    use crate::reqwest::PostmarkClient;
     use crate::Query;
+    use crate::reqwest::PostmarkClient;
 
     const NAME: &str = "Onboarding Email";
     const ALIAS: &str = "my-template-alias";

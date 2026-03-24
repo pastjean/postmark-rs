@@ -10,7 +10,7 @@ keywords = ["postmark", "email", "e-mail", "http"]
 readme = "README.md"
 categories = ["api-bindings", "email", "web-programming::http-client"]
 version = "0.11.5"
-edition = "2018"
+edition = "2024"
 
 [dependencies]
 async-trait = { version = "0.1" }

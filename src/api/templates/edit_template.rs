@@ -1,4 +1,4 @@
-use crate::{api::Body, Endpoint};
+use crate::{Endpoint, api::Body};
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 use typed_builder::TypedBuilder;
@@ -45,7 +45,7 @@ pub struct EditTemplateRequest {
     ///
     /// HtmlBody is required if TextBody is not specified. See our template language
     /// documentation for more information on the [syntax for this field]
-    /// (https://postmarkapp.com/support/article/1077-template-syntax). A content
+    /// (<https://postmarkapp.com/support/article/1077-template-syntax>). A content
     /// placeholder is required to be present for a layout template, and can be
     /// placed only once in the HtmlBody.
     ///
@@ -58,7 +58,7 @@ pub struct EditTemplateRequest {
     /// The content to use for the Subject when this template is used to send email.
     /// Subject is only required on standard templates. See our template language
     /// documentation for more information on the [syntax for this field]
-    /// (https://postmarkapp.com/support/article/1077-template-syntax). Subjects are
+    /// (<https://postmarkapp.com/support/article/1077-template-syntax>). Subjects are
     ///  not allowed for layout templates and will result in an API error.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(into, strip_option))]
@@ -112,12 +112,12 @@ impl Endpoint for EditTemplateRequest {
 #[cfg(test)]
 mod tests {
     use httptest::matchers::request;
-    use httptest::{responders::*, Expectation, Server};
+    use httptest::{Expectation, Server, responders::*};
     use serde_json::json;
 
     use super::*;
-    use crate::reqwest::PostmarkClient;
     use crate::Query;
+    use crate::reqwest::PostmarkClient;
 
     const NAME: &str = "Onboarding Email";
     const ALIAS: &str = "my-template-alias";

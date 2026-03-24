@@ -3,8 +3,8 @@ use std::borrow::Cow;
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
 
-use crate::api::templates::{TemplateAction, TemplateType};
 use crate::Endpoint;
+use crate::api::templates::{TemplateAction, TemplateType};
 
 #[derive(Debug, Clone, PartialEq, Serialize)]
 #[serde(rename_all = "PascalCase")]
@@ -55,11 +55,11 @@ impl Endpoint for CopyTemplatesRequest {
 #[cfg(test)]
 mod tests {
     use httptest::matchers::request;
-    use httptest::{responders::*, Expectation, Server};
+    use httptest::{Expectation, Server, responders::*};
     use serde_json::json;
 
-    use crate::reqwest::PostmarkClient;
     use crate::Query;
+    use crate::reqwest::PostmarkClient;
 
     use super::*;
 

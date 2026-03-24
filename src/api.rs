@@ -14,11 +14,14 @@ pub mod domains;
 pub mod email;
 pub mod message_streams;
 pub mod messages;
+pub mod meta;
+pub mod query;
 pub mod server;
 pub mod signatures;
 pub mod stats;
 pub mod templates;
 pub mod triggers;
+pub mod types;
 pub mod webhooks;
 
 /// The body of a email message

@@ -1,9 +1,13 @@
 use std::borrow::Cow;
 
-use crate::api::server::Server;
 use crate::Endpoint;
+use crate::api::meta::{EndpointMeta, LIST_SERVERS_META};
+use crate::api::query::QueryBuilder;
+use crate::api::server::Server;
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
+
+pub const META: EndpointMeta = LIST_SERVERS_META;
 
 #[derive(Debug, Clone, PartialEq, Serialize, TypedBuilder)]
 #[serde(rename_all = "PascalCase")]
@@ -26,7 +30,10 @@ impl Endpoint for ListServersRequest {
     type Response = ListServersResponse;
 
     fn endpoint(&self) -> Cow<'static, str> {
-        format!("/servers?count={}&offset={}", self.count, self.offset).into()
+        let mut query = QueryBuilder::new();
+        query.push_opt("count", Some(self.count));
+        query.push_opt("offset", Some(self.offset));
+        format!("/servers?{}", query.finish()).into()
     }
 
     fn body(&self) -> &Self::Request {
@@ -41,11 +48,11 @@ impl Endpoint for ListServersRequest {
 #[cfg(test)]
 mod tests {
     use httptest::matchers::request;
-    use httptest::{responders::*, Expectation, Server as HttpServer};
+    use httptest::{Expectation, Server as HttpServer, responders::*};
     use serde_json::json;
 
-    use crate::reqwest::PostmarkClient;
     use crate::Query;
+    use crate::reqwest::PostmarkClient;
 
     use super::*;
 
@@ -77,5 +84,11 @@ mod tests {
 
         assert_eq!(resp.total_count, 1);
         assert_eq!(resp.servers[0].id, 1);
+    }
+
+    #[test]
+    fn list_servers_endpoint_encodes_query_consistently() {
+        let req = ListServersRequest::builder().count(100).offset(0).build();
+        assert_eq!(req.endpoint(), "/servers?count=100&offset=0");
     }
 }

@@ -1,7 +1,7 @@
 use std::borrow::Cow;
 
-use crate::api::triggers::InboundRule;
 use crate::Endpoint;
+use crate::api::triggers::InboundRule;
 use serde::Serialize;
 use typed_builder::TypedBuilder;
 
@@ -27,11 +27,11 @@ impl Endpoint for CreateInboundRuleTriggerRequest {
 #[cfg(test)]
 mod tests {
     use httptest::matchers::request;
-    use httptest::{responders::*, Expectation, Server};
+    use httptest::{Expectation, Server, responders::*};
     use serde_json::json;
 
-    use crate::reqwest::PostmarkClient;
     use crate::Query;
+    use crate::reqwest::PostmarkClient;
 
     use super::*;
 
