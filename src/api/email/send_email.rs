@@ -106,18 +106,13 @@ pub struct Attachment {
 }
 
 /// Activate link tracking for links in the HTML or Text bodies of this email.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub enum TrackLink {
+    #[default]
     None,
     HtmlAndText,
     HtmlOnly,
     TextOnly,
-}
-
-impl Default for TrackLink {
-    fn default() -> Self {
-        Self::None
-    }
 }
 
 /// Response for the [`SendEmailRequest`] Endpoint.

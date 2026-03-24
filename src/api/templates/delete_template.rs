@@ -86,7 +86,7 @@ mod tests {
             .id(TemplateIdOrAlias::TemplateId(12345))
             .build();
 
-        print!("{}\n", req.endpoint());
+        println!("{}", req.endpoint());
 
         req.execute(&client)
             .await
@@ -116,7 +116,7 @@ mod tests {
             .id(TemplateIdOrAlias::Alias(String::from(ALIAS)))
             .build();
 
-        print!("{}\n", req.endpoint());
+        println!("{}", req.endpoint());
 
         req.execute(&client)
             .await

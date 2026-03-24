@@ -111,7 +111,7 @@ mod tests {
             ]))
             .build();
 
-        print!("{}\n", req.endpoint());
+        println!("{}", req.endpoint());
 
         req.execute(&client)
             .await

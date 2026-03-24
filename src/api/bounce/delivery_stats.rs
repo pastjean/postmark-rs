@@ -24,7 +24,6 @@ impl Endpoint for DeliveryStatsRequest {
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "PascalCase")]
-
 pub struct DeliveryStatsResponse {
     #[serde(rename = "InactiveMails")]
     /// Number of inactive emails
