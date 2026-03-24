@@ -1,6 +1,6 @@
 use std::borrow::Cow;
 
-use crate::api::server::{DeliveryType, ServerColor};
+use crate::api::server::{DeliveryType, GetServerResponse, ServerColor};
 use crate::Endpoint;
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
@@ -21,18 +21,9 @@ pub struct CreateServerRequest {
     pub smtp_api_activated: bool,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "PascalCase")]
-pub struct CreateServerResponse {
-    #[serde(rename = "ID")]
-    pub id: isize,
-    pub name: String,
-    pub api_tokens: Vec<String>,
-}
-
 impl Endpoint for CreateServerRequest {
     type Request = CreateServerRequest;
-    type Response = CreateServerResponse;
+    type Response = GetServerResponse;
 
     fn endpoint(&self) -> Cow<'static, str> {
         "/servers".into()
