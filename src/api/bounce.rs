@@ -2,12 +2,14 @@
 mod activate_bounce;
 mod delivery_stats;
 mod get_bounce;
+mod get_bounces;
 mod get_bounce_dump;
 mod list_bounces;
 
 pub use activate_bounce::*;
 pub use delivery_stats::*;
 pub use get_bounce::*;
+pub use get_bounces::*;
 pub use get_bounce_dump::*;
 pub use list_bounces::*;
 

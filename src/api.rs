@@ -13,6 +13,7 @@ pub mod data_removal;
 pub mod domains;
 pub mod email;
 pub mod message_streams;
+pub mod messages;
 pub mod server;
 pub mod signatures;
 pub mod stats;
