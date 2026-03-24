@@ -2,13 +2,10 @@ use std::borrow::Cow;
 
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
+use url::form_urlencoded::Serializer;
 
 use crate::Endpoint;
 use crate::api::messages::MessageSummary;
-use crate::api::meta::{EndpointMeta, OUTBOUND_SEARCH_META};
-use crate::api::query::QueryBuilder;
-
-pub const META: EndpointMeta = OUTBOUND_SEARCH_META;
 
 #[derive(Debug, Clone, PartialEq, Serialize, TypedBuilder)]
 #[builder(field_defaults(default, setter(strip_option)))]
@@ -44,14 +41,25 @@ impl Endpoint for OutboundSearchRequest {
     type Response = OutboundSearchResponse;
 
     fn endpoint(&self) -> Cow<'static, str> {
-        let mut query = QueryBuilder::new();
-        query.push_opt("count", self.count);
-        query.push_opt("offset", self.offset);
-        query.push_opt("recipient", self.recipient.as_deref());
-        query.push_opt("tag", self.tag.as_deref());
-        query.push_opt("messagestream", self.message_stream.as_deref());
+        let mut serializer = Serializer::new(String::new());
 
-        let query = query.finish();
+        if let Some(count) = self.count {
+            serializer.append_pair("count", &count.to_string());
+        }
+        if let Some(offset) = self.offset {
+            serializer.append_pair("offset", &offset.to_string());
+        }
+        if let Some(ref recipient) = self.recipient {
+            serializer.append_pair("recipient", recipient);
+        }
+        if let Some(ref tag) = self.tag {
+            serializer.append_pair("tag", tag);
+        }
+        if let Some(ref message_stream) = self.message_stream {
+            serializer.append_pair("messagestream", message_stream);
+        }
+
+        let query = serializer.finish();
         if query.is_empty() {
             "/messages/outbound".into()
         } else {

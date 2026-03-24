@@ -1,13 +1,9 @@
 use std::borrow::Cow;
 
 use crate::Endpoint;
-use crate::api::meta::{EndpointMeta, LIST_SERVERS_META};
-use crate::api::query::QueryBuilder;
 use crate::api::server::Server;
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
-
-pub const META: EndpointMeta = LIST_SERVERS_META;
 
 #[derive(Debug, Clone, PartialEq, Serialize, TypedBuilder)]
 #[serde(rename_all = "PascalCase")]
@@ -30,10 +26,7 @@ impl Endpoint for ListServersRequest {
     type Response = ListServersResponse;
 
     fn endpoint(&self) -> Cow<'static, str> {
-        let mut query = QueryBuilder::new();
-        query.push_opt("count", Some(self.count));
-        query.push_opt("offset", Some(self.offset));
-        format!("/servers?{}", query.finish()).into()
+        format!("/servers?count={}&offset={}", self.count, self.offset).into()
     }
 
     fn body(&self) -> &Self::Request {

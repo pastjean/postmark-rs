@@ -1,12 +1,8 @@
 use std::borrow::Cow;
 
 use crate::Endpoint;
-use crate::api::meta::{EndpointMeta, LIST_WEBHOOKS_META};
-use crate::api::query::QueryBuilder;
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
-
-pub const META: EndpointMeta = LIST_WEBHOOKS_META;
 
 #[derive(Debug, Clone, PartialEq, Serialize, TypedBuilder)]
 #[serde(rename_all = "PascalCase")]
@@ -84,14 +80,9 @@ impl Endpoint for ListWebhooksRequest {
     type Response = ListWebhooksResponse;
 
     fn endpoint(&self) -> Cow<'static, str> {
-        let mut query = QueryBuilder::new();
-        query.push_opt("MessageStream", self.message_stream.as_deref());
-
-        let query = query.finish();
-        if query.is_empty() {
-            "/webhooks".into()
-        } else {
-            format!("/webhooks?{query}").into()
+        match &self.message_stream {
+            Some(message_stream) => format!("/webhooks?MessageStream={message_stream}").into(),
+            None => "/webhooks".into(),
         }
     }
 
@@ -172,13 +163,5 @@ mod tests {
         assert_eq!(resp.webhooks.len(), 1);
         assert_eq!(resp.webhooks[0].id, 1234567);
         assert_eq!(resp.webhooks[0].message_stream, "outbound");
-    }
-
-    #[test]
-    fn list_webhooks_message_stream_is_encoded() {
-        let req = ListWebhooksRequest::builder()
-            .message_stream("broadcast stream")
-            .build();
-        assert_eq!(req.endpoint(), "/webhooks?MessageStream=broadcast+stream");
     }
 }

@@ -14,8 +14,6 @@ pub mod domains;
 pub mod email;
 pub mod message_streams;
 pub mod messages;
-pub mod meta;
-pub mod query;
 pub mod server;
 pub mod signatures;
 pub mod stats;
