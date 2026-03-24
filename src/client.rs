@@ -79,14 +79,21 @@ where
     type Result = Result<T::Response, QueryError<C::Error>>;
 
     async fn execute(self, client: &C) -> Self::Result {
-        let body = serde_json::to_vec(self.body())?;
-
-        let http_req = http::Request::builder()
-            .method(self.method())
+        let method = self.method();
+        let mut req_builder = http::Request::builder()
+            .method(method.clone())
             .uri(String::from(self.endpoint()))
-            .header("Accept", "application/json")
-            .header("Content-Type", "application/json")
-            .body(body.into())?;
+            .header("Accept", "application/json");
+
+        let body = match method {
+            http::Method::GET | http::Method::DELETE | http::Method::HEAD => Bytes::new(),
+            _ => {
+                req_builder = req_builder.header("Content-Type", "application/json");
+                serde_json::to_vec(self.body())?.into()
+            }
+        };
+
+        let http_req = req_builder.body(body)?;
 
         let response = client.execute(http_req).await.map_err(QueryError::client)?;
 
@@ -101,4 +108,173 @@ pub trait Client {
     type Error: Error + Send + Sync + 'static;
     /// Execute the request which was formed by [`Endpoint`]
     async fn execute(&self, req: Request<Bytes>) -> Result<Response<Bytes>, Self::Error>;
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use bytes::Bytes;
+    use http::StatusCode;
+    use std::borrow::Cow;
+    use std::sync::{Arc, Mutex};
+
+    #[derive(Debug, thiserror::Error)]
+    #[error("test client error")]
+    struct TestClientError;
+
+    #[derive(Clone)]
+    struct TestClient {
+        last_request: Arc<Mutex<Option<Request<Bytes>>>>,
+    }
+
+    impl TestClient {
+        fn new() -> Self {
+            Self {
+                last_request: Arc::new(Mutex::new(None)),
+            }
+        }
+
+        fn last_request(&self) -> Request<Bytes> {
+            self.last_request
+                .lock()
+                .expect("lock")
+                .clone()
+                .expect("request present")
+        }
+    }
+
+    #[async_trait]
+    impl Client for TestClient {
+        type Error = TestClientError;
+
+        async fn execute(&self, req: Request<Bytes>) -> Result<Response<Bytes>, Self::Error> {
+            *self.last_request.lock().expect("lock") = Some(req);
+            Ok(Response::builder()
+                .status(StatusCode::OK)
+                .body(Bytes::from_static(br#"{"ok":true}"#))
+                .expect("response"))
+        }
+    }
+
+    #[derive(serde::Serialize)]
+    struct NoBody;
+
+    #[derive(serde::Serialize)]
+    struct SomeBody {
+        value: &'static str,
+    }
+
+    #[derive(serde::Deserialize)]
+    struct OkResponse {
+        ok: bool,
+    }
+
+    struct GetEndpoint;
+    impl Endpoint for GetEndpoint {
+        type Request = NoBody;
+        type Response = OkResponse;
+
+        fn endpoint(&self) -> Cow<'static, str> {
+            "/test-get".into()
+        }
+
+        fn body(&self) -> &Self::Request {
+            static BODY: NoBody = NoBody;
+            &BODY
+        }
+
+        fn method(&self) -> http::Method {
+            http::Method::GET
+        }
+    }
+
+    struct DeleteEndpoint;
+    impl Endpoint for DeleteEndpoint {
+        type Request = NoBody;
+        type Response = OkResponse;
+
+        fn endpoint(&self) -> Cow<'static, str> {
+            "/test-delete".into()
+        }
+
+        fn body(&self) -> &Self::Request {
+            static BODY: NoBody = NoBody;
+            &BODY
+        }
+
+        fn method(&self) -> http::Method {
+            http::Method::DELETE
+        }
+    }
+
+    struct PostEndpoint;
+    impl Endpoint for PostEndpoint {
+        type Request = SomeBody;
+        type Response = OkResponse;
+
+        fn endpoint(&self) -> Cow<'static, str> {
+            "/test-post".into()
+        }
+
+        fn body(&self) -> &Self::Request {
+            static BODY: SomeBody = SomeBody { value: "hello" };
+            &BODY
+        }
+    }
+
+    #[tokio::test]
+    async fn get_request_has_no_json_body_or_content_type() {
+        let client = TestClient::new();
+        let response = GetEndpoint.execute(&client).await.expect("execute");
+
+        assert!(response.ok);
+
+        let request = client.last_request();
+        assert_eq!(request.method(), http::Method::GET);
+        assert!(request.body().is_empty());
+        assert!(request.headers().get("Content-Type").is_none());
+        assert_eq!(
+            request
+                .headers()
+                .get("Accept")
+                .expect("accept header")
+                .to_str()
+                .expect("header str"),
+            "application/json"
+        );
+    }
+
+    #[tokio::test]
+    async fn delete_request_has_no_json_body_or_content_type() {
+        let client = TestClient::new();
+        let response = DeleteEndpoint.execute(&client).await.expect("execute");
+
+        assert!(response.ok);
+
+        let request = client.last_request();
+        assert_eq!(request.method(), http::Method::DELETE);
+        assert!(request.body().is_empty());
+        assert!(request.headers().get("Content-Type").is_none());
+    }
+
+    #[tokio::test]
+    async fn post_request_keeps_json_body_and_content_type() {
+        let client = TestClient::new();
+        let response = PostEndpoint.execute(&client).await.expect("execute");
+
+        assert!(response.ok);
+
+        let request = client.last_request();
+        assert_eq!(request.method(), http::Method::POST);
+        assert_eq!(request.body(), &Bytes::from_static(br#"{"value":"hello"}"#));
+        assert_eq!(
+            request
+                .headers()
+                .get("Content-Type")
+                .expect("content type")
+                .to_str()
+                .expect("header str"),
+            "application/json"
+        );
+    }
 }

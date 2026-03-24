@@ -3,6 +3,7 @@ use std::collections::HashMap;
 
 use crate::Endpoint;
 use crate::api::email::{Attachment, Header, TrackLink};
+use crate::api::templates::TemplateId;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use typed_builder::TypedBuilder;
@@ -26,7 +27,7 @@ pub struct SendBulkEmailRequest {
     pub text_body: Option<String>,
     #[builder(default, setter(into, strip_option))]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub template_id: Option<isize>,
+    pub template_id: Option<TemplateId>,
     #[builder(default, setter(into, strip_option))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub template_alias: Option<String>,

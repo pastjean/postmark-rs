@@ -10,6 +10,7 @@ use crate::api::server::{Server, ServerIdOrName};
 #[serde(rename_all = "PascalCase")]
 #[derive(TypedBuilder)]
 pub struct GetServerRequest {
+    #[builder(setter(into))]
     #[serde(skip)]
     pub server_id: ServerIdOrName,
 }
@@ -42,7 +43,7 @@ mod tests {
 
     use super::*;
 
-    const SERVER_ID: isize = 123456;
+    const SERVER_ID: i64 = 123456;
     #[tokio::test]
     pub async fn get_server() {
         let server = Server::run();
@@ -82,7 +83,7 @@ mod tests {
             .build();
 
         let req = GetServerRequest::builder()
-            .server_id(ServerIdOrName::ServerId(SERVER_ID))
+            .server_id(ServerIdOrName::ServerId(SERVER_ID.into()))
             .build();
 
         req.execute(&client)

@@ -9,15 +9,15 @@ use typed_builder::TypedBuilder;
 #[serde(rename_all = "PascalCase")]
 pub struct ListBouncesRequest {
     #[serde(skip)]
-    pub count: isize,
+    pub count: i64,
     #[serde(skip)]
-    pub offset: isize,
+    pub offset: i64,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "PascalCase")]
 pub struct ListBouncesResponse {
-    pub total_count: isize,
+    pub total_count: i64,
     pub bounces: Vec<BounceInfo>,
 }
 

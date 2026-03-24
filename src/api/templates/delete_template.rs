@@ -11,7 +11,7 @@ use super::*;
 /// ```
 /// use postmark::api::{Body, templates::{DeleteTemplateRequest, TemplateIdOrAlias}};
 /// let req = DeleteTemplateRequest::builder()
-///   .id(TemplateIdOrAlias::TemplateId(12345))
+///   .id(TemplateIdOrAlias::TemplateId(12345.into()))
 ///   .build();
 /// ```
 #[derive(Debug, Clone, PartialEq, Serialize)]
@@ -19,6 +19,7 @@ use super::*;
 #[derive(TypedBuilder)]
 pub struct DeleteTemplateRequest {
     /// ID of template or template alias
+    #[builder(setter(into))]
     pub id: TemplateIdOrAlias,
 }
 
@@ -83,7 +84,7 @@ mod tests {
             .build();
 
         let req = DeleteTemplateRequest::builder()
-            .id(TemplateIdOrAlias::TemplateId(12345))
+            .id(TemplateIdOrAlias::TemplateId(12345.into()))
             .build();
 
         println!("{}", req.endpoint());
@@ -143,7 +144,7 @@ mod tests {
             .build();
 
         let req = DeleteTemplateRequest::builder()
-            .id(TemplateIdOrAlias::TemplateId(12345))
+            .id(TemplateIdOrAlias::TemplateId(12345.into()))
             .build();
 
         req.execute(&client)

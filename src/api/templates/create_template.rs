@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 use typed_builder::TypedBuilder;
 
-use super::TemplateType;
+use super::{TemplateId, TemplateType};
 
 /// Create a new e-mail template
 ///
@@ -80,7 +80,7 @@ pub struct CreateTemplateRequest {
 #[serde(rename_all = "PascalCase")]
 pub struct CreateTemplateResponse {
     /// ID of template
-    pub template_id: isize,
+    pub template_id: TemplateId,
     /// Name of template
     pub name: String,
     /// Indicates that this template may be used for sending email.

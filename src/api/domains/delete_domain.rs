@@ -1,6 +1,7 @@
 use std::borrow::Cow;
 
 use crate::Endpoint;
+use crate::api::domains::DomainId;
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
 
@@ -17,8 +18,9 @@ use typed_builder::TypedBuilder;
 #[derive(TypedBuilder)]
 pub struct DeleteDomainRequest {
     /// Unique ID of the domain to delete.
+    #[builder(setter(into))]
     #[serde(skip)]
-    pub domain_id: isize,
+    pub domain_id: DomainId,
 }
 
 /// Response for the [`DeleteDomainRequest`] endpoint.
@@ -62,7 +64,7 @@ mod tests {
 
     use super::*;
 
-    const DOMAIN_ID: isize = 36735;
+    const DOMAIN_ID: i64 = 36735;
 
     #[tokio::test]
     pub async fn delete_domain() {

@@ -1,7 +1,7 @@
 use std::borrow::Cow;
 
 use crate::Endpoint;
-use crate::api::domains::DomainDetails;
+use crate::api::domains::{DomainDetails, DomainId};
 use serde::Serialize;
 use typed_builder::TypedBuilder;
 
@@ -19,8 +19,9 @@ use typed_builder::TypedBuilder;
 #[derive(TypedBuilder)]
 pub struct EditDomainRequest {
     /// Unique ID of the domain to edit.
+    #[builder(setter(into))]
     #[serde(skip)]
-    pub domain_id: isize,
+    pub domain_id: DomainId,
     /// Custom Return-Path domain. Must be a subdomain of your From Email domain
     /// with a CNAME record pointing to `pm.mtasv.net`.
     #[builder(setter(into))]
@@ -55,7 +56,7 @@ mod tests {
 
     use super::*;
 
-    const DOMAIN_ID: isize = 36736;
+    const DOMAIN_ID: i64 = 36736;
 
     #[tokio::test]
     pub async fn edit_domain() {

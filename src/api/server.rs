@@ -1,5 +1,6 @@
 //! You'll find in email sending related endpoints.
 
+use crate::api::types::id_type;
 pub use create_server::*;
 pub use delete_server::*;
 pub use edit_server::*;
@@ -9,6 +10,8 @@ pub use get_server::*;
 pub use list_servers::*;
 use serde::{Deserialize, Serialize};
 use std::fmt;
+
+id_type!(pub ServerId);
 
 mod create_server;
 mod delete_server;
@@ -20,8 +23,20 @@ mod list_servers;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub enum ServerIdOrName {
-    ServerId(isize),
+    ServerId(ServerId),
     ServerName(String),
+}
+
+impl From<ServerId> for ServerIdOrName {
+    fn from(value: ServerId) -> Self {
+        Self::ServerId(value)
+    }
+}
+
+impl From<i64> for ServerIdOrName {
+    fn from(value: i64) -> Self {
+        Self::ServerId(value.into())
+    }
 }
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize, PartialEq)]
@@ -48,7 +63,7 @@ pub enum ServerColor {
 #[serde(rename_all = "PascalCase")]
 pub struct Server {
     #[serde(rename = "ID")]
-    pub id: isize,
+    pub id: ServerId,
     pub name: String,
     pub api_tokens: Vec<String>,
     #[serde(default)]

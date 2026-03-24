@@ -11,7 +11,7 @@ use super::*;
 /// ```
 /// use postmark::api::{Body, templates::{GetTemplateRequest, TemplateIdOrAlias}};
 /// let req = GetTemplateRequest::builder()
-///   .id(TemplateIdOrAlias::TemplateId(12345))
+///   .id(TemplateIdOrAlias::TemplateId(12345.into()))
 ///   .build();
 /// ```
 #[derive(Debug, Clone, PartialEq, Serialize)]
@@ -19,6 +19,7 @@ use super::*;
 #[derive(TypedBuilder)]
 pub struct GetTemplateRequest {
     /// ID of template or template alias
+    #[builder(setter(into))]
     pub id: TemplateIdOrAlias,
 }
 
@@ -30,7 +31,7 @@ pub struct GetTemplateRequest {
 #[serde(rename_all = "PascalCase")]
 pub struct GetTemplateResponse {
     /// ID of template
-    pub template_id: isize,
+    pub template_id: TemplateId,
     /// Name of template
     pub name: String,
     /// The content to use for the Subject when this template is used to send email.
@@ -40,7 +41,7 @@ pub struct GetTemplateResponse {
     #[serde(flatten)]
     pub body: Body,
     /// The ID of the Server with which this template is associated.
-    pub associated_server_id: isize,
+    pub associated_server_id: crate::api::server::ServerId,
     /// Indicates that this template may be used for sending email.
     pub active: bool,
     /// Template alias (or None if not specified).
@@ -112,7 +113,7 @@ mod tests {
             .build();
 
         let req = GetTemplateRequest::builder()
-            .id(TemplateIdOrAlias::TemplateId(12345))
+            .id(TemplateIdOrAlias::TemplateId(12345.into()))
             .build();
 
         println!("{}", req.endpoint());

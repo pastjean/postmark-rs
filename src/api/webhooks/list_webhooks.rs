@@ -1,6 +1,7 @@
 use std::borrow::Cow;
 
 use crate::Endpoint;
+use crate::api::webhooks::WebhookId;
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
 
@@ -22,7 +23,7 @@ pub struct ListWebhooksResponse {
 #[serde(rename_all = "PascalCase")]
 pub struct Webhook {
     #[serde(rename = "ID")]
-    pub id: isize,
+    pub id: WebhookId,
     pub url: String,
     pub message_stream: String,
     pub http_auth: Option<WebhookHttpAuth>,

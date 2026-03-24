@@ -1,7 +1,7 @@
 use std::borrow::Cow;
 
 use crate::Endpoint;
-use crate::api::domains::DomainDetails;
+use crate::api::domains::{DomainDetails, DomainId};
 use serde::Serialize;
 use typed_builder::TypedBuilder;
 
@@ -18,8 +18,9 @@ use typed_builder::TypedBuilder;
 #[derive(TypedBuilder)]
 pub struct GetDomainRequest {
     /// Unique ID of the domain to retrieve.
+    #[builder(setter(into))]
     #[serde(skip)]
-    pub domain_id: isize,
+    pub domain_id: DomainId,
 }
 
 impl Endpoint for GetDomainRequest {
@@ -50,7 +51,7 @@ mod tests {
 
     use super::*;
 
-    const DOMAIN_ID: isize = 36735;
+    const DOMAIN_ID: i64 = 36735;
 
     #[tokio::test]
     pub async fn get_domain() {

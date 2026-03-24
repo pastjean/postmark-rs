@@ -1,7 +1,7 @@
 use std::borrow::Cow;
 
 use crate::Endpoint;
-use crate::api::message_streams::StreamIdOrName;
+use crate::api::message_streams::{MessageStreamServerId, StreamIdOrName};
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
 
@@ -18,7 +18,7 @@ pub struct ArchiveMessageStreamResponse {
     #[serde(rename = "ID")]
     pub id: String,
     #[serde(rename = "ServerID")]
-    pub server_id: isize,
+    pub server_id: MessageStreamServerId,
     pub expected_purge_date: String,
 }
 

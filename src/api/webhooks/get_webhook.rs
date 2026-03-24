@@ -1,15 +1,16 @@
 use std::borrow::Cow;
 
 use crate::Endpoint;
-use crate::api::webhooks::Webhook;
+use crate::api::webhooks::{Webhook, WebhookId};
 use serde::Serialize;
 use typed_builder::TypedBuilder;
 
 #[derive(Debug, Clone, PartialEq, Serialize, TypedBuilder)]
 #[serde(rename_all = "PascalCase")]
 pub struct GetWebhookRequest {
+    #[builder(setter(into))]
     #[serde(skip)]
-    pub id: isize,
+    pub id: WebhookId,
 }
 
 impl Endpoint for GetWebhookRequest {

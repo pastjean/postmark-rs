@@ -1,15 +1,16 @@
 use std::borrow::Cow;
 
 use crate::Endpoint;
-use crate::api::webhooks::{Webhook, WebhookHeader, WebhookHttpAuth, WebhookTriggers};
+use crate::api::webhooks::{Webhook, WebhookHeader, WebhookHttpAuth, WebhookId, WebhookTriggers};
 use serde::Serialize;
 use typed_builder::TypedBuilder;
 
 #[derive(Debug, Clone, PartialEq, Serialize, TypedBuilder)]
 #[serde(rename_all = "PascalCase")]
 pub struct EditWebhookRequest {
+    #[builder(setter(into))]
     #[serde(skip)]
-    pub id: isize,
+    pub id: WebhookId,
     #[builder(default, setter(into, strip_option))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub url: Option<String>,

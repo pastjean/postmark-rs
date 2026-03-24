@@ -25,6 +25,7 @@ use super::*;
 pub struct EditTemplateRequest {
     /// ID of template or template alias. This id or alias is used to identify the
     /// correct template to edit.
+    #[builder(setter(into))]
     #[serde(skip)]
     pub id: TemplateIdOrAlias,
 
@@ -83,7 +84,7 @@ pub struct EditTemplateRequest {
 #[serde(rename_all = "PascalCase")]
 pub struct EditTemplateResponse {
     /// ID of template
-    pub template_id: isize,
+    pub template_id: TemplateId,
     /// Name of template
     pub name: String,
     /// Indicates that this template may be used for sending email.
@@ -147,7 +148,7 @@ mod tests {
             .build();
 
         let req = EditTemplateRequest::builder()
-            .id(TemplateIdOrAlias::TemplateId(12345))
+            .id(TemplateIdOrAlias::TemplateId(12345.into()))
             .name(NAME)
             .body(Body::text(TEXT_BODY.into()))
             .subject(SUBJ)
@@ -229,7 +230,7 @@ mod tests {
             .build();
 
         let req = EditTemplateRequest::builder()
-            .id(TemplateIdOrAlias::TemplateId(12345))
+            .id(TemplateIdOrAlias::TemplateId(12345.into()))
             .name(NAME)
             .body(Body::html_and_text(HTML_BODY.into(), TEXT_BODY.into()))
             .subject(SUBJ)

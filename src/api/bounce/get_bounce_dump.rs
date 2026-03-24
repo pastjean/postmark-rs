@@ -1,14 +1,16 @@
 use std::borrow::Cow;
 
 use crate::Endpoint;
+use crate::api::bounce::BounceId;
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
 
 #[derive(Debug, Clone, PartialEq, Serialize, TypedBuilder)]
 #[serde(rename_all = "PascalCase")]
 pub struct GetBounceDumpRequest {
+    #[builder(setter(into))]
     #[serde(skip)]
-    pub bounce_id: isize,
+    pub bounce_id: BounceId,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]

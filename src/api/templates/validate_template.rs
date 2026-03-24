@@ -49,8 +49,8 @@ pub struct ValidateTemplatePart {
 #[serde(rename_all = "PascalCase")]
 pub struct ValidateTemplateError {
     pub message: String,
-    pub line: Option<isize>,
-    pub character_position: Option<isize>,
+    pub line: Option<i64>,
+    pub character_position: Option<i64>,
 }
 
 impl Endpoint for ValidateTemplateRequest {

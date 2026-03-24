@@ -20,7 +20,7 @@ pub struct ListMessageStreamsRequest {
 #[serde(rename_all = "PascalCase")]
 pub struct ListMessageStreamsResponse {
     pub message_streams: Vec<MessageStream>,
-    pub total_count: isize,
+    pub total_count: i64,
 }
 
 impl Endpoint for ListMessageStreamsRequest {

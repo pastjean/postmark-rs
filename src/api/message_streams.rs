@@ -3,6 +3,8 @@
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
+pub type MessageStreamServerId = crate::api::server::ServerId;
+
 mod archive_message_stream;
 mod create_message_stream;
 mod create_suppression;
@@ -71,7 +73,7 @@ pub struct MessageStream {
     #[serde(rename = "ID")]
     pub id: String,
     #[serde(rename = "ServerID")]
-    pub server_id: isize,
+    pub server_id: MessageStreamServerId,
     pub name: String,
     pub description: Option<String>,
     pub message_stream_type: MessageStreamType,

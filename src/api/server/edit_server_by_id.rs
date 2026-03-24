@@ -1,15 +1,16 @@
 use std::borrow::Cow;
 
 use crate::Endpoint;
-use crate::api::server::{DeliveryType, Server, ServerColor};
+use crate::api::server::{DeliveryType, Server, ServerColor, ServerId};
 use serde::Serialize;
 use typed_builder::TypedBuilder;
 
 #[derive(Debug, Clone, PartialEq, Serialize, TypedBuilder)]
 #[serde(rename_all = "PascalCase")]
 pub struct EditServerByIdRequest {
+    #[builder(setter(into))]
     #[serde(skip)]
-    pub server_id: isize,
+    pub server_id: ServerId,
     #[builder(default, setter(into, strip_option))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,

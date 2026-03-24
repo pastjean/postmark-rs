@@ -1,6 +1,7 @@
 use std::borrow::Cow;
 
 use crate::Endpoint;
+use crate::api::triggers::InboundRuleTriggerId;
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
 
@@ -8,23 +9,23 @@ use typed_builder::TypedBuilder;
 #[serde(rename_all = "PascalCase")]
 pub struct ListInboundRuleTriggersRequest {
     #[serde(skip)]
-    pub count: isize,
+    pub count: i64,
     #[serde(skip)]
-    pub offset: isize,
+    pub offset: i64,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "PascalCase")]
 pub struct InboundRule {
     #[serde(rename = "ID")]
-    pub id: isize,
+    pub id: InboundRuleTriggerId,
     pub rule: String,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "PascalCase")]
 pub struct ListInboundRuleTriggersResponse {
-    pub total_count: isize,
+    pub total_count: i64,
     pub inbound_rules: Vec<InboundRule>,
 }
 

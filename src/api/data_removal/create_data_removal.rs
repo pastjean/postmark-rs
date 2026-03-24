@@ -1,6 +1,7 @@
 use std::borrow::Cow;
 
 use crate::Endpoint;
+use crate::api::data_removal::DataRemovalId;
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
 
@@ -16,7 +17,7 @@ pub struct CreateDataRemovalRequest {
 #[serde(rename_all = "PascalCase")]
 pub struct DataRemovalStatusResponse {
     #[serde(rename = "ID")]
-    pub id: isize,
+    pub id: DataRemovalId,
     pub status: String,
 }
 

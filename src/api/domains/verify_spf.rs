@@ -1,6 +1,7 @@
 use std::borrow::Cow;
 
 use crate::Endpoint;
+use crate::api::domains::DomainId;
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
 
@@ -17,8 +18,9 @@ use typed_builder::TypedBuilder;
 #[derive(TypedBuilder)]
 pub struct VerifySpfRequest {
     /// Unique ID of the domain whose SPF record should be verified.
+    #[builder(setter(into))]
     #[serde(skip)]
-    pub domain_id: isize,
+    pub domain_id: DomainId,
 }
 
 /// Response for the [`VerifySpfRequest`] endpoint.
@@ -64,7 +66,7 @@ mod tests {
 
     use super::*;
 
-    const DOMAIN_ID: isize = 36735;
+    const DOMAIN_ID: i64 = 36735;
 
     #[tokio::test]
     pub async fn verify_spf() {

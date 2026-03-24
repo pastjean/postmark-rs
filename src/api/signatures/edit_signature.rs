@@ -1,15 +1,16 @@
 use std::borrow::Cow;
 
 use crate::Endpoint;
-use crate::api::signatures::SenderSignature;
+use crate::api::signatures::{SenderSignature, SignatureId};
 use serde::Serialize;
 use typed_builder::TypedBuilder;
 
 #[derive(Debug, Clone, PartialEq, Serialize, TypedBuilder)]
 #[serde(rename_all = "PascalCase")]
 pub struct EditSignatureRequest {
+    #[builder(setter(into))]
     #[serde(skip)]
-    pub signature_id: isize,
+    pub signature_id: SignatureId,
     pub name: String,
     #[builder(default, setter(into, strip_option))]
     #[serde(rename = "ReplyToEmail", skip_serializing_if = "Option::is_none")]

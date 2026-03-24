@@ -17,7 +17,7 @@ pub struct GetBulkStatusResponse {
     #[serde(alias = "Id", rename = "ID")]
     pub id: String,
     pub submitted_at: String,
-    pub total_messages: isize,
+    pub total_messages: i64,
     pub percentage_completed: f64,
     pub status: String,
     pub subject: Option<String>,

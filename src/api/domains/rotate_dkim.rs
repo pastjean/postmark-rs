@@ -1,7 +1,7 @@
 use std::borrow::Cow;
 
 use crate::Endpoint;
-use crate::api::domains::DkimUpdateStatus;
+use crate::api::domains::{DkimUpdateStatus, DomainId};
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
 
@@ -18,8 +18,9 @@ use typed_builder::TypedBuilder;
 #[derive(TypedBuilder)]
 pub struct RotateDkimRequest {
     /// Unique ID of the domain whose DKIM keys should be rotated.
+    #[builder(setter(into))]
     #[serde(skip)]
-    pub domain_id: isize,
+    pub domain_id: DomainId,
 }
 
 /// Response for the [`RotateDkimRequest`] endpoint.
@@ -60,7 +61,7 @@ pub struct RotateDkimResponse {
     pub dkim_update_status: DkimUpdateStatus,
     /// Unique ID of the domain.
     #[serde(rename = "ID")]
-    pub id: isize,
+    pub id: DomainId,
 }
 
 impl Endpoint for RotateDkimRequest {
@@ -87,7 +88,7 @@ mod tests {
 
     use super::*;
 
-    const DOMAIN_ID: isize = 36735;
+    const DOMAIN_ID: i64 = 36735;
 
     #[tokio::test]
     pub async fn rotate_dkim() {

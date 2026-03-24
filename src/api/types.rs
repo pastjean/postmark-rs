@@ -1,9 +1,15 @@
+//! Legacy shared API types.
+//!
+//! New code should prefer IDs defined next to endpoint modules (for example
+//! `api::server::ServerId`, `api::domains::DomainId`).
+
 macro_rules! id_type {
-    ($name:ident) => {
+    ($vis:vis $name:ident) => {
         #[derive(
             Debug,
             Clone,
             Copy,
+            Default,
             PartialEq,
             Eq,
             PartialOrd,
@@ -14,7 +20,7 @@ macro_rules! id_type {
         )]
         #[serde(transparent)]
         #[repr(transparent)]
-        pub struct $name(i64);
+        $vis struct $name(i64);
 
         impl $name {
             pub const fn new(value: i64) -> Self {
@@ -25,26 +31,45 @@ macro_rules! id_type {
                 self.0
             }
         }
+
+        impl std::fmt::Display for $name {
+            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                write!(f, "{}", self.0)
+            }
+        }
+
+        impl From<i64> for $name {
+            fn from(value: i64) -> Self {
+                Self(value)
+            }
+        }
+
+        impl From<$name> for i64 {
+            fn from(value: $name) -> Self {
+                value.0
+            }
+        }
+
+        impl PartialEq<i64> for $name {
+            fn eq(&self, other: &i64) -> bool {
+                self.0 == *other
+            }
+        }
+
+        impl PartialEq<$name> for i64 {
+            fn eq(&self, other: &$name) -> bool {
+                *self == other.0
+            }
+        }
     };
 }
 
-id_type!(ServerId);
-id_type!(DomainId);
-id_type!(TemplateId);
-id_type!(WebhookId);
-id_type!(MessageNumericId);
-id_type!(ErrorCode);
+pub(crate) use id_type;
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
-#[serde(transparent)]
-pub struct MessageId(String);
-
-impl MessageId {
-    pub fn new(value: impl Into<String>) -> Self {
-        Self(value.into())
-    }
-
-    pub fn as_str(&self) -> &str {
-        &self.0
-    }
-}
+pub type ServerId = crate::api::server::ServerId;
+pub type DomainId = crate::api::domains::DomainId;
+pub type TemplateId = crate::api::templates::TemplateId;
+pub type WebhookId = crate::api::webhooks::WebhookId;
+pub type MessageNumericId = i64;
+pub type ErrorCode = i64;
+pub type MessageId = String;

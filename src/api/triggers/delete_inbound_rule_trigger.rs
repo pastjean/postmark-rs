@@ -1,20 +1,22 @@
 use std::borrow::Cow;
 
 use crate::Endpoint;
+use crate::api::triggers::InboundRuleTriggerId;
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
 
 #[derive(Debug, Clone, PartialEq, Serialize, TypedBuilder)]
 #[serde(rename_all = "PascalCase")]
 pub struct DeleteInboundRuleTriggerRequest {
+    #[builder(setter(into))]
     #[serde(skip)]
-    pub trigger_id: isize,
+    pub trigger_id: InboundRuleTriggerId,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "PascalCase")]
 pub struct DeleteInboundRuleTriggerResponse {
-    pub error_code: isize,
+    pub error_code: i64,
     pub message: String,
 }
 

@@ -1,7 +1,7 @@
 use std::borrow::Cow;
 
 use crate::Endpoint;
-use crate::api::templates::TemplateType;
+use crate::api::templates::{TemplateId, TemplateType};
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
 
@@ -12,17 +12,17 @@ use typed_builder::TypedBuilder;
 pub struct ListTemplatesRequest {
     /// Number of templates to return.
     #[serde(skip)]
-    pub count: isize,
+    pub count: i64,
     /// Number of templates to skip.
     #[serde(skip)]
-    pub offset: isize,
+    pub offset: i64,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "PascalCase")]
 pub struct ListTemplatesResponse {
     /// Total number of templates associated with current server.
-    pub total_count: isize,
+    pub total_count: i64,
     /// Templates list.
     pub templates: Vec<TemplateSummary>,
 }
@@ -31,7 +31,7 @@ pub struct ListTemplatesResponse {
 #[serde(rename_all = "PascalCase")]
 pub struct TemplateSummary {
     pub active: bool,
-    pub template_id: isize,
+    pub template_id: TemplateId,
     pub name: String,
     pub alias: Option<String>,
     pub template_type: TemplateType,

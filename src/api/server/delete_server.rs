@@ -1,20 +1,22 @@
 use std::borrow::Cow;
 
 use crate::Endpoint;
+use crate::api::server::ServerId;
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
 
 #[derive(Debug, Clone, PartialEq, Serialize, TypedBuilder)]
 #[serde(rename_all = "PascalCase")]
 pub struct DeleteServerRequest {
+    #[builder(setter(into))]
     #[serde(skip)]
-    pub server_id: isize,
+    pub server_id: ServerId,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "PascalCase")]
 pub struct DeleteServerResponse {
-    pub error_code: isize,
+    pub error_code: i64,
     pub message: String,
 }
 
