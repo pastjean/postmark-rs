@@ -38,11 +38,12 @@ async fn send_email(){
 }
 ```
 
-Messages facade example:
+Messages example:
 
 ```rust
 use postmark::api::messages::OutboundSearchRequest;
 use postmark::reqwest::PostmarkClient;
+use postmark::Query;
 
 async fn list_messages() {
   let client = PostmarkClient::builder()
@@ -50,7 +51,7 @@ async fn list_messages() {
     .build();
 
   let request = OutboundSearchRequest::builder().build();
-  let response = client.messages().outbound_search(request).await;
+  let response = request.execute(&client).await;
 }
 ```
 
