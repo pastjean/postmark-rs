@@ -21,6 +21,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0](https://github.com/pastjean/postmark-rs/compare/v0.11.5...v1.0.0) - 2026-03-25
+
+### Added
+
+- Implement all current top-level Postmark REST API reference sections documented by Postmark, with Sender Signatures limited to non-deprecated endpoints.
+- Add new public modules for `bulk`, `data_removal`, `messages`, `signatures`, `stats`, `triggers`, and `types`.
+- Add request and response coverage for Bulk, Bounce, Message Streams, Suppressions, Messages, Server/Servers, Sender Signatures, Stats, Triggers, Webhooks, Templates, and Data Removal APIs.
+- Add API coverage docs, compatibility notes, and examples under `docs/api/`.
+
+### Changed
+
+- Mark `postmark` 1.0.0 as the first stable release of the crate.
+
+### Breaking
+
+- `PostmarkClient` is no longer constructible with a struct literal.
+- `PostmarkClient` no longer implements `UnwindSafe` and `RefUnwindSafe`.
+- `QueryError` gained `Api` and `PostmarkClientError` gained `InvalidUri`, so exhaustive matches may need updating.
+- `DeliveryStatsRequest` and `DeliveryStatsResponse` were renamed to `GetDeliveryStatsRequest` and `GetDeliveryStatsResponse`.
+- `CreateServerResponse` and `GetServerResponse` were consolidated into `api::server::Server`.
+
 ## [0.11.5](https://github.com/pastjean/postmark-rs/compare/v0.11.4...v0.11.5) - 2026-03-21
 
 ### Fixed
