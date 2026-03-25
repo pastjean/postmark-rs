@@ -23,6 +23,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.0.0](https://github.com/pastjean/postmark-rs/compare/v0.11.5...v1.0.0) - 2026-03-25
 
+### Other
+
+- release v1.0.0 ([#48](https://github.com/pastjean/postmark-rs/pull/48))
+- Yes ([#54](https://github.com/pastjean/postmark-rs/pull/54))
+- Modernize API wrapper core and add parity scaffolding ([#52](https://github.com/pastjean/postmark-rs/pull/52))
+- Trim parity changes to required endpoint additions only
+- Add Postmark API coverage and docs
+- Implement a lot of missing APIs
+- commit
+- Add design doc for API parity rollout
+
+## [1.0.0](https://github.com/pastjean/postmark-rs/compare/v0.11.5...v1.0.0) - 2026-03-25
+
 ### Added
 
 - Implement all current top-level Postmark REST API reference sections documented by Postmark, with Sender Signatures limited to non-deprecated endpoints.
