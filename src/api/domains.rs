@@ -10,7 +10,10 @@ pub use verify_dkim::*;
 pub use verify_return_path::*;
 pub use verify_spf::*;
 
+use crate::api::types::id_type;
 use serde::{Deserialize, Serialize};
+
+id_type!(pub DomainId);
 
 mod create_domain;
 mod delete_domain;
@@ -57,7 +60,7 @@ pub struct DomainSummary {
     pub return_path_domain_verified: bool,
     /// Unique ID of the domain.
     #[serde(rename = "ID")]
-    pub id: isize,
+    pub id: DomainId,
 }
 
 /// Full domain details as returned by get, create, edit, and verify endpoints.
@@ -117,5 +120,5 @@ pub struct DomainDetails {
     pub return_path_domain_cname_value: String,
     /// Unique ID of the domain.
     #[serde(rename = "ID")]
-    pub id: isize,
+    pub id: DomainId,
 }

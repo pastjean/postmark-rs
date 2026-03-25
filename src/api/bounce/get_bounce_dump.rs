@@ -1,14 +1,16 @@
 use std::borrow::Cow;
 
 use crate::Endpoint;
+use crate::api::bounce::BounceId;
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
 
 #[derive(Debug, Clone, PartialEq, Serialize, TypedBuilder)]
 #[serde(rename_all = "PascalCase")]
 pub struct GetBounceDumpRequest {
+    #[builder(setter(into))]
     #[serde(skip)]
-    pub bounce_id: isize,
+    pub bounce_id: BounceId,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -37,11 +39,11 @@ impl Endpoint for GetBounceDumpRequest {
 #[cfg(test)]
 mod tests {
     use httptest::matchers::request;
-    use httptest::{responders::*, Expectation, Server};
+    use httptest::{Expectation, Server, responders::*};
     use serde_json::json;
 
-    use crate::reqwest::PostmarkClient;
     use crate::Query;
+    use crate::reqwest::PostmarkClient;
 
     use super::*;
 

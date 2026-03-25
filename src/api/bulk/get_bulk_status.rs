@@ -1,6 +1,7 @@
 use std::borrow::Cow;
 
 use crate::Endpoint;
+use crate::api::endpoint_with_path_segment;
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
 
@@ -17,7 +18,7 @@ pub struct GetBulkStatusResponse {
     #[serde(alias = "Id", rename = "ID")]
     pub id: String,
     pub submitted_at: String,
-    pub total_messages: isize,
+    pub total_messages: i64,
     pub percentage_completed: f64,
     pub status: String,
     pub subject: Option<String>,
@@ -28,7 +29,7 @@ impl Endpoint for GetBulkStatusRequest {
     type Response = GetBulkStatusResponse;
 
     fn endpoint(&self) -> Cow<'static, str> {
-        format!("/email/bulk/{}", self.bulk_request_id).into()
+        endpoint_with_path_segment("/email/bulk", &self.bulk_request_id.to_string())
     }
 
     fn body(&self) -> &Self::Request {
@@ -43,11 +44,11 @@ impl Endpoint for GetBulkStatusRequest {
 #[cfg(test)]
 mod tests {
     use httptest::matchers::request;
-    use httptest::{responders::*, Expectation, Server};
+    use httptest::{Expectation, Server, responders::*};
     use serde_json::json;
 
-    use crate::reqwest::PostmarkClient;
     use crate::Query;
+    use crate::reqwest::PostmarkClient;
 
     use super::*;
 

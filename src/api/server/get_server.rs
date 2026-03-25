@@ -3,13 +3,15 @@ use std::borrow::Cow;
 use serde::Serialize;
 use typed_builder::TypedBuilder;
 
-use crate::api::server::{Server, ServerIdOrName};
 use crate::Endpoint;
+use crate::api::endpoint_with_path_segment;
+use crate::api::server::{Server, ServerIdOrName};
 
 #[derive(Debug, Clone, PartialEq, Serialize)]
 #[serde(rename_all = "PascalCase")]
 #[derive(TypedBuilder)]
 pub struct GetServerRequest {
+    #[builder(setter(into))]
     #[serde(skip)]
     pub server_id: ServerIdOrName,
 }
@@ -19,7 +21,7 @@ impl Endpoint for GetServerRequest {
     type Response = Server;
 
     fn endpoint(&self) -> Cow<'static, str> {
-        format!("/servers/{}", self.server_id).into()
+        endpoint_with_path_segment("/servers", &self.server_id.to_string())
     }
 
     fn body(&self) -> &Self::Request {
@@ -34,15 +36,15 @@ impl Endpoint for GetServerRequest {
 #[cfg(test)]
 mod tests {
     use httptest::matchers::request;
-    use httptest::{responders::*, Expectation, Server};
+    use httptest::{Expectation, Server, responders::*};
     use serde_json::json;
 
-    use crate::reqwest::PostmarkClient;
     use crate::Query;
+    use crate::reqwest::PostmarkClient;
 
     use super::*;
 
-    const SERVER_ID: isize = 123456;
+    const SERVER_ID: i64 = 123456;
     #[tokio::test]
     pub async fn get_server() {
         let server = Server::run();
@@ -82,7 +84,7 @@ mod tests {
             .build();
 
         let req = GetServerRequest::builder()
-            .server_id(ServerIdOrName::ServerId(SERVER_ID))
+            .server_id(ServerIdOrName::ServerId(SERVER_ID.into()))
             .build();
 
         req.execute(&client)

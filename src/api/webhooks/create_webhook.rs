@@ -1,6 +1,7 @@
 use std::borrow::Cow;
 
 use crate::Endpoint;
+use crate::api::webhooks::WebhookId;
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
 
@@ -18,7 +19,7 @@ pub struct CreateWebhookRequest {
 #[serde(rename_all = "PascalCase")]
 pub struct CreateWebhookResponse {
     #[serde(rename = "ID")]
-    pub webhook_id: isize,
+    pub webhook_id: WebhookId,
     pub triggers: Triggers,
 }
 
@@ -49,11 +50,11 @@ impl Endpoint for CreateWebhookRequest {
 #[cfg(test)]
 mod tests {
     use httptest::matchers::request;
-    use httptest::{responders::*, Expectation, Server};
+    use httptest::{Expectation, Server, responders::*};
     use serde_json::json;
 
-    use crate::reqwest::PostmarkClient;
     use crate::Query;
+    use crate::reqwest::PostmarkClient;
 
     use super::*;
     const WEBHOOK_URL: &str = "http://www.example.com/webhook-test-tracking";

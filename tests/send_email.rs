@@ -3,10 +3,10 @@
 // manual testing against a Postmark account
 use std::env;
 
-use postmark::api::email::SendEmailRequest;
-use postmark::api::Body;
-use postmark::reqwest::PostmarkClient;
 use postmark::Query;
+use postmark::api::Body;
+use postmark::api::email::SendEmailRequest;
+use postmark::reqwest::PostmarkClient;
 
 #[tokio::test(flavor = "multi_thread")]
 #[ignore]

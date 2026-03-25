@@ -1,4 +1,4 @@
-use crate::Endpoint;
+use crate::{Endpoint, api::endpoint_with_path_segment};
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 use typed_builder::TypedBuilder;
@@ -11,7 +11,7 @@ use super::*;
 /// ```
 /// use postmark::api::{Body, templates::{DeleteTemplateRequest, TemplateIdOrAlias}};
 /// let req = DeleteTemplateRequest::builder()
-///   .id(TemplateIdOrAlias::TemplateId(12345))
+///   .id(TemplateIdOrAlias::TemplateId(12345.into()))
 ///   .build();
 /// ```
 #[derive(Debug, Clone, PartialEq, Serialize)]
@@ -19,6 +19,7 @@ use super::*;
 #[derive(TypedBuilder)]
 pub struct DeleteTemplateRequest {
     /// ID of template or template alias
+    #[builder(setter(into))]
     pub id: TemplateIdOrAlias,
 }
 
@@ -41,7 +42,7 @@ impl Endpoint for DeleteTemplateRequest {
     type Response = DeleteTemplateResponse;
 
     fn endpoint(&self) -> Cow<'static, str> {
-        format!("/templates/{}", self.id).into()
+        endpoint_with_path_segment("/templates", &self.id.to_string())
     }
 
     fn body(&self) -> &Self::Request {
@@ -56,12 +57,12 @@ impl Endpoint for DeleteTemplateRequest {
 #[cfg(test)]
 mod tests {
     use httptest::matchers::request;
-    use httptest::{responders::*, Expectation, Server};
+    use httptest::{Expectation, Server, responders::*};
     use serde_json::json;
 
     use super::*;
-    use crate::reqwest::PostmarkClient;
     use crate::Query;
+    use crate::reqwest::PostmarkClient;
 
     const ALIAS: &str = "my-template-alias";
 
@@ -83,10 +84,8 @@ mod tests {
             .build();
 
         let req = DeleteTemplateRequest::builder()
-            .id(TemplateIdOrAlias::TemplateId(12345))
+            .id(TemplateIdOrAlias::TemplateId(12345.into()))
             .build();
-
-        println!("{}", req.endpoint());
 
         req.execute(&client)
             .await
@@ -116,8 +115,6 @@ mod tests {
             .id(TemplateIdOrAlias::Alias(String::from(ALIAS)))
             .build();
 
-        println!("{}", req.endpoint());
-
         req.execute(&client)
             .await
             .expect("Should get a response and be able to json decode it");
@@ -143,7 +140,7 @@ mod tests {
             .build();
 
         let req = DeleteTemplateRequest::builder()
-            .id(TemplateIdOrAlias::TemplateId(12345))
+            .id(TemplateIdOrAlias::TemplateId(12345.into()))
             .build();
 
         req.execute(&client)

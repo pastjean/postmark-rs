@@ -1,15 +1,17 @@
 use std::borrow::Cow;
 
-use crate::api::data_removal::DataRemovalStatusResponse;
 use crate::Endpoint;
+use crate::api::data_removal::{DataRemovalId, DataRemovalStatusResponse};
+use crate::api::endpoint_with_path_segment;
 use serde::Serialize;
 use typed_builder::TypedBuilder;
 
 #[derive(Debug, Clone, PartialEq, Serialize, TypedBuilder)]
 #[serde(rename_all = "PascalCase")]
 pub struct GetDataRemovalStatusRequest {
+    #[builder(setter(into))]
     #[serde(skip)]
-    pub data_removal_id: isize,
+    pub data_removal_id: DataRemovalId,
 }
 
 impl Endpoint for GetDataRemovalStatusRequest {
@@ -17,7 +19,7 @@ impl Endpoint for GetDataRemovalStatusRequest {
     type Response = DataRemovalStatusResponse;
 
     fn endpoint(&self) -> Cow<'static, str> {
-        format!("/data-removals/{}", self.data_removal_id).into()
+        endpoint_with_path_segment("/data-removals", &self.data_removal_id.to_string())
     }
 
     fn body(&self) -> &Self::Request {
@@ -32,11 +34,11 @@ impl Endpoint for GetDataRemovalStatusRequest {
 #[cfg(test)]
 mod tests {
     use httptest::matchers::request;
-    use httptest::{responders::*, Expectation, Server};
+    use httptest::{Expectation, Server, responders::*};
     use serde_json::json;
 
-    use crate::reqwest::PostmarkClient;
     use crate::Query;
+    use crate::reqwest::PostmarkClient;
 
     use super::*;
 

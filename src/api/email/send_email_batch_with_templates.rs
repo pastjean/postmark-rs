@@ -29,12 +29,12 @@ impl Endpoint for SendEmailBatchWithTemplatesRequest {
 #[cfg(test)]
 mod tests {
     use httptest::matchers::request;
-    use httptest::{responders::*, Expectation, Server};
+    use httptest::{Expectation, Server, responders::*};
     use serde_json::json;
 
+    use crate::Query;
     use crate::api::email::*;
     use crate::reqwest::PostmarkClient;
-    use crate::Query;
 
     #[tokio::test]
     pub async fn send_email_test() {

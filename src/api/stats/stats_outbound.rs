@@ -1,7 +1,7 @@
 use std::borrow::Cow;
 
-use crate::api::stats::{stats_endpoint, StatsQuery};
 use crate::Endpoint;
+use crate::api::stats::{StatsQuery, stats_endpoint};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use typed_builder::TypedBuilder;
@@ -227,11 +227,11 @@ stats_req!(
 #[cfg(test)]
 mod tests {
     use httptest::matchers::request;
-    use httptest::{responders::*, Expectation, Server};
+    use httptest::{Expectation, Server, responders::*};
     use serde_json::json;
 
-    use crate::reqwest::PostmarkClient;
     use crate::Query;
+    use crate::reqwest::PostmarkClient;
 
     use super::*;
 

@@ -1,7 +1,7 @@
 use std::borrow::Cow;
 
-use crate::api::message_streams::StreamIdOrName;
 use crate::Endpoint;
+use crate::api::message_streams::{MessageStreamServerId, StreamIdOrName};
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
 
@@ -18,7 +18,7 @@ pub struct ArchiveMessageStreamResponse {
     #[serde(rename = "ID")]
     pub id: String,
     #[serde(rename = "ServerID")]
-    pub server_id: isize,
+    pub server_id: MessageStreamServerId,
     pub expected_purge_date: String,
 }
 
@@ -38,11 +38,11 @@ impl Endpoint for ArchiveMessageStreamRequest {
 #[cfg(test)]
 mod tests {
     use httptest::matchers::request;
-    use httptest::{responders::*, Expectation, Server};
+    use httptest::{Expectation, Server, responders::*};
     use serde_json::json;
 
-    use crate::reqwest::PostmarkClient;
     use crate::Query;
+    use crate::reqwest::PostmarkClient;
 
     use super::*;
 

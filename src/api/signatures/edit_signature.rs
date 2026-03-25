@@ -1,15 +1,17 @@
 use std::borrow::Cow;
 
-use crate::api::signatures::SenderSignature;
 use crate::Endpoint;
+use crate::api::endpoint_with_path_segment;
+use crate::api::signatures::{SenderSignature, SignatureId};
 use serde::Serialize;
 use typed_builder::TypedBuilder;
 
 #[derive(Debug, Clone, PartialEq, Serialize, TypedBuilder)]
 #[serde(rename_all = "PascalCase")]
 pub struct EditSignatureRequest {
+    #[builder(setter(into))]
     #[serde(skip)]
-    pub signature_id: isize,
+    pub signature_id: SignatureId,
     pub name: String,
     #[builder(default, setter(into, strip_option))]
     #[serde(rename = "ReplyToEmail", skip_serializing_if = "Option::is_none")]
@@ -27,7 +29,7 @@ impl Endpoint for EditSignatureRequest {
     type Response = SenderSignature;
 
     fn endpoint(&self) -> Cow<'static, str> {
-        format!("/senders/{}", self.signature_id).into()
+        endpoint_with_path_segment("/senders", &self.signature_id.to_string())
     }
 
     fn body(&self) -> &Self::Request {
@@ -42,11 +44,11 @@ impl Endpoint for EditSignatureRequest {
 #[cfg(test)]
 mod tests {
     use httptest::matchers::request;
-    use httptest::{responders::*, Expectation, Server};
+    use httptest::{Expectation, Server, responders::*};
     use serde_json::json;
 
-    use crate::reqwest::PostmarkClient;
     use crate::Query;
+    use crate::reqwest::PostmarkClient;
 
     use super::*;
 

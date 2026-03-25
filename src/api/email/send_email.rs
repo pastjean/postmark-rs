@@ -1,4 +1,4 @@
-use crate::{api::Body, Endpoint};
+use crate::{Endpoint, api::Body};
 use serde::{Deserialize, Serialize};
 use std::{borrow::Cow, collections::HashMap};
 use typed_builder::TypedBuilder;
@@ -86,7 +86,7 @@ pub struct SendEmailRequest {
     pub message_stream: Option<String>,
 }
 
-/// A custom headers to include in a email.
+/// A custom header to include in an email.
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "PascalCase")]
 pub struct Header {
@@ -94,7 +94,7 @@ pub struct Header {
     pub value: String,
 }
 
-/// And attachment to an email.
+/// An attachment to an email.
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "PascalCase")]
 pub struct Attachment {
@@ -158,12 +158,12 @@ impl Endpoint for SendEmailRequest {
 #[cfg(test)]
 mod tests {
     use httptest::matchers::request;
-    use httptest::{responders::*, Expectation, Server};
+    use httptest::{Expectation, Server, responders::*};
     use serde_json::json;
 
     use super::*;
-    use crate::reqwest::PostmarkClient;
     use crate::Query;
+    use crate::reqwest::PostmarkClient;
 
     const FROM: &str = "pa@example.com";
     const TO: &str = "mathieu@example.com";

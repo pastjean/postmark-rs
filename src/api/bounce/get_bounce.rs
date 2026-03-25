@@ -1,15 +1,17 @@
 use std::borrow::Cow;
 
-use crate::api::bounce::BounceInfo;
 use crate::Endpoint;
+use crate::api::bounce::{BounceId, BounceInfo};
+use crate::api::endpoint_with_path_segment;
 use serde::Serialize;
 use typed_builder::TypedBuilder;
 
 #[derive(Debug, Clone, PartialEq, Serialize, TypedBuilder)]
 #[serde(rename_all = "PascalCase")]
 pub struct GetBounceRequest {
+    #[builder(setter(into))]
     #[serde(skip)]
-    pub bounce_id: isize,
+    pub bounce_id: BounceId,
 }
 
 impl Endpoint for GetBounceRequest {
@@ -17,7 +19,7 @@ impl Endpoint for GetBounceRequest {
     type Response = BounceInfo;
 
     fn endpoint(&self) -> Cow<'static, str> {
-        format!("/bounces/{}", self.bounce_id).into()
+        endpoint_with_path_segment("/bounces", &self.bounce_id.to_string())
     }
 
     fn body(&self) -> &Self::Request {
@@ -32,11 +34,11 @@ impl Endpoint for GetBounceRequest {
 #[cfg(test)]
 mod tests {
     use httptest::matchers::request;
-    use httptest::{responders::*, Expectation, Server};
+    use httptest::{Expectation, Server, responders::*};
     use serde_json::json;
 
-    use crate::reqwest::PostmarkClient;
     use crate::Query;
+    use crate::reqwest::PostmarkClient;
 
     use super::*;
 

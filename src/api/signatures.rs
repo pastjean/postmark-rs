@@ -1,7 +1,10 @@
 //! Sender signatures API endpoints.
 
+use crate::api::types::id_type;
 use serde::{Deserialize, Serialize};
-use std::borrow::Cow;
+
+id_type!(pub SignatureId);
+pub type ApiErrorCode = i64;
 
 mod create_signature;
 mod delete_signature;
@@ -58,7 +61,7 @@ pub struct SenderSignature {
     pub return_path_domain_verified: Option<bool>,
     pub return_path_domain_cname_value: Option<String>,
     #[serde(rename = "ID")]
-    pub id: isize,
+    pub id: SignatureId,
     pub confirmation_personal_note: Option<String>,
 }
 
@@ -71,16 +74,12 @@ pub struct SenderSignatureSummary {
     pub name: String,
     pub confirmed: bool,
     #[serde(rename = "ID")]
-    pub id: isize,
+    pub id: SignatureId,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "PascalCase")]
 pub struct BasicApiResponse {
-    pub error_code: isize,
+    pub error_code: ApiErrorCode,
     pub message: String,
-}
-
-pub(crate) fn paginated_endpoint(path: &str, count: isize, offset: isize) -> Cow<'static, str> {
-    format!("{path}?count={count}&offset={offset}").into()
 }

@@ -1,9 +1,9 @@
 use std::borrow::Cow;
 
+use crate::Endpoint;
 use crate::api::message_streams::{
     MessageStream, MessageStreamType, SubscriptionManagementConfiguration,
 };
-use crate::Endpoint;
 use serde::Serialize;
 use typed_builder::TypedBuilder;
 
@@ -37,12 +37,12 @@ impl Endpoint for CreateMessageStreamRequest {
 #[cfg(test)]
 mod tests {
     use httptest::matchers::request;
-    use httptest::{responders::*, Expectation, Server};
+    use httptest::{Expectation, Server, responders::*};
     use serde_json::json;
 
+    use crate::Query;
     use crate::api::message_streams::UnsubscribeHandlingType;
     use crate::reqwest::PostmarkClient;
-    use crate::Query;
 
     use super::*;
 

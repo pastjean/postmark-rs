@@ -1,4 +1,7 @@
-use crate::{api::Body, Endpoint};
+use crate::{
+    Endpoint,
+    api::{Body, endpoint_with_path_segment},
+};
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 use typed_builder::TypedBuilder;
@@ -11,7 +14,7 @@ use super::*;
 /// ```
 /// use postmark::api::{Body, templates::{GetTemplateRequest, TemplateIdOrAlias}};
 /// let req = GetTemplateRequest::builder()
-///   .id(TemplateIdOrAlias::TemplateId(12345))
+///   .id(TemplateIdOrAlias::TemplateId(12345.into()))
 ///   .build();
 /// ```
 #[derive(Debug, Clone, PartialEq, Serialize)]
@@ -19,6 +22,7 @@ use super::*;
 #[derive(TypedBuilder)]
 pub struct GetTemplateRequest {
     /// ID of template or template alias
+    #[builder(setter(into))]
     pub id: TemplateIdOrAlias,
 }
 
@@ -30,7 +34,7 @@ pub struct GetTemplateRequest {
 #[serde(rename_all = "PascalCase")]
 pub struct GetTemplateResponse {
     /// ID of template
-    pub template_id: isize,
+    pub template_id: TemplateId,
     /// Name of template
     pub name: String,
     /// The content to use for the Subject when this template is used to send email.
@@ -40,7 +44,7 @@ pub struct GetTemplateResponse {
     #[serde(flatten)]
     pub body: Body,
     /// The ID of the Server with which this template is associated.
-    pub associated_server_id: isize,
+    pub associated_server_id: crate::api::server::ServerId,
     /// Indicates that this template may be used for sending email.
     pub active: bool,
     /// Template alias (or None if not specified).
@@ -56,7 +60,7 @@ impl Endpoint for GetTemplateRequest {
     type Response = GetTemplateResponse;
 
     fn endpoint(&self) -> Cow<'static, str> {
-        format!("/templates/{}", self.id).into()
+        endpoint_with_path_segment("/templates", &self.id.to_string())
     }
 
     fn body(&self) -> &Self::Request {
@@ -71,12 +75,12 @@ impl Endpoint for GetTemplateRequest {
 #[cfg(test)]
 mod tests {
     use httptest::matchers::request;
-    use httptest::{responders::*, Expectation, Server};
+    use httptest::{Expectation, Server, responders::*};
     use serde_json::json;
 
     use super::*;
-    use crate::reqwest::PostmarkClient;
     use crate::Query;
+    use crate::reqwest::PostmarkClient;
 
     const NAME: &str = "Onboarding Email";
     const ALIAS: &str = "my-template-alias";
@@ -112,10 +116,8 @@ mod tests {
             .build();
 
         let req = GetTemplateRequest::builder()
-            .id(TemplateIdOrAlias::TemplateId(12345))
+            .id(TemplateIdOrAlias::TemplateId(12345.into()))
             .build();
-
-        println!("{}", req.endpoint());
 
         req.execute(&client)
             .await
@@ -150,10 +152,22 @@ mod tests {
             .id(TemplateIdOrAlias::Alias(String::from(ALIAS)))
             .build();
 
-        println!("{}", req.endpoint());
-
         req.execute(&client)
             .await
             .expect("Should get a response and be able to json decode it");
+    }
+
+    #[test]
+    fn get_template_encodes_alias_path_segment() {
+        let req = GetTemplateRequest::builder()
+            .id(TemplateIdOrAlias::Alias(
+                "folder/name with space".to_string(),
+            ))
+            .build();
+
+        assert_eq!(
+            req.endpoint().as_ref(),
+            "/templates/folder%2Fname%20with%20space"
+        );
     }
 }

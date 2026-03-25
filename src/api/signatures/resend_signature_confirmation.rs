@@ -1,15 +1,16 @@
 use std::borrow::Cow;
 
-use crate::api::signatures::BasicApiResponse;
 use crate::Endpoint;
+use crate::api::signatures::{BasicApiResponse, SignatureId};
 use serde::Serialize;
 use typed_builder::TypedBuilder;
 
 #[derive(Debug, Clone, PartialEq, Serialize, TypedBuilder)]
 #[serde(rename_all = "PascalCase")]
 pub struct ResendSignatureConfirmationRequest {
+    #[builder(setter(into))]
     #[serde(skip)]
-    pub signature_id: isize,
+    pub signature_id: SignatureId,
 }
 
 impl Endpoint for ResendSignatureConfirmationRequest {
@@ -28,11 +29,11 @@ impl Endpoint for ResendSignatureConfirmationRequest {
 #[cfg(test)]
 mod tests {
     use httptest::matchers::request;
-    use httptest::{responders::*, Expectation, Server};
+    use httptest::{Expectation, Server, responders::*};
     use serde_json::json;
 
-    use crate::reqwest::PostmarkClient;
     use crate::Query;
+    use crate::reqwest::PostmarkClient;
 
     use super::*;
 

@@ -141,8 +141,18 @@ Legend:
 | POST | `/data-removals` | account | x | `api::data_removal::CreateDataRemovalRequest` |
 | GET | `/data-removals/{id}` | account | x | `api::data_removal::GetDataRemovalStatusRequest` |
 
-## Missing section
+## Messages
 
-| Section | Status |
-|---|---|
-| Messages API | not implemented |
+| Method | Path | Token | Status | Rust request type |
+|---|---|---|---|---|
+| GET | `/messages/outbound` | server | x | `api::messages::OutboundSearchRequest` |
+| GET | `/messages/outbound/{messageid}/details` | server | x | `api::messages::OutboundDetailsRequest` |
+| GET | `/messages/outbound/{messageid}/dump` | server | x | `api::messages::OutboundDumpRequest` |
+| GET | `/messages/inbound` | server | x | `api::messages::InboundSearchRequest` |
+| GET | `/messages/inbound/{messageid}/details` | server | x | `api::messages::InboundDetailsRequest` |
+| PUT | `/messages/inbound/{messageid}/bypass` | server | x | `api::messages::BypassBlockedInboundRequest` |
+| PUT | `/messages/inbound/{messageid}/retry` | server | x | `api::messages::RetryFailedInboundRequest` |
+| GET | `/messages/outbound/opens` | server | x | `api::messages::MessageOpensRequest` |
+| GET | `/messages/outbound/opens/{messageid}` | server | x | `api::messages::SingleMessageOpensRequest` |
+| GET | `/messages/outbound/clicks` | server | x | `api::messages::MessageClicksRequest` |
+| GET | `/messages/outbound/clicks/{messageid}` | server | x | `api::messages::SingleMessageClicksRequest` |

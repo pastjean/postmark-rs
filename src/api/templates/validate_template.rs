@@ -1,7 +1,7 @@
 use std::borrow::Cow;
 
-use crate::api::templates::TemplateType;
 use crate::Endpoint;
+use crate::api::templates::TemplateType;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use typed_builder::TypedBuilder;
@@ -49,8 +49,8 @@ pub struct ValidateTemplatePart {
 #[serde(rename_all = "PascalCase")]
 pub struct ValidateTemplateError {
     pub message: String,
-    pub line: Option<isize>,
-    pub character_position: Option<isize>,
+    pub line: Option<i64>,
+    pub character_position: Option<i64>,
 }
 
 impl Endpoint for ValidateTemplateRequest {
@@ -69,11 +69,11 @@ impl Endpoint for ValidateTemplateRequest {
 #[cfg(test)]
 mod tests {
     use httptest::matchers::request;
-    use httptest::{responders::*, Expectation, Server};
+    use httptest::{Expectation, Server, responders::*};
     use serde_json::json;
 
-    use crate::reqwest::PostmarkClient;
     use crate::Query;
+    use crate::reqwest::PostmarkClient;
 
     use super::*;
 

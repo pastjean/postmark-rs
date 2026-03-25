@@ -1,15 +1,17 @@
 use std::borrow::Cow;
 
-use crate::api::webhooks::{Webhook, WebhookHeader, WebhookHttpAuth, WebhookTriggers};
 use crate::Endpoint;
+use crate::api::endpoint_with_path_segment;
+use crate::api::webhooks::{Webhook, WebhookHeader, WebhookHttpAuth, WebhookId, WebhookTriggers};
 use serde::Serialize;
 use typed_builder::TypedBuilder;
 
 #[derive(Debug, Clone, PartialEq, Serialize, TypedBuilder)]
 #[serde(rename_all = "PascalCase")]
 pub struct EditWebhookRequest {
+    #[builder(setter(into))]
     #[serde(skip)]
-    pub id: isize,
+    pub webhook_id: WebhookId,
     #[builder(default, setter(into, strip_option))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub url: Option<String>,
@@ -29,7 +31,7 @@ impl Endpoint for EditWebhookRequest {
     type Response = Webhook;
 
     fn endpoint(&self) -> Cow<'static, str> {
-        format!("/webhooks/{}", self.id).into()
+        endpoint_with_path_segment("/webhooks", &self.webhook_id.to_string())
     }
 
     fn body(&self) -> &Self::Request {
@@ -44,11 +46,11 @@ impl Endpoint for EditWebhookRequest {
 #[cfg(test)]
 mod tests {
     use httptest::matchers::request;
-    use httptest::{responders::*, Expectation, Server};
+    use httptest::{Expectation, Server, responders::*};
     use serde_json::json;
 
-    use crate::reqwest::PostmarkClient;
     use crate::Query;
+    use crate::reqwest::PostmarkClient;
 
     use super::*;
 
@@ -81,7 +83,7 @@ mod tests {
             .build();
 
         let req = EditWebhookRequest::builder()
-            .id(1234567)
+            .webhook_id(1234567)
             .url("https://www.example.com/webhooks")
             .build();
 
@@ -90,7 +92,7 @@ mod tests {
             .await
             .expect("Should get a response and be able to json decode it");
 
-        assert_eq!(resp.id, 1234567);
+        assert_eq!(resp.webhook_id, 1234567);
         assert_eq!(resp.url, "https://www.example.com/webhooks");
     }
 }

@@ -4,8 +4,9 @@ use serde::Serialize;
 use typed_builder::TypedBuilder;
 use url::form_urlencoded::Serializer;
 
-use crate::api::messages::MessageOpensResponse;
 use crate::Endpoint;
+use crate::api::messages::MessageOpensResponse;
+use crate::api::{endpoint_with_path_segment, endpoint_with_query};
 
 #[derive(Debug, Clone, PartialEq, Serialize, TypedBuilder)]
 #[builder(field_defaults(default, setter(strip_option)))]
@@ -34,12 +35,8 @@ impl Endpoint for SingleMessageOpensRequest {
             serializer.append_pair("offset", &offset.to_string());
         }
 
-        let query = serializer.finish();
-        if query.is_empty() {
-            format!("/messages/outbound/opens/{}", self.message_id).into()
-        } else {
-            format!("/messages/outbound/opens/{}?{query}", self.message_id).into()
-        }
+        let path = endpoint_with_path_segment("/messages/outbound/opens", &self.message_id);
+        endpoint_with_query(path.as_ref(), serializer.finish())
     }
 
     fn body(&self) -> &Self::Request {
@@ -54,12 +51,12 @@ impl Endpoint for SingleMessageOpensRequest {
 #[cfg(test)]
 mod tests {
     use httptest::matchers::request;
-    use httptest::{responders::*, Expectation, Server};
+    use httptest::{Expectation, Server, responders::*};
     use serde_json::json;
 
     use super::*;
-    use crate::reqwest::PostmarkClient;
     use crate::Query;
+    use crate::reqwest::PostmarkClient;
 
     #[tokio::test]
     async fn single_message_opens_gets_events() {

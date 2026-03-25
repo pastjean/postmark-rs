@@ -1,9 +1,11 @@
 use std::borrow::Cow;
 
-use crate::api::templates::TemplateType;
 use crate::Endpoint;
+use crate::api::templates::{TemplateId, TemplateType};
+use crate::api::{DEFAULT_PAGE_COUNT, DEFAULT_PAGE_OFFSET, endpoint_with_query};
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
+use url::form_urlencoded::Serializer;
 
 /// List templates with pagination.
 #[derive(Debug, Clone, PartialEq, Serialize)]
@@ -12,17 +14,19 @@ use typed_builder::TypedBuilder;
 pub struct ListTemplatesRequest {
     /// Number of templates to return.
     #[serde(skip)]
-    pub count: isize,
+    #[builder(default = DEFAULT_PAGE_COUNT)]
+    pub count: i64,
     /// Number of templates to skip.
     #[serde(skip)]
-    pub offset: isize,
+    #[builder(default = DEFAULT_PAGE_OFFSET)]
+    pub offset: i64,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "PascalCase")]
 pub struct ListTemplatesResponse {
     /// Total number of templates associated with current server.
-    pub total_count: isize,
+    pub total_count: i64,
     /// Templates list.
     pub templates: Vec<TemplateSummary>,
 }
@@ -31,7 +35,7 @@ pub struct ListTemplatesResponse {
 #[serde(rename_all = "PascalCase")]
 pub struct TemplateSummary {
     pub active: bool,
-    pub template_id: isize,
+    pub template_id: TemplateId,
     pub name: String,
     pub alias: Option<String>,
     pub template_type: TemplateType,
@@ -43,7 +47,10 @@ impl Endpoint for ListTemplatesRequest {
     type Response = ListTemplatesResponse;
 
     fn endpoint(&self) -> Cow<'static, str> {
-        format!("/templates?count={}&offset={}", self.count, self.offset).into()
+        let mut serializer = Serializer::new(String::new());
+        serializer.append_pair("count", &self.count.to_string());
+        serializer.append_pair("offset", &self.offset.to_string());
+        endpoint_with_query("/templates", serializer.finish())
     }
 
     fn body(&self) -> &Self::Request {
@@ -58,11 +65,11 @@ impl Endpoint for ListTemplatesRequest {
 #[cfg(test)]
 mod tests {
     use httptest::matchers::request;
-    use httptest::{responders::*, Expectation, Server};
+    use httptest::{Expectation, Server, responders::*};
     use serde_json::json;
 
-    use crate::reqwest::PostmarkClient;
     use crate::Query;
+    use crate::reqwest::PostmarkClient;
 
     use super::*;
 
@@ -114,5 +121,11 @@ mod tests {
             resp.templates[0].alias.as_deref(),
             Some("password-recovery")
         );
+    }
+
+    #[test]
+    fn list_templates_uses_default_pagination() {
+        let req = ListTemplatesRequest::builder().build();
+        assert_eq!(req.endpoint(), "/templates?count=100&offset=0");
     }
 }

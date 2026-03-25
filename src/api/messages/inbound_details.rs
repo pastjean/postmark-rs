@@ -2,8 +2,8 @@ use std::borrow::Cow;
 
 use serde::Serialize;
 
-use crate::api::messages::InboundMessageDetails;
 use crate::Endpoint;
+use crate::api::messages::InboundMessageDetails;
 
 #[derive(Debug, Clone, PartialEq, Serialize)]
 pub struct InboundDetailsRequest {
@@ -39,12 +39,12 @@ impl Endpoint for InboundDetailsRequest {
 #[cfg(test)]
 mod tests {
     use httptest::matchers::request;
-    use httptest::{responders::*, Expectation, Server};
+    use httptest::{Expectation, Server, responders::*};
     use serde_json::json;
 
     use super::*;
-    use crate::reqwest::PostmarkClient;
     use crate::Query;
+    use crate::reqwest::PostmarkClient;
 
     #[tokio::test]
     async fn inbound_details_gets_message_details() {

@@ -24,13 +24,13 @@ impl Endpoint for SendEmailBatchRequest {
 #[cfg(test)]
 mod tests {
     use httptest::matchers::request;
-    use httptest::{responders::*, Expectation, Server};
+    use httptest::{Expectation, Server, responders::*};
     use serde_json::json;
 
-    use crate::api::email::*;
-    use crate::api::Body;
-    use crate::reqwest::PostmarkClient;
     use crate::Query;
+    use crate::api::Body;
+    use crate::api::email::*;
+    use crate::reqwest::PostmarkClient;
 
     #[tokio::test]
     pub async fn send_email_test() {

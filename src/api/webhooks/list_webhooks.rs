@@ -1,8 +1,11 @@
 use std::borrow::Cow;
 
 use crate::Endpoint;
+use crate::api::endpoint_with_query;
+use crate::api::webhooks::WebhookId;
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
+use url::form_urlencoded::Serializer;
 
 #[derive(Debug, Clone, PartialEq, Serialize, TypedBuilder)]
 #[serde(rename_all = "PascalCase")]
@@ -22,7 +25,7 @@ pub struct ListWebhooksResponse {
 #[serde(rename_all = "PascalCase")]
 pub struct Webhook {
     #[serde(rename = "ID")]
-    pub id: isize,
+    pub webhook_id: WebhookId,
     pub url: String,
     pub message_stream: String,
     pub http_auth: Option<WebhookHttpAuth>,
@@ -80,10 +83,13 @@ impl Endpoint for ListWebhooksRequest {
     type Response = ListWebhooksResponse;
 
     fn endpoint(&self) -> Cow<'static, str> {
-        match &self.message_stream {
-            Some(message_stream) => format!("/webhooks?MessageStream={message_stream}").into(),
-            None => "/webhooks".into(),
+        let mut serializer = Serializer::new(String::new());
+        if let Some(message_stream) = self.message_stream.as_deref() {
+            serializer.append_pair("MessageStream", message_stream);
         }
+
+        let query = serializer.finish();
+        endpoint_with_query("/webhooks", query)
     }
 
     fn body(&self) -> &Self::Request {
@@ -98,11 +104,11 @@ impl Endpoint for ListWebhooksRequest {
 #[cfg(test)]
 mod tests {
     use httptest::matchers::request;
-    use httptest::{responders::*, Expectation, Server};
+    use httptest::{Expectation, Server, responders::*};
     use serde_json::json;
 
-    use crate::reqwest::PostmarkClient;
     use crate::Query;
+    use crate::reqwest::PostmarkClient;
 
     use super::*;
 
@@ -161,7 +167,7 @@ mod tests {
             .expect("Should get a response and be able to json decode it");
 
         assert_eq!(resp.webhooks.len(), 1);
-        assert_eq!(resp.webhooks[0].id, 1234567);
+        assert_eq!(resp.webhooks[0].webhook_id, 1234567);
         assert_eq!(resp.webhooks[0].message_stream, "outbound");
     }
 }

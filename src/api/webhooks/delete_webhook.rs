@@ -1,20 +1,23 @@
 use std::borrow::Cow;
 
 use crate::Endpoint;
+use crate::api::endpoint_with_path_segment;
+use crate::api::webhooks::WebhookId;
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
 
 #[derive(Debug, Clone, PartialEq, Serialize, TypedBuilder)]
 #[serde(rename_all = "PascalCase")]
 pub struct DeleteWebhookRequest {
+    #[builder(setter(into))]
     #[serde(skip)]
-    pub id: isize,
+    pub webhook_id: WebhookId,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "PascalCase")]
 pub struct DeleteWebhookResponse {
-    pub error_code: isize,
+    pub error_code: i64,
     pub message: String,
 }
 
@@ -23,7 +26,7 @@ impl Endpoint for DeleteWebhookRequest {
     type Response = DeleteWebhookResponse;
 
     fn endpoint(&self) -> Cow<'static, str> {
-        format!("/webhooks/{}", self.id).into()
+        endpoint_with_path_segment("/webhooks", &self.webhook_id.to_string())
     }
 
     fn body(&self) -> &Self::Request {
@@ -38,11 +41,11 @@ impl Endpoint for DeleteWebhookRequest {
 #[cfg(test)]
 mod tests {
     use httptest::matchers::request;
-    use httptest::{responders::*, Expectation, Server};
+    use httptest::{Expectation, Server, responders::*};
     use serde_json::json;
 
-    use crate::reqwest::PostmarkClient;
     use crate::Query;
+    use crate::reqwest::PostmarkClient;
 
     use super::*;
 
@@ -63,7 +66,7 @@ mod tests {
             .base_url(server.url("/").to_string())
             .build();
 
-        let req = DeleteWebhookRequest::builder().id(1234).build();
+        let req = DeleteWebhookRequest::builder().webhook_id(1234).build();
 
         let resp = req
             .execute(&client)

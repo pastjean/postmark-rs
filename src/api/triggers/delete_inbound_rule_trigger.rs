@@ -1,20 +1,23 @@
 use std::borrow::Cow;
 
 use crate::Endpoint;
+use crate::api::endpoint_with_path_segment;
+use crate::api::triggers::InboundRuleTriggerId;
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
 
 #[derive(Debug, Clone, PartialEq, Serialize, TypedBuilder)]
 #[serde(rename_all = "PascalCase")]
 pub struct DeleteInboundRuleTriggerRequest {
+    #[builder(setter(into))]
     #[serde(skip)]
-    pub trigger_id: isize,
+    pub trigger_id: InboundRuleTriggerId,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "PascalCase")]
 pub struct DeleteInboundRuleTriggerResponse {
-    pub error_code: isize,
+    pub error_code: i64,
     pub message: String,
 }
 
@@ -23,7 +26,7 @@ impl Endpoint for DeleteInboundRuleTriggerRequest {
     type Response = DeleteInboundRuleTriggerResponse;
 
     fn endpoint(&self) -> Cow<'static, str> {
-        format!("/triggers/inboundrules/{}", self.trigger_id).into()
+        endpoint_with_path_segment("/triggers/inboundrules", &self.trigger_id.to_string())
     }
 
     fn body(&self) -> &Self::Request {
@@ -38,11 +41,11 @@ impl Endpoint for DeleteInboundRuleTriggerRequest {
 #[cfg(test)]
 mod tests {
     use httptest::matchers::request;
-    use httptest::{responders::*, Expectation, Server};
+    use httptest::{Expectation, Server, responders::*};
     use serde_json::json;
 
-    use crate::reqwest::PostmarkClient;
     use crate::Query;
+    use crate::reqwest::PostmarkClient;
 
     use super::*;
 

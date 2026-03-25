@@ -1,6 +1,7 @@
 use std::borrow::Cow;
 
 use crate::Endpoint;
+use crate::api::data_removal::DataRemovalId;
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
 
@@ -16,7 +17,7 @@ pub struct CreateDataRemovalRequest {
 #[serde(rename_all = "PascalCase")]
 pub struct DataRemovalStatusResponse {
     #[serde(rename = "ID")]
-    pub id: isize,
+    pub id: DataRemovalId,
     pub status: String,
 }
 
@@ -36,11 +37,11 @@ impl Endpoint for CreateDataRemovalRequest {
 #[cfg(test)]
 mod tests {
     use httptest::matchers::request;
-    use httptest::{responders::*, Expectation, Server};
+    use httptest::{Expectation, Server, responders::*};
     use serde_json::json;
 
-    use crate::reqwest::PostmarkClient;
     use crate::Query;
+    use crate::reqwest::PostmarkClient;
 
     use super::*;
 

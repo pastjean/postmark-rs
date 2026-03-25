@@ -1,15 +1,17 @@
 use std::borrow::Cow;
 
-use crate::api::signatures::SenderSignature;
 use crate::Endpoint;
+use crate::api::endpoint_with_path_segment;
+use crate::api::signatures::{SenderSignature, SignatureId};
 use serde::Serialize;
 use typed_builder::TypedBuilder;
 
 #[derive(Debug, Clone, PartialEq, Serialize, TypedBuilder)]
 #[serde(rename_all = "PascalCase")]
 pub struct GetSignatureRequest {
+    #[builder(setter(into))]
     #[serde(skip)]
-    pub signature_id: isize,
+    pub signature_id: SignatureId,
 }
 
 impl Endpoint for GetSignatureRequest {
@@ -17,7 +19,7 @@ impl Endpoint for GetSignatureRequest {
     type Response = SenderSignature;
 
     fn endpoint(&self) -> Cow<'static, str> {
-        format!("/senders/{}", self.signature_id).into()
+        endpoint_with_path_segment("/senders", &self.signature_id.to_string())
     }
 
     fn body(&self) -> &Self::Request {
@@ -32,11 +34,11 @@ impl Endpoint for GetSignatureRequest {
 #[cfg(test)]
 mod tests {
     use httptest::matchers::request;
-    use httptest::{responders::*, Expectation, Server};
+    use httptest::{Expectation, Server, responders::*};
     use serde_json::json;
 
-    use crate::reqwest::PostmarkClient;
     use crate::Query;
+    use crate::reqwest::PostmarkClient;
 
     use super::*;
 

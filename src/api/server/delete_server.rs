@@ -1,20 +1,23 @@
 use std::borrow::Cow;
 
 use crate::Endpoint;
+use crate::api::endpoint_with_path_segment;
+use crate::api::server::ServerId;
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
 
 #[derive(Debug, Clone, PartialEq, Serialize, TypedBuilder)]
 #[serde(rename_all = "PascalCase")]
 pub struct DeleteServerRequest {
+    #[builder(setter(into))]
     #[serde(skip)]
-    pub server_id: isize,
+    pub server_id: ServerId,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "PascalCase")]
 pub struct DeleteServerResponse {
-    pub error_code: isize,
+    pub error_code: i64,
     pub message: String,
 }
 
@@ -23,7 +26,7 @@ impl Endpoint for DeleteServerRequest {
     type Response = DeleteServerResponse;
 
     fn endpoint(&self) -> Cow<'static, str> {
-        format!("/servers/{}", self.server_id).into()
+        endpoint_with_path_segment("/servers", &self.server_id.to_string())
     }
 
     fn body(&self) -> &Self::Request {
@@ -38,11 +41,11 @@ impl Endpoint for DeleteServerRequest {
 #[cfg(test)]
 mod tests {
     use httptest::matchers::request;
-    use httptest::{responders::*, Expectation, Server as HttpServer};
+    use httptest::{Expectation, Server as HttpServer, responders::*};
     use serde_json::json;
 
-    use crate::reqwest::PostmarkClient;
     use crate::Query;
+    use crate::reqwest::PostmarkClient;
 
     use super::*;
 
