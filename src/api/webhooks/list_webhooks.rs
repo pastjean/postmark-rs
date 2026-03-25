@@ -1,6 +1,7 @@
 use std::borrow::Cow;
 
 use crate::Endpoint;
+use crate::api::endpoint_with_query;
 use crate::api::webhooks::WebhookId;
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
@@ -88,11 +89,7 @@ impl Endpoint for ListWebhooksRequest {
         }
 
         let query = serializer.finish();
-        if query.is_empty() {
-            "/webhooks".into()
-        } else {
-            format!("/webhooks?{query}").into()
-        }
+        endpoint_with_query("/webhooks", query)
     }
 
     fn body(&self) -> &Self::Request {

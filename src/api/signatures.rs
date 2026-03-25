@@ -2,7 +2,6 @@
 
 use crate::api::types::id_type;
 use serde::{Deserialize, Serialize};
-use std::borrow::Cow;
 
 id_type!(pub SignatureId);
 pub type ApiErrorCode = i64;
@@ -83,8 +82,4 @@ pub struct SenderSignatureSummary {
 pub struct BasicApiResponse {
     pub error_code: ApiErrorCode,
     pub message: String,
-}
-
-pub(crate) fn paginated_endpoint(path: &str, count: i64, offset: i64) -> Cow<'static, str> {
-    format!("{path}?count={count}&offset={offset}").into()
 }

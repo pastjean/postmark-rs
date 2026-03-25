@@ -5,6 +5,7 @@ use typed_builder::TypedBuilder;
 use url::form_urlencoded::Serializer;
 
 use crate::Endpoint;
+use crate::api::endpoint_with_query;
 use crate::api::messages::MessageSummary;
 
 #[derive(Debug, Clone, PartialEq, Serialize, TypedBuilder)]
@@ -59,12 +60,7 @@ impl Endpoint for OutboundSearchRequest {
             serializer.append_pair("messagestream", message_stream);
         }
 
-        let query = serializer.finish();
-        if query.is_empty() {
-            "/messages/outbound".into()
-        } else {
-            format!("/messages/outbound?{query}").into()
-        }
+        endpoint_with_query("/messages/outbound", serializer.finish())
     }
 
     fn body(&self) -> &Self::Request {

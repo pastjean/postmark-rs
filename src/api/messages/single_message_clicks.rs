@@ -6,6 +6,7 @@ use url::form_urlencoded::Serializer;
 
 use crate::Endpoint;
 use crate::api::messages::MessageClicksResponse;
+use crate::api::{endpoint_with_path_segment, endpoint_with_query};
 
 #[derive(Debug, Clone, PartialEq, Serialize, TypedBuilder)]
 #[builder(field_defaults(default, setter(strip_option)))]
@@ -34,12 +35,8 @@ impl Endpoint for SingleMessageClicksRequest {
             serializer.append_pair("offset", &offset.to_string());
         }
 
-        let query = serializer.finish();
-        if query.is_empty() {
-            format!("/messages/outbound/clicks/{}", self.message_id).into()
-        } else {
-            format!("/messages/outbound/clicks/{}?{query}", self.message_id).into()
-        }
+        let path = endpoint_with_path_segment("/messages/outbound/clicks", &self.message_id);
+        endpoint_with_query(path.as_ref(), serializer.finish())
     }
 
     fn body(&self) -> &Self::Request {

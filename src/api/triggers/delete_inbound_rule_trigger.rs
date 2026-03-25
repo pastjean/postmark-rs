@@ -1,6 +1,7 @@
 use std::borrow::Cow;
 
 use crate::Endpoint;
+use crate::api::endpoint_with_path_segment;
 use crate::api::triggers::InboundRuleTriggerId;
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
@@ -25,7 +26,7 @@ impl Endpoint for DeleteInboundRuleTriggerRequest {
     type Response = DeleteInboundRuleTriggerResponse;
 
     fn endpoint(&self) -> Cow<'static, str> {
-        format!("/triggers/inboundrules/{}", self.trigger_id).into()
+        endpoint_with_path_segment("/triggers/inboundrules", &self.trigger_id.to_string())
     }
 
     fn body(&self) -> &Self::Request {

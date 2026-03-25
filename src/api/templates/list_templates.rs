@@ -2,8 +2,12 @@ use std::borrow::Cow;
 
 use crate::Endpoint;
 use crate::api::templates::{TemplateId, TemplateType};
+use crate::api::{
+    DEFAULT_PAGE_COUNT, DEFAULT_PAGE_OFFSET, endpoint_with_query,
+};
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
+use url::form_urlencoded::Serializer;
 
 /// List templates with pagination.
 #[derive(Debug, Clone, PartialEq, Serialize)]
@@ -12,9 +16,11 @@ use typed_builder::TypedBuilder;
 pub struct ListTemplatesRequest {
     /// Number of templates to return.
     #[serde(skip)]
+    #[builder(default = DEFAULT_PAGE_COUNT)]
     pub count: i64,
     /// Number of templates to skip.
     #[serde(skip)]
+    #[builder(default = DEFAULT_PAGE_OFFSET)]
     pub offset: i64,
 }
 
@@ -43,7 +49,10 @@ impl Endpoint for ListTemplatesRequest {
     type Response = ListTemplatesResponse;
 
     fn endpoint(&self) -> Cow<'static, str> {
-        format!("/templates?count={}&offset={}", self.count, self.offset).into()
+        let mut serializer = Serializer::new(String::new());
+        serializer.append_pair("count", &self.count.to_string());
+        serializer.append_pair("offset", &self.offset.to_string());
+        endpoint_with_query("/templates", serializer.finish())
     }
 
     fn body(&self) -> &Self::Request {
@@ -114,5 +123,11 @@ mod tests {
             resp.templates[0].alias.as_deref(),
             Some("password-recovery")
         );
+    }
+
+    #[test]
+    fn list_templates_uses_default_pagination() {
+        let req = ListTemplatesRequest::builder().build();
+        assert_eq!(req.endpoint(), "/templates?count=100&offset=0");
     }
 }

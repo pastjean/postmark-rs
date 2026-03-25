@@ -65,11 +65,3 @@ macro_rules! id_type {
 }
 
 pub(crate) use id_type;
-
-pub type ServerId = crate::api::server::ServerId;
-pub type DomainId = crate::api::domains::DomainId;
-pub type TemplateId = crate::api::templates::TemplateId;
-pub type WebhookId = crate::api::webhooks::WebhookId;
-pub type MessageNumericId = i64;
-pub type ErrorCode = i64;
-pub type MessageId = String;

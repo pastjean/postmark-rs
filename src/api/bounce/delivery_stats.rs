@@ -3,11 +3,11 @@ use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq)]
-pub struct DeliveryStatsRequest {}
+pub struct GetDeliveryStatsRequest {}
 
-impl Endpoint for DeliveryStatsRequest {
+impl Endpoint for GetDeliveryStatsRequest {
     type Request = ();
-    type Response = DeliveryStatsResponse;
+    type Response = GetDeliveryStatsResponse;
 
     fn endpoint(&self) -> Cow<'static, str> {
         "/deliverystats".into()
@@ -24,7 +24,7 @@ impl Endpoint for DeliveryStatsRequest {
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "PascalCase")]
-pub struct DeliveryStatsResponse {
+pub struct GetDeliveryStatsResponse {
     #[serde(rename = "InactiveMails")]
     /// Number of inactive emails
     pub inactive_mails: i64,
@@ -46,7 +46,7 @@ mod tests {
     use httptest::{Expectation, Server, responders::*};
     use serde_json::json;
 
-    use super::DeliveryStatsRequest;
+    use super::GetDeliveryStatsRequest;
     use crate::Query;
     use crate::reqwest::PostmarkClient;
 
@@ -102,7 +102,7 @@ mod tests {
             .base_url(server.url("/").to_string())
             .build();
 
-        let req = DeliveryStatsRequest::default();
+        let req = GetDeliveryStatsRequest::default();
 
         let resp = req
             .execute(&client)

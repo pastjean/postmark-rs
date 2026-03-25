@@ -2,7 +2,7 @@ use std::borrow::Cow;
 
 use async_trait::async_trait;
 use bytes::Bytes;
-use http::{Request, Response};
+use http::{Request, Response, StatusCode};
 use std::error::Error;
 use thiserror::Error;
 
@@ -42,7 +42,7 @@ where
         /// The client error.
         source: E,
     },
-    /// JSON deserialization from GitLab failed.
+    /// JSON deserialization failed.
     #[error("could not parse JSON response: {}", source)]
     Json {
         /// The source of the error.
@@ -56,6 +56,18 @@ where
         #[from]
         source: http::Error,
     },
+    /// API returned non-success status code.
+    #[error("api error: status={status}, error_code={error_code:?}, message={message:?}")]
+    Api {
+        /// HTTP status code.
+        status: StatusCode,
+        /// Postmark error code when present.
+        error_code: Option<i64>,
+        /// Postmark error message when present.
+        message: Option<String>,
+        /// Raw response body.
+        body: Bytes,
+    },
 }
 
 impl<E> QueryError<E>
@@ -68,14 +80,14 @@ where
     }
 }
 
-/// Extension method to all Endpoints to execute themselves againts a query
+/// Extension method for all endpoints to execute themselves against a client.
 #[async_trait]
 impl<T, C> Query<C> for T
 where
     T: Endpoint + Send + Sync,
     C: Client + Send + Sync,
 {
-    /// An endpoint return it's Response or the Client's Error
+    /// Returns the endpoint response or the client error.
     type Result = Result<T::Response, QueryError<C::Error>>;
 
     async fn execute(self, client: &C) -> Self::Result {
@@ -96,6 +108,26 @@ where
         let http_req = req_builder.body(body)?;
 
         let response = client.execute(http_req).await.map_err(QueryError::client)?;
+
+        if !response.status().is_success() {
+            #[derive(serde::Deserialize)]
+            struct PostmarkErrorBody {
+                #[serde(rename = "ErrorCode")]
+                error_code: Option<i64>,
+                #[serde(rename = "Message")]
+                message: Option<String>,
+            }
+
+            let body = response.body().clone();
+            let parsed = serde_json::from_slice::<PostmarkErrorBody>(&body).ok();
+
+            return Err(QueryError::Api {
+                status: response.status(),
+                error_code: parsed.as_ref().and_then(|p| p.error_code),
+                message: parsed.and_then(|p| p.message),
+                body,
+            });
+        }
 
         Ok(serde_json::from_slice(response.body())?)
     }
@@ -276,5 +308,92 @@ mod tests {
                 .expect("header str"),
             "application/json"
         );
+    }
+
+    #[derive(Debug, serde::Deserialize)]
+    struct UnusedResponse;
+
+    struct ErrorEndpoint;
+    impl Endpoint for ErrorEndpoint {
+        type Request = NoBody;
+        type Response = UnusedResponse;
+
+        fn endpoint(&self) -> Cow<'static, str> {
+            "/test-error".into()
+        }
+
+        fn body(&self) -> &Self::Request {
+            static BODY: NoBody = NoBody;
+            &BODY
+        }
+    }
+
+    #[derive(Clone)]
+    struct ErrorClient {
+        response_status: StatusCode,
+        response_body: Bytes,
+    }
+
+    #[async_trait]
+    impl Client for ErrorClient {
+        type Error = TestClientError;
+
+        async fn execute(&self, _req: Request<Bytes>) -> Result<Response<Bytes>, Self::Error> {
+            Ok(Response::builder()
+                .status(self.response_status)
+                .body(self.response_body.clone())
+                .expect("response"))
+        }
+    }
+
+    #[tokio::test]
+    async fn non_success_status_returns_api_error() {
+        let client = ErrorClient {
+            response_status: StatusCode::UNPROCESSABLE_ENTITY,
+            response_body: Bytes::from_static(
+                br#"{"ErrorCode":300,"Message":"Invalid 'From' address"}"#,
+            ),
+        };
+
+        let error = ErrorEndpoint.execute(&client).await.expect_err("api error");
+
+        match error {
+            QueryError::Api {
+                status,
+                error_code,
+                message,
+                ..
+            } => {
+                assert_eq!(status, StatusCode::UNPROCESSABLE_ENTITY);
+                assert_eq!(error_code, Some(300));
+                assert_eq!(message.as_deref(), Some("Invalid 'From' address"));
+            }
+            _ => panic!("expected api error"),
+        }
+    }
+
+    #[tokio::test]
+    async fn non_success_status_preserves_raw_body_when_not_json() {
+        let client = ErrorClient {
+            response_status: StatusCode::BAD_GATEWAY,
+            response_body: Bytes::from_static(b"gateway timeout"),
+        };
+
+        let error = ErrorEndpoint.execute(&client).await.expect_err("api error");
+
+        match error {
+            QueryError::Api {
+                status,
+                error_code,
+                message,
+                body,
+            } => {
+                assert_eq!(status, StatusCode::BAD_GATEWAY);
+                assert_eq!(error_code, None);
+                assert_eq!(message, None);
+                assert_eq!(body, Bytes::from_static(b"gateway timeout"));
+            }
+            _ => panic!("expected api error"),
+        }
     }
 }

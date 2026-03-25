@@ -2,15 +2,21 @@ use std::borrow::Cow;
 
 use crate::Endpoint;
 use crate::api::bounce::BounceInfo;
+use crate::api::{
+    DEFAULT_PAGE_COUNT, DEFAULT_PAGE_OFFSET, endpoint_with_query,
+};
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
+use url::form_urlencoded::Serializer;
 
 #[derive(Debug, Clone, PartialEq, Serialize, TypedBuilder)]
 #[serde(rename_all = "PascalCase")]
 pub struct ListBouncesRequest {
     #[serde(skip)]
+    #[builder(default = DEFAULT_PAGE_COUNT)]
     pub count: i64,
     #[serde(skip)]
+    #[builder(default = DEFAULT_PAGE_OFFSET)]
     pub offset: i64,
 }
 
@@ -26,7 +32,10 @@ impl Endpoint for ListBouncesRequest {
     type Response = ListBouncesResponse;
 
     fn endpoint(&self) -> Cow<'static, str> {
-        format!("/bounces?count={}&offset={}", self.count, self.offset).into()
+        let mut serializer = Serializer::new(String::new());
+        serializer.append_pair("count", &self.count.to_string());
+        serializer.append_pair("offset", &self.offset.to_string());
+        endpoint_with_query("/bounces", serializer.finish())
     }
 
     fn body(&self) -> &Self::Request {
@@ -87,5 +96,11 @@ mod tests {
 
         assert_eq!(resp.total_count, 1);
         assert_eq!(resp.bounces[0].id, 42);
+    }
+
+    #[test]
+    fn list_bounces_uses_default_pagination() {
+        let req = ListBouncesRequest::builder().build();
+        assert_eq!(req.endpoint(), "/bounces?count=100&offset=0");
     }
 }

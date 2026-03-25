@@ -38,6 +38,22 @@ async fn send_email(){
 }
 ```
 
+Messages facade example:
+
+```rust
+use postmark::api::messages::OutboundSearchRequest;
+use postmark::reqwest::PostmarkClient;
+
+async fn list_messages() {
+  let client = PostmarkClient::builder()
+    .server_token("<sometoken>")
+    .build();
+
+  let request = OutboundSearchRequest::builder().build();
+  let response = client.messages().outbound_search(request).await;
+}
+```
+
 # API coverage
 
 Detailed endpoint matrix and examples:
@@ -64,7 +80,7 @@ Current high-level status:
 | Webhooks | implemented |
 | Suppressions | implemented |
 | Data Removal | implemented |
-| Messages | not implemented |
+| Messages | implemented |
 
 # Releasing a new version
 

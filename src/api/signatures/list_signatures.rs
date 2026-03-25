@@ -1,16 +1,22 @@
 use std::borrow::Cow;
 
 use crate::Endpoint;
-use crate::api::signatures::{SenderSignatureSummary, paginated_endpoint};
+use crate::api::signatures::SenderSignatureSummary;
+use crate::api::{
+    DEFAULT_PAGE_COUNT, DEFAULT_PAGE_OFFSET, endpoint_with_query,
+};
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
+use url::form_urlencoded::Serializer;
 
 #[derive(Debug, Clone, PartialEq, Serialize, TypedBuilder)]
 #[serde(rename_all = "PascalCase")]
 pub struct ListSignaturesRequest {
     #[serde(skip)]
+    #[builder(default = DEFAULT_PAGE_COUNT)]
     pub count: i64,
     #[serde(skip)]
+    #[builder(default = DEFAULT_PAGE_OFFSET)]
     pub offset: i64,
 }
 
@@ -26,7 +32,10 @@ impl Endpoint for ListSignaturesRequest {
     type Response = ListSignaturesResponse;
 
     fn endpoint(&self) -> Cow<'static, str> {
-        paginated_endpoint("/senders", self.count, self.offset)
+        let mut serializer = Serializer::new(String::new());
+        serializer.append_pair("count", &self.count.to_string());
+        serializer.append_pair("offset", &self.offset.to_string());
+        endpoint_with_query("/senders", serializer.finish())
     }
 
     fn body(&self) -> &Self::Request {
@@ -73,5 +82,11 @@ mod tests {
         let req = ListSignaturesRequest::builder().count(50).offset(0).build();
         let resp = req.execute(&client).await.expect("json decode");
         assert_eq!(resp.total_count, 1);
+    }
+
+    #[test]
+    fn list_signatures_uses_default_pagination() {
+        let req = ListSignaturesRequest::builder().build();
+        assert_eq!(req.endpoint(), "/senders?count=100&offset=0");
     }
 }

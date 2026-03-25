@@ -2,6 +2,7 @@ use std::borrow::Cow;
 
 use crate::Endpoint;
 use crate::api::domains::DomainId;
+use crate::api::endpoint_with_path_segment;
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
 
@@ -41,7 +42,7 @@ impl Endpoint for DeleteDomainRequest {
     type Response = DeleteDomainResponse;
 
     fn endpoint(&self) -> Cow<'static, str> {
-        format!("/domains/{}", self.domain_id).into()
+        endpoint_with_path_segment("/domains", &self.domain_id.to_string())
     }
 
     fn body(&self) -> &Self::Request {

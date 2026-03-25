@@ -1,4 +1,5 @@
 use crate::Endpoint;
+use crate::api::endpoint_with_query;
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 use typed_builder::TypedBuilder;
@@ -81,12 +82,7 @@ impl Endpoint for ListBouncesWithFiltersRequest {
             serializer.append_pair("todate", to_date);
         }
 
-        let query = serializer.finish();
-        if query.is_empty() {
-            "/bounces".into()
-        } else {
-            format!("/bounces?{query}").into()
-        }
+        endpoint_with_query("/bounces", serializer.finish())
     }
 
     fn body(&self) -> &Self::Request {

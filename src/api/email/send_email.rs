@@ -86,7 +86,7 @@ pub struct SendEmailRequest {
     pub message_stream: Option<String>,
 }
 
-/// A custom headers to include in a email.
+/// A custom header to include in an email.
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "PascalCase")]
 pub struct Header {
@@ -94,7 +94,7 @@ pub struct Header {
     pub value: String,
 }
 
-/// And attachment to an email.
+/// An attachment to an email.
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "PascalCase")]
 pub struct Attachment {

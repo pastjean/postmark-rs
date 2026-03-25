@@ -1,6 +1,7 @@
 use std::borrow::Cow;
 
 use crate::Endpoint;
+use crate::api::endpoint_with_path_segment;
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
 
@@ -28,7 +29,7 @@ impl Endpoint for GetBulkStatusRequest {
     type Response = GetBulkStatusResponse;
 
     fn endpoint(&self) -> Cow<'static, str> {
-        format!("/email/bulk/{}", self.bulk_request_id).into()
+        endpoint_with_path_segment("/email/bulk", &self.bulk_request_id.to_string())
     }
 
     fn body(&self) -> &Self::Request {

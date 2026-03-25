@@ -4,6 +4,7 @@ use serde::Serialize;
 use typed_builder::TypedBuilder;
 
 use crate::Endpoint;
+use crate::api::endpoint_with_path_segment;
 use crate::api::server::{Server, ServerIdOrName};
 
 #[derive(Debug, Clone, PartialEq, Serialize)]
@@ -20,7 +21,7 @@ impl Endpoint for GetServerRequest {
     type Response = Server;
 
     fn endpoint(&self) -> Cow<'static, str> {
-        format!("/servers/{}", self.server_id).into()
+        endpoint_with_path_segment("/servers", &self.server_id.to_string())
     }
 
     fn body(&self) -> &Self::Request {

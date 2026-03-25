@@ -2,6 +2,7 @@
 
 use std::borrow::Cow;
 
+use crate::api::endpoint_with_query;
 use serde::Serialize;
 use url::form_urlencoded::Serializer;
 
@@ -31,12 +32,7 @@ pub(crate) fn stats_endpoint(path: &str, query: &StatsQuery) -> Cow<'static, str
         serializer.append_pair("MessageStream", message_stream);
     }
 
-    let query_string = serializer.finish();
-    if query_string.is_empty() {
-        path.to_string().into()
-    } else {
-        format!("{path}?{query_string}").into()
-    }
+    endpoint_with_query(path, serializer.finish())
 }
 
 #[cfg(test)]

@@ -1,4 +1,4 @@
-use crate::Endpoint;
+use crate::{Endpoint, api::endpoint_with_path_segment};
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 use typed_builder::TypedBuilder;
@@ -42,7 +42,7 @@ impl Endpoint for DeleteTemplateRequest {
     type Response = DeleteTemplateResponse;
 
     fn endpoint(&self) -> Cow<'static, str> {
-        format!("/templates/{}", self.id).into()
+        endpoint_with_path_segment("/templates", &self.id.to_string())
     }
 
     fn body(&self) -> &Self::Request {
@@ -87,8 +87,6 @@ mod tests {
             .id(TemplateIdOrAlias::TemplateId(12345.into()))
             .build();
 
-        println!("{}", req.endpoint());
-
         req.execute(&client)
             .await
             .expect("Should get a response and be able to json decode it");
@@ -116,8 +114,6 @@ mod tests {
         let req = DeleteTemplateRequest::builder()
             .id(TemplateIdOrAlias::Alias(String::from(ALIAS)))
             .build();
-
-        println!("{}", req.endpoint());
 
         req.execute(&client)
             .await

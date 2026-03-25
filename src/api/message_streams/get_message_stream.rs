@@ -1,6 +1,7 @@
 use std::borrow::Cow;
 
 use crate::Endpoint;
+use crate::api::endpoint_with_path_segment;
 use crate::api::message_streams::{MessageStream, StreamIdOrName};
 use serde::Serialize;
 use typed_builder::TypedBuilder;
@@ -17,7 +18,7 @@ impl Endpoint for GetMessageStreamRequest {
     type Response = MessageStream;
 
     fn endpoint(&self) -> Cow<'static, str> {
-        format!("/message-streams/{}", self.stream_id).into()
+        endpoint_with_path_segment("/message-streams", &self.stream_id.to_string())
     }
 
     fn body(&self) -> &Self::Request {

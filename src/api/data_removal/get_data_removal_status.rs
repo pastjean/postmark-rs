@@ -2,6 +2,7 @@ use std::borrow::Cow;
 
 use crate::Endpoint;
 use crate::api::data_removal::{DataRemovalId, DataRemovalStatusResponse};
+use crate::api::endpoint_with_path_segment;
 use serde::Serialize;
 use typed_builder::TypedBuilder;
 
@@ -18,7 +19,7 @@ impl Endpoint for GetDataRemovalStatusRequest {
     type Response = DataRemovalStatusResponse;
 
     fn endpoint(&self) -> Cow<'static, str> {
-        format!("/data-removals/{}", self.data_removal_id).into()
+        endpoint_with_path_segment("/data-removals", &self.data_removal_id.to_string())
     }
 
     fn body(&self) -> &Self::Request {

@@ -1,6 +1,7 @@
 use std::borrow::Cow;
 
 use crate::Endpoint;
+use crate::api::endpoint_with_path_segment;
 use crate::api::server::{DeliveryType, Server, ServerColor, ServerId};
 use serde::Serialize;
 use typed_builder::TypedBuilder;
@@ -30,7 +31,7 @@ impl Endpoint for EditServerByIdRequest {
     type Response = Server;
 
     fn endpoint(&self) -> Cow<'static, str> {
-        format!("/servers/{}", self.server_id).into()
+        endpoint_with_path_segment("/servers", &self.server_id.to_string())
     }
 
     fn body(&self) -> &Self::Request {

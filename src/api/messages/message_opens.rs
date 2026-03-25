@@ -5,6 +5,7 @@ use typed_builder::TypedBuilder;
 use url::form_urlencoded::Serializer;
 
 use crate::Endpoint;
+use crate::api::endpoint_with_query;
 use crate::api::messages::MessageOpen;
 
 #[derive(Debug, Clone, PartialEq, Serialize, TypedBuilder)]
@@ -59,12 +60,7 @@ impl Endpoint for MessageOpensRequest {
             serializer.append_pair("messagestream", message_stream);
         }
 
-        let query = serializer.finish();
-        if query.is_empty() {
-            "/messages/outbound/opens".into()
-        } else {
-            format!("/messages/outbound/opens?{query}").into()
-        }
+        endpoint_with_query("/messages/outbound/opens", serializer.finish())
     }
 
     fn body(&self) -> &Self::Request {

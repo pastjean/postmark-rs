@@ -1,6 +1,7 @@
 use std::borrow::Cow;
 
 use crate::Endpoint;
+use crate::api::endpoint_with_path_segment;
 use crate::api::signatures::{BasicApiResponse, SignatureId};
 use serde::Serialize;
 use typed_builder::TypedBuilder;
@@ -18,7 +19,7 @@ impl Endpoint for DeleteSignatureRequest {
     type Response = BasicApiResponse;
 
     fn endpoint(&self) -> Cow<'static, str> {
-        format!("/senders/{}", self.signature_id).into()
+        endpoint_with_path_segment("/senders", &self.signature_id.to_string())
     }
 
     fn body(&self) -> &Self::Request {

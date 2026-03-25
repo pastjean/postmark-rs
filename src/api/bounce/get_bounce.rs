@@ -2,6 +2,7 @@ use std::borrow::Cow;
 
 use crate::Endpoint;
 use crate::api::bounce::{BounceId, BounceInfo};
+use crate::api::endpoint_with_path_segment;
 use serde::Serialize;
 use typed_builder::TypedBuilder;
 
@@ -18,7 +19,7 @@ impl Endpoint for GetBounceRequest {
     type Response = BounceInfo;
 
     fn endpoint(&self) -> Cow<'static, str> {
-        format!("/bounces/{}", self.bounce_id).into()
+        endpoint_with_path_segment("/bounces", &self.bounce_id.to_string())
     }
 
     fn body(&self) -> &Self::Request {

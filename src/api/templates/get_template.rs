@@ -1,4 +1,7 @@
-use crate::{Endpoint, api::Body};
+use crate::{
+    Endpoint,
+    api::{Body, endpoint_with_path_segment},
+};
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 use typed_builder::TypedBuilder;
@@ -57,7 +60,7 @@ impl Endpoint for GetTemplateRequest {
     type Response = GetTemplateResponse;
 
     fn endpoint(&self) -> Cow<'static, str> {
-        format!("/templates/{}", self.id).into()
+        endpoint_with_path_segment("/templates", &self.id.to_string())
     }
 
     fn body(&self) -> &Self::Request {
@@ -116,8 +119,6 @@ mod tests {
             .id(TemplateIdOrAlias::TemplateId(12345.into()))
             .build();
 
-        println!("{}", req.endpoint());
-
         req.execute(&client)
             .await
             .expect("Should get a response and be able to json decode it");
@@ -151,10 +152,22 @@ mod tests {
             .id(TemplateIdOrAlias::Alias(String::from(ALIAS)))
             .build();
 
-        println!("{}", req.endpoint());
-
         req.execute(&client)
             .await
             .expect("Should get a response and be able to json decode it");
+    }
+
+    #[test]
+    fn get_template_encodes_alias_path_segment() {
+        let req = GetTemplateRequest::builder()
+            .id(TemplateIdOrAlias::Alias(
+                "folder/name with space".to_string(),
+            ))
+            .build();
+
+        assert_eq!(
+            req.endpoint().as_ref(),
+            "/templates/folder%2Fname%20with%20space"
+        );
     }
 }

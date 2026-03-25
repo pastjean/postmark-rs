@@ -2,8 +2,12 @@ use std::borrow::Cow;
 
 use crate::Endpoint;
 use crate::api::domains::DomainSummary;
+use crate::api::{
+    DEFAULT_PAGE_COUNT, DEFAULT_PAGE_OFFSET, endpoint_with_query,
+};
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
+use url::form_urlencoded::Serializer;
 
 /// List domains with pagination.
 ///
@@ -20,9 +24,11 @@ use typed_builder::TypedBuilder;
 pub struct ListDomainsRequest {
     /// Number of records to return per request. Max 500.
     #[serde(skip)]
+    #[builder(default = DEFAULT_PAGE_COUNT)]
     pub count: i64,
     /// Number of records to skip.
     #[serde(skip)]
+    #[builder(default = DEFAULT_PAGE_OFFSET)]
     pub offset: i64,
 }
 
@@ -41,7 +47,10 @@ impl Endpoint for ListDomainsRequest {
     type Response = ListDomainsResponse;
 
     fn endpoint(&self) -> Cow<'static, str> {
-        format!("/domains?count={}&offset={}", self.count, self.offset).into()
+        let mut serializer = Serializer::new(String::new());
+        serializer.append_pair("count", &self.count.to_string());
+        serializer.append_pair("offset", &self.offset.to_string());
+        endpoint_with_query("/domains", serializer.finish())
     }
 
     fn body(&self) -> &Self::Request {
@@ -109,5 +118,11 @@ mod tests {
         assert_eq!(resp.domains.len(), 2);
         assert_eq!(resp.domains[0].name, "postmarkapp.com");
         assert_eq!(resp.domains[0].id, 36735);
+    }
+
+    #[test]
+    fn list_domains_uses_default_pagination() {
+        let req = ListDomainsRequest::builder().build();
+        assert_eq!(req.endpoint(), "/domains?count=100&offset=0");
     }
 }

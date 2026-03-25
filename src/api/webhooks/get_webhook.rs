@@ -1,6 +1,7 @@
 use std::borrow::Cow;
 
 use crate::Endpoint;
+use crate::api::endpoint_with_path_segment;
 use crate::api::webhooks::{Webhook, WebhookId};
 use serde::Serialize;
 use typed_builder::TypedBuilder;
@@ -18,7 +19,7 @@ impl Endpoint for GetWebhookRequest {
     type Response = Webhook;
 
     fn endpoint(&self) -> Cow<'static, str> {
-        format!("/webhooks/{}", self.webhook_id).into()
+        endpoint_with_path_segment("/webhooks", &self.webhook_id.to_string())
     }
 
     fn body(&self) -> &Self::Request {
