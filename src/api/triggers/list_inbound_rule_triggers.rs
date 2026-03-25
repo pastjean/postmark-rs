@@ -2,9 +2,7 @@ use std::borrow::Cow;
 
 use crate::Endpoint;
 use crate::api::triggers::InboundRuleTriggerId;
-use crate::api::{
-    DEFAULT_PAGE_COUNT, DEFAULT_PAGE_OFFSET, endpoint_with_query,
-};
+use crate::api::{DEFAULT_PAGE_COUNT, DEFAULT_PAGE_OFFSET, endpoint_with_query};
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
 use url::form_urlencoded::Serializer;
