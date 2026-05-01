@@ -21,6 +21,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.0](https://github.com/pastjean/postmark-rs/compare/v1.0.0...v2.0.0) - 2026-05-01
+
+### Other
+
+- Add serialization for error responses by postmark for the /email/bulk endpoint ([#56](https://github.com/pastjean/postmark-rs/pull/56))
+
 ## [1.0.0](https://github.com/pastjean/postmark-rs/compare/v0.11.5...v1.0.0) - 2026-03-25
 
 ### Added
