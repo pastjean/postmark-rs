@@ -73,13 +73,28 @@ pub struct BulkMessage {
     pub headers: Option<Vec<Header>>,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
 #[serde(rename_all = "PascalCase")]
 pub struct SendBulkEmailResponse {
-    #[serde(rename = "ID")]
-    pub id: String,
-    pub status: String,
-    pub submitted_at: String,
+    #[serde(rename = "ID", default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub status: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub submitted_at: Option<String>,
+    #[serde(default)]
+    pub error_code: i64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub message: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub errors: Option<HashMap<String, Vec<BulkEmailFieldError>>>,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "PascalCase")]
+pub struct BulkEmailFieldError {
+    pub error_code: i64,
+    pub message: String,
 }
 
 impl Endpoint for SendBulkEmailRequest {
@@ -137,6 +152,50 @@ mod tests {
             .build();
 
         let resp = req.execute(&client).await.expect("json decode");
-        assert_eq!(resp.status, "Accepted");
+        assert_eq!(resp.status.as_deref(), Some("Accepted"));
+        assert_eq!(resp.error_code, 0);
+    }
+
+    #[tokio::test]
+    async fn send_bulk_email_error_envelope() {
+        let server = Server::run();
+
+        server.expect(
+            Expectation::matching(request::method_path("POST", "/email/bulk")).respond_with(
+                json_encoded(json!({
+                    "ErrorCode": 11,
+                    "Message": "Multiple errors occurred. Inspect the Errors property for more information.",
+                    "Errors": {
+                        "From": [
+                            { "ErrorCode": 300, "Message": "Invalid 'From' address: 'test'." }
+                        ],
+                        "To": [
+                            { "ErrorCode": 300, "Message": "Invalid 'To' address: 'test'." }
+                        ]
+                    }
+                })),
+            ),
+        );
+
+        let client = PostmarkClient::builder()
+            .base_url(server.url("/").to_string())
+            .build();
+
+        let req = SendBulkEmailRequest::builder()
+            .from("test".to_string())
+            .text_body("Hi")
+            .messages(vec![BulkMessage {
+                to: "test".to_string(),
+                ..Default::default()
+            }])
+            .build();
+
+        let resp = req.execute(&client).await.expect("json decode");
+        assert_eq!(resp.error_code, 11);
+        assert!(resp.id.is_none());
+        assert!(resp.status.is_none());
+        let errors = resp.errors.expect("Errors map present");
+        assert_eq!(errors.get("From").unwrap()[0].error_code, 300);
+        assert_eq!(errors.get("To").unwrap()[0].error_code, 300);
     }
 }
